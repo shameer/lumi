@@ -1,0 +1,29 @@
+`monoSpline` <-
+function(x, y, newX=NULL, nKnots=5, ifPlot=FALSE) {
+    # behavior: if extropolation, outside values are constant to the
+    #  nearest inside one
+    # require(mgcv)
+	nKnots <- round(nKnots)
+	if (is.null(newX)) newX <- x
+	
+    # Show regular spline fit (and save fitted object)
+    f.ug <- gam(y ~ s(x, k=nKnots, bs="cr")) # ;lines(x,fitted(f.ug))
+
+    # Create Design matrix, constraints etc. for monotonic spline....
+    dat <- data.frame(x=x, y=y)
+    sm <- smoothCon(s(x, k=nKnots, bs="cr"), dat, knots=NULL)
+    F <- mono.con(sm$xp);   # get constraints
+    G <- list(X=sm$X, C=matrix(0,0,0), sp=f.ug$sp, p=sm$xp, y=y, w=y*0+1, 
+			Ain=F$A, bin=F$b, S=sm$S, off=0)
+
+    p <- pcls(G);  # fit spline(using s.p. from unconstrained fit)
+    fv <- Predict.matrix(sm, data.frame(x=newX)) %*% p
+	fv <- as.vector(fv)
+	
+    if (ifPlot) {
+        plot(x,y); lines(newX, fv, col=2)
+    }
+    
+    return(fv)
+}
+

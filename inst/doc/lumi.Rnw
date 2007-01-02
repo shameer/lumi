@@ -1,0 +1,683 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{lumi}
+%\VignetteDepends{lumi, affy, Biobase}
+%\VignetteKeywords{Illumina}
+%\VignetteKeywords{microarray}
+%\VignetteKeywords{microarray normalization}
+%\VignetteKeywords{lumi}
+%\VignettePackage{lumi}
+\documentclass[a4paper]{article}
+
+\usepackage{amsmath,pstricks}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\textit{#1}}}
+
+\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
+\begin{document}
+
+\setkeys{Gin}{width=1\textwidth} 
+
+\title{Using lumi, a package processing Illumina Microarray }
+\maketitle
+\begin{center}$^\ddagger$Robert H. Lurie Comprehensive Cancer Center \\ Northwestern University, Chicago, IL, 60611, USA
+\end{center}
+
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Overview of lumi} 
+\Rpackage{lumi} R package is designed to preprocess the Illumina microarray data. It includes data input, quality control, variance stabilization, normalization and gene annotation part. The package can be easily integrated with other microarray data analysis, like differentiated gene identification, gene ontology analysis or clustering analysis.  
+
+% \section{Citation}
+
+
+\section{Object models of major classes}
+The \Rpackage{lumi} package has two major class: {\bf LumiBatch} and {\bf LumiQC}. Both classes are inherited from {\bf ExpressionSet} class in Bioconductor for better compatibility. Their relations are shown in Figure \ref{objects-lumi}. {\bf LumiBatch} class includes {\it se.exprs},  {\it beadNum} and {\it detection} in {\bf assayData} slot for additional informations unique to Illumina microarrays.  Class {\bf LumiQC} keeps the quality control information. The S4 function \Rfunction{plot} supports different kinds of plots by specifying the  specific plot type of {\bf LumiQC} object. See help of \Rfunction{plot-methods} function for details. The {\it history} slot records all the operations made on the {\bf LumiBatch} or {\bf LumiQC} objects. This provides data provenance. Function \Rfunction{getHistory} is to retrieve the {\it history} slot. Please see the help files of {\bf LumiBatch} and {\bf LumiQC} class for more details.
+
+
+\begin{figure}
+\includegraphics{objects-lumi}
+\caption{Object models in lumi package}
+\label{objects-lumi}
+\end{figure}
+
+
+\section{Data preprocessing}
+
+The first thing is to load the  \Rpackage{lumi} package.
+<<eval=T>>=
+library(lumi)
+@
+
+\subsection{Input data}
+The \Rfunction{lumiR} function supports directly reading the Illumina raw data output of the Illumina Bead Studio toolkit.  It can automatically detect the format of the text file and create a new {\bf LumiBatch} object for it. An example of the input data format is shown in in Figure \ref{fig:dataFileSample}. For simplicity, only part of the data of first sample is shown. The data in the highlighted columns are kept in the corresponding slots of {\bf LumiBatch} object, as shown in Figure \ref{fig:dataFileSample}. The \Rfunction{lumiR} function will automatically determine the starting line of the data. The columns started with \verb+AVG_Signal+ and \verb+BEAD_STDEV+ are required for the {\bf LumiBatch} object. The sample IDs and sample labels are extracted from the column names of the data file. For example, based on the column name: \verb+AVG_Signal-1304401001_A+, we will extract \verb+"1304401001"+ as the sample ID and \verb+"A"+ as the sample label (The function assumes the separation of the sample ID and the sample label is \verb+"_"+ if it exists in the column name.). The algorithm will check the uniqueness of sample IDs. If the sample ID is not unique, the entire portion after \verb+"AVG_Signal-"+ will be used as a sample ID. A file format error will be reported if the uniqueness still cannot be satisfied in this way. 
+
+\begin{figure}
+\includegraphics{dataFileSample}
+\caption{An example of the input data format}
+\label{fig:dataFileSample}
+\end{figure}
+
+
+\begin{Sinput}
+> ## specify the file name
+> # fileName <- 'Barnes_gene_profile.txt'  	# Not Run
+> ## load the data
+> # x.lumi <- lumiR(fileName)		# Not Run
+\end{Sinput}
+
+
+Here, we just load the pre-saved example data, which is a {\bf LumiBatch} object, example.lumi
+\begin{Sinput}
+> ## load example data
+> data(example.lumi)	
+> ## summary of the example data
+> example.lumi
+\end{Sinput}
+
+
+<<echo=FALSE>>=
+data(example.lumi)		
+example.lumi	
+@ 
+
+\subsection{Quality control of the raw data}
+The quality control of a {\bf LumiBatch} object includes the gene expression value and its coefficient of variance, estimating the mean and standard deviation of the microarrays, microarray correlation,  detectable probe ratio of each microarray, density of each microarray, sample (microarray) relations, detecting outliers of samples(microarrays).
+
+\Rfunction{LumiQ} function will do these calculation based on a {\bf LumiBatch} object and organize the results in a {\bf LumiQC} object.
+
+\begin{Sinput}
+> ## Do quality control estimation
+> lumi.Q <- lumiQ(example.lumi)		
+> ## summary of the quality control
+> lumi.Q
+\end{Sinput}
+
+<<echo=F>>=
+lumi.Q <- lumiQ(example.lumi)		## Do quality control estimation
+lumi.Q	## summary of the quality control
+@
+
+The S4 method \Rfunction{plot} can plot the quality control estimation results kept in a {\bf LumiQC} object. The quality control plots includes: the density plot (Figure \ref{fig:density}), box plot (Figure \ref{fig:box}), pairwise correlation between microarrays (Figure \ref{fig:pairs}), pairwise MAplot between microarrays (Figure \ref{fig:MAplot}), density plot of coefficient of varience, (Figure \ref{fig:cv}), and the sample relations (Figure \ref{fig:sampleRelation1}). More details are in the help of \Rfunction{plot,LumiQC-method} function. Most of these plots can also be plotted by the extended general functions: \Rfunction{hist} (for density plot), \Rfunction{boxplot}, \Rfunction{MAplot}, \Rfunction{pairs}.
+
+
+% density plot
+Plot the density plot of the {\bf LumiQC} object. See Figure \ref{fig:density}.
+\begin{Sinput}
+> ## plot the density
+> plot(lumi.Q, what='density')			
+> ## or
+> hist(lumi.Q)
+> ## or
+> hist(example.lumi)
+\end{Sinput}
+
+\begin{figure}
+\centering
+<<fig=true, width=10, height=8, quiet=T, echo=F>>=
+plot(lumi.Q, what='density')	## plot the density
+@
+\caption{Density plot of Illumina microarrays before normalization}
+\label{fig:density}
+\end{figure}            
+
+% box plot
+Plot the box plot of the {\bf LumiQC} object. See Figure \ref{fig:box}.
+\begin{Sinput}
+> ## plot the box plot
+> plot(lumi.Q, what='boxplot')			
+> ## or
+> boxplot(lumi.Q)
+> ## or
+> boxplot(example.lumi)
+\end{Sinput}
+
+\begin{figure}
+\centering
+<<fig=true, width=10, height=8, quiet=T, echo=F>>=
+plot(lumi.Q, what='boxplot') 	## box plot
+@
+\caption{Density plot of Illumina microarrays before normalization}
+\label{fig:box}
+\end{figure}            
+
+% pair plot with microarray correlation
+Plot the pairwise sample correlation of the {\bf LumiQC} object. See Figure \ref{fig:pairs}.
+\begin{Sinput}
+> ## plot the pair plot
+> plot(lumi.Q, what='pair')			
+> ## or
+> pairs(lumi.Q)
+> ## or
+> pairs(example.lumi)
+\end{Sinput}
+
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T, echo=F>>=
+plot(lumi.Q, what='pair')		## pairwise plots
+@
+\caption{Pairwise plot with microarray correlation before normalization}
+\label{fig:pairs}
+\end{figure}            
+
+% MA plot
+The MA plot of the {\bf LumiQC} object. See Figure \ref{fig:MAplot}.
+\begin{Sinput}
+> ## plot the MAplot
+> plot(lumi.Q, what='MAplot')			
+> ## or
+> MAplot(lumi.Q)
+> ## or
+> MAplot(example.lumi)
+\end{Sinput}
+
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T, echo=F>>=
+plot(lumi.Q, what='MAplot')	## pairwise MAplot
+@
+\caption{Pairwise MAplot before normalization}
+\label{fig:MAplot}
+\end{figure}            
+
+
+% plot the density plot of coefficient of variance
+The density plot of the coefficient of variance of the {\bf LumiQC} object. See Figure \ref{fig:cv}.
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+plot(lumi.Q, what='cv')	## density plot of coefficient of varience
+@
+\caption{Density Plot of Coefficient of Varience}
+\label{fig:cv}
+\end{figure}            
+
+
+% sample relations, hierarchical clustering
+Plot sample relations using hierarchical clustering, see Figure \ref{fig:sampleRelation1}
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+plot(lumi.Q, what='sampleRelation')
+@
+\caption{Sample relations before normalization}
+\label{fig:sampleRelation1}
+\end{figure}            
+
+% sample relations, MDS
+Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+'100US', '95US:5P', '100US', '95US:5P'+ for the sample data. Please see the help of \Rfunction{getSampleRelation} and \Rfunction{plot-methods} for the setting of "parameterList".
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+plot(lumi.Q, what='sampleRelation', parameterList=list(method='mds', 
+		col=c('100US', '95US:5P', '100US', '95US:5P')))
+@
+\caption{Sample relations before normalization}
+\label{fig:sampleRelation2}
+\end{figure}            
+
+
+\subsection{Variance stabilizing transform}
+Variance stabilization is critical for subsequent statistical inference to identify differential genes from microarray data. We devised a variance-stabilizing transformation (VST) by taking advantages of larger number of technical replicates available on the Illumina microarray. Please see [1] for details of the algorithm.
+
+Function \Rfunction{lumiT} performs variance stabilizing transform with both input and output being {\bf LumiBatch} object.
+
+Do default VST variance stabilizing transform
+<<>>=
+## Do default VST variance stabilizing transform
+lumi.T <- lumiT(example.lumi)
+@ 
+
+Function \Rfunction{lumiT} also provides options to do \verb+"log2" or "cubicRoot"+ transform. See help of \Rfunction{lumiT} for details.
+
+\subsection{Data normalization}
+We proposed a robust spline normalization (RSN) algorithm, which combines the features of quanitle and loess nor-malization, is designed to normalize the variance-stabilized data. Please see [1] for details of the algorithm.
+
+Function \Rfunction{lumiN} performs robust spline normalization (RSN) algorithm with both input and output being {\bf LumiBatch} object. \Rfunction{lumiN} also provides options to do \verb+"loess", "quantile", "VSN"+ normalization. See help of \Rfunction{lumiN} for details.
+
+Do default RSN between microarray normaliazation
+<<>>=
+## Do RSN between microarray normaliazation
+lumi.N <- lumiN(lumi.T)
+@ 
+
+User can also easily select other normalization method. For example, the following command will run quantile between microarray normaliazation.
+<<eval=FALSE>>=
+## Do quantile between microarray normaliazation
+lumi.N <- lumiN(lumi.T, method='quantile')	## Not Run
+@ 
+
+
+\subsection{Quality control after normalization}
+To make sure the data quality meets our requirement, we do a second round of quality control of normalized data with different QC plots. Compare the plots before and after normalization, we can clearly see the improvements.
+
+<<>>=
+## Do quality control estimation after normalization
+lumi.N.Q <- lumiQ(lumi.N)
+
+## summary of the quality control
+lumi.N.Q		## summary of QC
+@
+
+% density plot
+\begin{figure}
+\centering
+<<fig=true, width=10, height=8, quiet=T>>=
+plot(lumi.N.Q, what='density')		## plot the density
+@
+\caption{Density plot of Illumina microarrays after normalization}
+\label{fig:density.N}
+\end{figure}            
+
+% box plot
+\begin{figure}
+\centering
+<<fig=true, width=10, height=8, quiet=T>>=
+plot(lumi.N.Q, what='boxplot')		## box plot
+# boxplot(lumi.N.Q)
+@
+\caption{Density plot of Illumina microarrays after normalization}
+\label{fig:box.N}
+\end{figure}            
+
+% pairwise plot with microarray correlation
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+plot(lumi.N.Q, what='pair')			## pairwise plots
+@
+\caption{Pairwise plot with microarray correlation after normalization}
+\label{fig:pairs.N}
+\end{figure}            
+
+% MA plot
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+plot(lumi.N.Q, what='MAplot')		## plot the pairwise MAplot
+@
+\caption{Pairwise MAplot after normalization}
+\label{fig:MAplot.N}
+\end{figure}            
+
+% sample relations, hierarchical clustering
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+## plot the sampleRelation using hierarchical clustering
+plot(lumi.N.Q, what='sampleRelation')
+@
+\caption{Sample relations after normalization}
+\label{fig:sampleRelation1.N}
+\end{figure}            
+
+% sample relations, MDS
+\begin{figure}
+\centering
+<<fig=true, width=10, height=10, quiet=T>>=
+## plot the sampleRelation using MDS
+plot(lumi.N.Q, what='sampleRelation', parameterList=list(method='mds', 
+	col=c('100US', '95US:5P', '100US', '95US:5P')))
+@
+\caption{Sample relations after normalization}
+\label{fig:sampleRelation2.N}
+\end{figure}            
+
+
+
+\section{Gene annotation}
+Because the TargetID used by Illumina microarray is not consistent among different versions of arrays. For instance, the same 50mer sequence has two different TargetIDs used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips. Also the targetID is not meaningful for the user. We designed a nucleotide universal identifier (nuID), which encodes the 50mer oligonucleotide sequence and contains error checking and self-identification code. For details, please read [2]. 
+
+
+\subsection{Examples of nuID}
+\begin{Sinput}
+> ## provide an arbitrary nucleotide sequence as an example 
+> seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
+> ## create a nuID for it
+> id <- seq2id(seq)
+> print(id)
+\end{Sinput}
+
+<<echo=F>>=
+## provide an arbitrary nucleotide sequence as an example 
+seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
+## create a nuID for it
+id <- seq2id(seq)
+print(id)
+@
+
+
+The original nucleotide sequence can be easily recovered by \Rfunction{id2seq}
+<<>>=
+id2seq(id)
+@
+
+The nuID is self-identifiable. \Rfunction{is.nuID} can check the sequence is nuID or not. 
+A real nuID
+<<>>=
+is.nuID(id)
+@
+
+An random sequence
+<<>>=
+is.nuID('adfqeqe')
+@
+
+\subsection{Illumina microarray annotation package}
+Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations. Currently, annotation packages for human (\Rpackage{Human.lumi}) and mouse (\Rpackage{Mouse.lumi}) have been created. Packages for more species will be created in the future.
+
+The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} with small modification. As a result, the format of the package is the same as Affymetrix annotation package, lots of packages designed for Affymetrix can also be used for Illumina annotation package.
+
+Here is some examples:
+\begin{Sinput}
+> ## load lumi annotation package
+> lib <- 'Human.lumi'		# Huamn lumi annotation package
+> if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
++ 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
++ 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
++ 	# probes under 'GO:0004816'  category
++ 	print(probe)
++ }
+\end{Sinput} 
+
+<<echo=F>>=
+## load lumi annotation package
+lib <- 'Human.lumi'		# Huamn lumi annotation package
+if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
+	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
+	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
+	# probes under 'GO:0004816'  category
+	print(probe)
+}
+@
+
+
+\begin{Sinput}
+> # specify a nuID
+> nuId <- 'WVUU7XyNw3ucXzwdEk'	
+> if (require(annotate) & require(lib, character.only=TRUE)) {
++	# get the gene symbol of nuId
++	getSYMBOL(nuId, lib)
++ }
+\end{Sinput} 
+
+
+<<echo=F>>=
+# specify a nuID
+nuId <- 'WVUU7XyNw3ucXzwdEk'	
+if (require(annotate) & require(lib, character.only=TRUE)) {
+	# get the gene symbol of nuId
+	getSYMBOL(nuId, lib)
+}
+@ 
+
+
+\subsection{Transfer Illumina microarray data as nuID annotated}
+For Illumina microarray data, there are two ways to transfer the TargetID as nuID. The first way is to use the annotation file for the specific chip which is provided by Illumina company. \verb+'Human_RefSeq-8.csv'+ is an example annotation file for Human RefSeq-8 microarray. We recommend using this method because it can make sure the matching of TargetID and nucleotide sequence. \Rfunction{addNuId2lumi} implements the function.
+\begin{Sinput}
+> ## specify the annotation file for the Illumina chip
+> annotationFile <- 'Human_RefSeq-8.csv'			# Not run
+> ## Replace the Target ID with nuID
+> lumi.N <- addNuId2lumi(lumi.N, annotationFile)	# Not run
+\end{Sinput}
+
+An alternative way is to load the Annotation library and match the targetID with nuID
+<<quiet=T>>=
+if (require(Human.lumi)) {
+	lumi.N <- addNuId2lumi(lumi.N, lib='Human.lumi')
+}
+@
+
+\section{A use case: from raw data to functional analysis}
+Figure \ref{useCase} shows the data processing flow chart of the use case. Since the classes in \Rpackage{lumi} package are inherited from class {\bf ExpressionSet}, packages and functions compatible with class {\bf ExpressionSet} or accepting matrix as input   all can be used for \Rpackage{lumi} results. Here we just give two examples: using \Rpackage{limma} to identify differentiated genes and using \Rpackage{GOstats} to annotate the significant genes.
+
+We use the Barnes data set [3] as an example.  The Barnes data setmeasured a dilution series of two human tis-sues, brain and placenta, at the titration rate of 100\%, 95\%, 75\%, 50\%, 25\% and 0\%. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We used this data set to evaluate the detection of differential expressions.
+
+\begin{figure}
+\includegraphics{useCaseFlowChart}
+\caption{Flow chart of the use case}
+\label{useCase}
+\end{figure}
+
+
+\subsection{Preprocess the Illumina data}
+\begin{Sinput}
+> library(lumi)
+> ## specify the file name
+> # fileName <- 'Barnes_gene_profile.txt'  #  Not run
+> ## load the data
+> # example.lumi <- lumiR(fileName)	 # Not run
+ 
+> ## load saved data
+> load(example.lumi) 
+> ## Transfer Illumina microarray data as nuID annotated
+> example.lumi <- addNuId2lumi(example.lumi, lib='Human.lumi')
+
+> ## Quality control based on the raw data
+> lumi.Q <- lumiQ(example.lumi)		# (optional)
+ 
+> ## Do default VST variance stabilizing transform
+> lumi.T <- lumiT(example.lumi)			
+
+> ## Do lumi between microarray normaliazation
+> lumi.N <- lumiN(lumi.T)			
+
+> ## Quality control after normalization
+> lumi.N.Q <- lumiQ(lumi.N)			# (optional)
+\end{Sinput}
+
+\subsection{Identify differentiate genes}
+Identify the differentiated genes based on moderated t-test using \Rpackage{limma}.
+
+Retrieve the normalized data
+<<>>=
+dataMatrix <- exprs(lumi.N)
+@
+
+To speed up the processing and reduce FDR, remove the unexpressed genes
+<<>>=
+presentCount <- pData(featureData(lumi.N))$presentCount
+selDataMatrix <- dataMatrix[presentCount > 0,]
+selProbe <- rownames(selDataMatrix)
+@
+
+
+\begin{Sinput}
+> ## Specify the sample type
+> sampleType <- c('100US', '95US:5P', '100US', '95US:5P')
+> if(require(limma)) {
++ 	## compare  '95US:5P' and '100US'
++ 	design <- model.matrix(~ factor(sampleType))
++ 	colnames(design) <- c('100US', '95US:5P-100US')
++ 	fit <- lmFit(selDataMatrix, design)
++ 	fit <- eBayes(fit)
++ 	## print the top 10 genes
++ 	topTable(fit, coef='95US:5P-100US', adjust='fdr', number=10)
++ 	
++ 	## get significant gene list with FDR adjusted p.values less than 0.01
++ 	p.adj <- p.adjust(fit$p.value[,2])		
++ 	sigGene.adj <- selProbe[ p.adj < 0.01]
++ 	## without FDR adjustment
++ 	sigGene <- selProbe[ fit$p.value[,2] < 0.001]
++
++ } 
+\end{Sinput}
+
+<<echo=F>>=
+## Specify the sample type
+sampleType <- c('100US', '95US:5P', '100US', '95US:5P')
+if(require(limma)) {
+	## compare  '95US:5P' and '100US'
+	design <- model.matrix(~ factor(sampleType))
+	colnames(design) <- c('100US', '95US:5P-100US')
+	fit <- lmFit(selDataMatrix, design)
+	fit <- eBayes(fit)
+	## print the top 10 genes
+	topTable(fit, coef='95US:5P-100US', adjust='fdr', number=10)
+	
+	## get significant gene list with FDR adjusted p.values less than 0.01
+	p.adj <- p.adjust(fit$p.value[,2])		
+	sigGene.adj <- selProbe[ p.adj < 0.01]
+	## without FDR adjustment
+	sigGene <- selProbe[ fit$p.value[,2] < 0.01]
+} 
+@
+
+
+
+\subsection{Gene Ontology annotation}
+Based on the significant genes identified using \Rpackage{limma} or t-test, we can further do Gene Ontology annotation. We can use package \Rpackage{GOstats} to do the analysis.
+
+Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of MF (Molecular Function). For other categories(BP, CC), just follow the same procedure.
+
+\begin{Sinput}
+> if (require(GOstats) & require(Human.lumi)) {
++ 
++       ## Get the locuslink Id of the gene
++       sigLL <- unique(unlist(mget(sigGene, env=Human.lumiLOCUSID, ifnotfound=NA)))
++       sigLL <- as.character(sigLL[!is.na(sigLL)])
++       params <- new("GOHyperGParams",
++               geneIds= sigLL,
++               annotation="Human.lumi",
++               ontology="BP",
++               pvalueCutoff= 0.01,
++               conditional=FALSE,
++               testDirection="over")
++          
++       hgOver <- hyperGTest(params)
++          
++       ## Get the p-values of the test
++       gGhyp.pv <- pvalues(hgOver)
++ 	
++       ## select the Go terms with p-value less than 0.01
++       sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.01])
++ 	
++       ## Here only show the significant GO terms of BP (Molecular Function)
++       ## 	For other categories, just follow the same procedure.
++       sigGO.Term <- getGOTerm(sigGO.ID)[["BP"]]
++ }
+\end{Sinput}
+
+
+<<echo=F, eval=F>>=
+if (require(GOstats) & require(Human.lumi)) {
+
+	## Get the locuslink Id of the gene
+	sigLL <- unique(unlist(mget(sigGene, env=Human.lumiLOCUSID, ifnotfound=NA)))
+	sigLL <- as.character(sigLL[!is.na(sigLL)])
+	params <- new("GOHyperGParams",
+              geneIds= sigLL,
+              annotation="Human.lumi",
+              ontology="BP",
+              pvalueCutoff= 0.01,
+              conditional=FALSE,
+              testDirection="over")
+         
+         hgOver <- hyperGTest(params)
+         	
+	## Get the p-values of the test
+	gGhyp.pv <- pvalues(hgOver)
+	
+	## select the Go terms with p-value less than 0.01
+	sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.01])
+	
+	## Here only show the significant GO terms of BP (Molecular Function)
+	## 	For other categories, just follow the same procedure.
+	sigGO.Term <- getGOTerm(sigGO.ID)[["BP"]]
+}
+@
+
+
+% Produce the significant GO term table
+<<echo=FALSE, results=tex, eval=F>>=
+if (require(GOstats) & require(Human.lumi) & require(xtable)) {
+
+	##get gene counts at each GO category
+	gg.counts <- geneCounts(hgOver)[sigGO.ID]
+	total.counts <- universeCounts(hgOver)[sigGO.ID]
+
+	ggt <- unlist(sigGO.Term)
+	numCh <- nchar(ggt)
+	ggt2 <- substr(ggt, 1, 17)
+	ggt3 <- paste(ggt2, ifelse(numCh > 17, "...", ""), sep="")
+	
+	## output the significant GO categories as a table
+	ggMat <- matrix(c(names(sigGO.Term), ggt3, signif(gGhyp.pv[sigGO.ID],5), gg.counts, total.counts),
+    		byrow=FALSE, nc=5, dimnames=list(1:length(sigGO.Term), c("GO ID",
+   		"Term", "p-value","Significant Genes No.", "Total Genes No.")))
+	xtable.matrix(ggMat,
+  		caption="GO terms, p-values and counts.", label="ta:GOggterms")
+}
+@
+
+% Produce the significant GO term table
+% latex table generated in R 2.4.0 by xtable 1.4-2 package
+% Sat Dec  9 23:14:22 2006
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{rlllll}
+  \hline
+ & GO ID & Term & p-value & Significant Genes No. & Total Genes No. \\
+  \hline
+1 & GO:0006817 & phosphate transpo... & 7.1814e-05 & 11 & 48 \\
+  2 & GO:0006692 & prostanoid metabo... & 7.4988e-05 & 6 & 14 \\
+  3 & GO:0006693 & prostaglandin met... & 7.4988e-05 & 6 & 14 \\
+  4 & GO:0015698 & inorganic anion t... & 0.00014391 & 15 & 88 \\
+  5 & GO:0006954 & inflammatory resp... & 0.00046099 & 21 & 163 \\
+  6 & GO:0006820 & anion transport & 0.00046297 & 16 & 108 \\
+  7 & GO:0007229 & integrin-mediated... & 0.00066863 & 9 & 43 \\
+  8 & GO:0009613 & response to pest,... & 0.00082834 & 41 & 425 \\
+  9 & GO:0051707 & response to other... & 0.00099687 & 41 & 429 \\
+  10 & GO:0006690 & icosanoid metabol... & 0.0010893 & 7 & 29 \\
+  11 & GO:0001516 & prostaglandin bio... & 0.0011223 & 4 & 9 \\
+  12 & GO:0046457 & prostanoid biosyn... & 0.0011223 & 4 & 9 \\
+  13 & GO:0006950 & response to stres... & 0.0014567 & 67 & 808 \\
+  14 & GO:0015884 & folic acid transp... & 0.001786 & 3 & 5 \\
+  15 & GO:0007155 & cell adhesion & 0.0020978 & 41 & 446 \\
+  16 & GO:0009611 & response to wound... & 0.0021351 & 31 & 311 \\
+  17 & GO:0007565 & pregnancy & 0.0021352 & 8 & 41 \\
+  18 & GO:0006517 & protein deglycosy... & 0.0033714 & 2 & 2 \\
+  19 & GO:0007179 & transforming grow... & 0.0038755 & 6 & 27 \\
+  20 & GO:0006955 & immune response & 0.0040391 & 52 & 620 \\
+  21 & GO:0051181 & cofactor transpor... & 0.0057251 & 3 & 7 \\
+  22 & GO:0051706 & physiological int... & 0.0059084 & 8 & 48 \\
+  23 & GO:0046456 & icosanoid biosynt... & 0.0060734 & 5 & 21 \\
+  24 & GO:0009605 & response to exter... & 0.0063917 & 35 & 390 \\
+  25 & GO:0008632 & apoptotic program & 0.0064967 & 7 & 39 \\
+  26 & GO:0051704 & interaction betwe... & 0.0068181 & 10 & 70 \\
+  27 & GO:0008361 & regulation of cel... & 0.0088256 & 13 & 107 \\
+  28 & GO:0016049 & cell growth & 0.0088256 & 13 & 107 \\
+  29 & GO:0007243 & protein kinase ca... & 0.0092369 & 21 & 208 \\
+  30 & GO:0007167 & enzyme linked rec... & 0.0094688 & 17 & 157 \\
+  31 & GO:0043174 & nucleoside salvag... & 0.0097239 & 2 & 3 \\
+  32 & GO:0043101 & purine salvage & 0.0097239 & 2 & 3 \\
+  33 & GO:0006166 & purine ribonucleo... & 0.0097239 & 2 & 3 \\
+   \hline
+\end{tabular}
+\caption{GO terms, p-values and counts.}
+\label{ta:GOggterms}
+\end{center}
+\end{table}
+
+
+
+\section{Reference}
+
+1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", submitted
+
+2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.
+
+3. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
+
+%\bibliographystyle{plainnat}
+%\bibliography{lumi}
+
+
+\end{document}
