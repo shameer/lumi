@@ -371,14 +371,14 @@ is.nuID('adfqeqe')
 @
 
 \subsection{Illumina microarray annotation package}
-Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations. Currently, annotation packages for human (\Rpackage{Human.lumi}) and mouse (\Rpackage{Mouse.lumi}) have been created. Packages for more species will be created in the future.
+Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations. Currently, annotation packages for human (\Rpackage{lumiHumanV1}) and mouse (\Rpackage{Mouse.lumi}) have been created. Packages for more species will be created in the future.
 
 The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} with small modification. As a result, the format of the package is the same as Affymetrix annotation package, lots of packages designed for Affymetrix can also be used for Illumina annotation package.
 
 Here is some examples:
 \begin{Sinput}
 > ## load lumi annotation package
-> lib <- 'Human.lumi'		# Huamn lumi annotation package
+> lib <- 'lumiHumanV1'		# Huamn lumi annotation package
 > if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 + 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
 + 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
@@ -389,7 +389,7 @@ Here is some examples:
 
 <<echo=F>>=
 ## load lumi annotation package
-lib <- 'Human.lumi'		# Huamn lumi annotation package
+lib <- 'lumiHumanV1'		# Huamn lumi annotation package
 if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
@@ -420,7 +420,7 @@ if (require(annotate) & require(lib, character.only=TRUE)) {
 
 
 \subsection{Transfer Illumina microarray data as nuID annotated}
-For Illumina microarray data, there are two ways to transfer the TargetID as nuID. The first way is to use the annotation file for the specific chip which is provided by Illumina company. \verb+'Human_RefSeq-8.csv'+ is an example annotation file for Human RefSeq-8 microarray. We recommend using this method because it can make sure the matching of TargetID and nucleotide sequence. \Rfunction{addNuId2lumi} implements the function.
+For Illumina microarray data, there are two ways to transfer the TargetID (or Probe Id) as nuID. The first way is to use the annotation file for the specific chip which is provided by Illumina company. \verb+'Human_RefSeq-8.csv'+ is an example annotation file for Human RefSeq-8 microarray. \Rfunction{addNuId2lumi} implements the function.
 \begin{Sinput}
 > ## specify the annotation file for the Illumina chip
 > annotationFile <- 'Human_RefSeq-8.csv'			# Not run
@@ -428,10 +428,10 @@ For Illumina microarray data, there are two ways to transfer the TargetID as nuI
 > lumi.N <- addNuId2lumi(lumi.N, annotationFile)	# Not run
 \end{Sinput}
 
-An alternative way is to load the Annotation library and match the targetID with nuID
+An alternative way is to load the Annotation library and match the targetID (or Probe Id) with nuID. The function can automatically check whether targetID or Probe Id  was used in the first column of the text data file, and convert them as nuID.
 <<quiet=T>>=
-if (require(Human.lumi)) {
-	lumi.N <- addNuId2lumi(lumi.N, lib='Human.lumi')
+if (require(lumiHumanV1)) {
+	lumi.N <- addNuId2lumi(lumi.N, lib='lumiHumanV1')
 }
 @
 
@@ -458,7 +458,7 @@ We use the Barnes data set [3] as an example.  The Barnes data setmeasured a dil
 > ## load saved data
 > load(example.lumi) 
 > ## Transfer Illumina microarray data as nuID annotated
-> example.lumi <- addNuId2lumi(example.lumi, lib='Human.lumi')
+> example.lumi <- addNuId2lumi(example.lumi, lib='lumiHumanV1')
 
 > ## Quality control based on the raw data
 > lumi.Q <- lumiQ(example.lumi)		# (optional)
@@ -538,14 +538,14 @@ Based on the significant genes identified using \Rpackage{limma} or t-test, we c
 Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of MF (Molecular Function). For other categories(BP, CC), just follow the same procedure.
 
 \begin{Sinput}
-> if (require(GOstats) & require(Human.lumi)) {
+> if (require(GOstats) & require(lumiHumanV1)) {
 + 
 +       ## Get the locuslink Id of the gene
-+       sigLL <- unique(unlist(mget(sigGene, env=Human.lumiLOCUSID, ifnotfound=NA)))
++       sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1LOCUSID, ifnotfound=NA)))
 +       sigLL <- as.character(sigLL[!is.na(sigLL)])
 +       params <- new("GOHyperGParams",
 +               geneIds= sigLL,
-+               annotation="Human.lumi",
++               annotation="lumiHumanV1",
 +               ontology="BP",
 +               pvalueCutoff= 0.01,
 +               conditional=FALSE,
@@ -567,14 +567,14 @@ Do Hypergeometric test of Gene Ontology based on the significant gene list (for 
 
 
 <<echo=F, eval=F>>=
-if (require(GOstats) & require(Human.lumi)) {
+if (require(GOstats) & require(lumiHumanV1)) {
 
 	## Get the locuslink Id of the gene
-	sigLL <- unique(unlist(mget(sigGene, env=Human.lumiLOCUSID, ifnotfound=NA)))
+	sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1LOCUSID, ifnotfound=NA)))
 	sigLL <- as.character(sigLL[!is.na(sigLL)])
 	params <- new("GOHyperGParams",
               geneIds= sigLL,
-              annotation="Human.lumi",
+              annotation="lumiHumanV1",
               ontology="BP",
               pvalueCutoff= 0.01,
               conditional=FALSE,
@@ -597,7 +597,7 @@ if (require(GOstats) & require(Human.lumi)) {
 
 % Produce the significant GO term table
 <<echo=FALSE, results=tex, eval=F>>=
-if (require(GOstats) & require(Human.lumi) & require(xtable)) {
+if (require(GOstats) & require(lumiHumanV1) & require(xtable)) {
 
 	##get gene counts at each GO category
 	gg.counts <- geneCounts(hgOver)[sigGO.ID]

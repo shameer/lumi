@@ -56,6 +56,10 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	} else if (!is.null(lib)) {
 		if (require(lib, character.only=TRUE)) {
 			newId <- mget(targetID, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
+			if (length(which(!is.na(newID))) == 0) {
+				newId <- mget(targetID, get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'), ifnotfound=NA)
+				if (length(which(!is.na(newID))) == 0) stop('The library does not match the data!')
+			}
 			## Check for the targetIDs cannot be found in the lib.
 			## Some known control genes will not be checked.
 			naInd <- is.na(newId)
