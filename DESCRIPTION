@@ -5,7 +5,7 @@ Version: 1.0.4
 Date: 2006-12-28
 Depends: R (>= 2.4.0), Biobase (>= 1.12.0), affy, mgcv, methods
 Suggests: vsn
-Author: Pan Du, Simon Lin
+Author: Pan Du, Warren Kibbe, Simon Lin
 Maintainer: Pan Du <dupan@northwestern.edu>
 Description: lumi R package is designed to preprocess the Illumina microarray data. It includes functions of Illumina data input, quality control, variance stabilization, normalization and gene annotation. 
 License: LGPL version 2 or newer
