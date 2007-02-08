@@ -182,7 +182,7 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE) {
 	info <- gsub('\t+', '\t', info)
 	experimentData(x.lumi)@other <- list(info)
     x.lumi@history<- rbind(x.lumi@history,
-                       c(history.submitted, history.finished, history.command))
+                       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
     
     return(x.lumi)
 }
