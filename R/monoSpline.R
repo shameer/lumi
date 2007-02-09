@@ -2,7 +2,8 @@
 function(x, y, newX=NULL, nKnots=5, ifPlot=FALSE) {
     # behavior: if extropolation, outside values are constant to the
     #  nearest inside one
-    require(mgcv)
+	if(!require(mgcv)) stop('Package "mgcv" should be installed!')
+
 	nKnots <- round(nKnots)
 	if (is.null(newX)) newX <- x
 	
