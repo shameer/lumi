@@ -1,3 +1,21 @@
+
+-----------------------------------------------------
+version 1.0.4
+release date: 02/08/2007
+
+1. Updated lumiR function to make it compatible with R 2.5;
+2. Updated addNuId2lumi and lumiN function to fix some typos:
+
+Thanks Jean-Eudes DAZARD reporting this problem.
+
+
+-----------------------------------------------------
+version 1.0.3
+release date: 01/21/2007
+
+1. Updated lumiR and addNuId2lumi functions to allow them mapping TargetId or ProbeId to nuID;
+
+
 -----------------------------------------------------
 version 1.0.2
 release date: 01/01/2007

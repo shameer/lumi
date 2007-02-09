@@ -7,7 +7,7 @@ function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
     history.submitted <- as.character(Sys.time())
     new.lumi <- x.lumi 
     if (method == 'VSN') {
-		if(!reqiure(vsn)) stop('Package "vsn" should be installed for "VSN" method!')
+		if(!require(vsn)) stop('Package "vsn" should be installed for "VSN" method!')
 	}
 
 	exprs(new.lumi) <- switch(method,
