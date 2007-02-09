@@ -35,7 +35,8 @@ function(x.lumi, logMode=TRUE, sampleRelation.param=list(), detectOutLier.param=
 	## record history
     history.finished <- as.character(Sys.time())
     history.command <- capture.output(print(match.call(lumiQ)))  
-	history<- rbind(x.lumi@history, c(history.submitted, history.finished, history.command))
+	history <- rbind(x.lumi@history,
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
 
 	## create a Lumi.QC object
 	names(mm) <- names(std) <- names(detectionRate) <- names(outlier) <- sampleName

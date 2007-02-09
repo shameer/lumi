@@ -136,7 +136,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	#history.command <- match.call()
     history.command <- capture.output(print(match.call(combine)))  
 	x@history<- rbind(x@history, y@history)
-    x@history<- rbind(x@history, c(history.submitted, history.finished, history.command))
+    x@history<- rbind(x@history, 
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
 	return(x)
 })
 
@@ -340,7 +341,8 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 
     # history tracking
     history.finished <- as.character(Sys.time())
-    x@history<- rbind(x@history, c(history.submitted, history.finished, history.command))
+    x@history<- rbind(x@history, 
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
 
 	return(x)
 })

@@ -21,8 +21,8 @@ function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
     # history tracking
     history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(lumiN)))
-    new.lumi@history <- rbind(new.lumi@history,
-           c(history.submitted, history.finished, history.command))
+	new.lumi@history<- rbind(new.lumi@history,
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
     
     return(new.lumi)
 }

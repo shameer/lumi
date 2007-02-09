@@ -38,8 +38,9 @@ function(x.lumi, method=c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot=F
 	# history tracking
 	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(lumiT)))
-	new.lumi@history <- rbind(new.lumi@history,
-	       c(history.submitted, history.finished, history.command))
+	new.lumi@history<- rbind(new.lumi@history,
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+
 	if (method == 'vst') {
 		attr(new.lumi, 'parameter') <- transPara
 		attr(new.lumi, 'transformFun') <- transFun
