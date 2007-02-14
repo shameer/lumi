@@ -1,6 +1,8 @@
 `addNuId2lumi` <-
 function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target')) {
-	
+
+    history.submitted <- as.character(Sys.time())
+
 	## check whether the object is nuID annotated.
 	exprs <- exprs(x.lumi)
 	targetID <- rownames(exprs)
@@ -56,6 +58,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	} else if (!is.null(lib)) {
 		if (require(lib, character.only=TRUE)) {
 			newId <- mget(targetID, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
+			newId <- unlist(newId)
 			if (length(which(!is.na(newId))) == 0) {
 				newId <- mget(targetID, get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'), ifnotfound=NA)
 				if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!')
@@ -107,10 +110,19 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 		x.lumi <- x.lumi[-rmIndex, ]
 		newId <- newId[-rmIndex]
 	}		
-	
+
 	## update the feature names (probe ids)
 	featureNames(x.lumi) <- newId
-	
+	## update the feautre data
+	featureData <- featureData(x.lumi)
+	rownames(pData(featureData)) <- newId
+	featureData(x.lumi) <- featureData
+
+	## Add history tracking
+    history.finished <- as.character(Sys.time())
+    history.command <- capture.output(print(match.call(addNuId2lumi)))  
+    x.lumi@history<- rbind(x.lumi@history,
+                       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+
 	return(x.lumi)
 }
-

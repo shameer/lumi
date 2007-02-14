@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE) {
+function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
     history.submitted <- as.character(Sys.time())
 
 	## ---------------------------------------
@@ -183,6 +183,9 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE) {
 	experimentData(x.lumi)@other <- list(info)
     x.lumi@history<- rbind(x.lumi@history,
                        data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+				
+	## Add nuID if the lib is provided
+	if (!is.null(lib))  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
     
     return(x.lumi)
 }
