@@ -79,7 +79,6 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 })
 
 
-
 ##geneNames method
 if (is.null(getGeneric("combine")))
   	setGeneric("combine", function(x, y, ...)
@@ -96,17 +95,14 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
    	history.submitted <- as.character(Sys.time())
 
     assayData(x) <- combine(assayData(x), assayData(y))
-    # phenoData(x) <- combine(phenoData(x), phenoData(y))
-    # featureData(x) <- combine(featureData(x), featureData(y))
     experimentData(x) <- combine(experimentData(x),experimentData(y))
 	
 	## combine pheno data
 	if (!is.null(phenoData(x)) | !is.null(phenoData(y))) {
 		phenoData.x <- phenoData(x)
 		phenoData.y <- phenoData(y)
-		
-		pData(phenoData.x) <- merge(pData(phenoData.x), pData(phenoData.y), all=TRUE)
 
+		pData(phenoData.x) <- rbind(pData(phenoData.x), pData(phenoData.y))
 		metaInfo <- rbind(varMetadata(phenoData.x), varMetadata(phenoData.y))
 		varMetadata(phenoData.x) <- metaInfo[!duplicated(c(rownames(varMetadata(phenoData.x)),
 		 		rownames(varMetadata(phenoData.y)))), ,drop=FALSE]
@@ -117,8 +113,11 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	if (!is.null(featureData(x)) | !is.null(featureData(y))) {
 		feature.x <- featureData(x)
 		feature.y <- featureData(y)
-		
-		repInfo <- merge(pData(feature.x), pData(feature.y), by='targetID', all=TRUE, suffixes = c(".x",".y"))
+
+		pData.x <- pData(feature.x)
+		pData.y <- pData(feature.y)
+		if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are not incompatible!')
+		repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
 		if ('presentCount' %in% intersect(colnames(pData(feature.x)), colnames(pData(feature.y)))) {
 			colInd <- which(colnames(repInfo) %in% c('presentCount.x', 'presentCount.y'))
 			presentCount <- rowSums(repInfo[, colInd])
@@ -133,7 +132,6 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 
     # history tracking
     history.finished <- as.character(Sys.time())
-	#history.command <- match.call()
     history.command <- capture.output(print(match.call(combine)))  
 	x@history<- rbind(x@history, y@history)
     x@history<- rbind(x@history, 

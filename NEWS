@@ -1,4 +1,11 @@
 -----------------------------------------------------
+version 1.0.6
+release date: 02/15/2007
+
+1. Updated the combine method of LumiBatch class, addNuId2lumi, lumiR for better adaptiveness.
+
+
+-----------------------------------------------------
 version 1.0.5
 release date: 02/14/2007
 

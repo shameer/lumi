@@ -24,7 +24,7 @@
 		\item{\code{mean}:}{ the mean of each sample}
 		\item{\code{std}:}{ the standard deviation of each sample}
 		\item{\code{sampleCor}:}{ the correlation bewteen the samples }
-		\item{\code{detectionCount}:}{ the percentage of detected genes }
+		\item{\code{detectionRate}:}{ the percentage of detected genes }
 		\item{\code{sampleRelation}:}{ the sample relations (distance among samples) }
 		\item{\code{outlier}:}{ identification of outlier samples. See \code{\link{detectOutlier}}. }
 		\item{\code{history}:}{ the operation records of LumiQC objects. }

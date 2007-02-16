@@ -1,6 +1,9 @@
 `lumiR` <-
 function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
     history.submitted <- as.character(Sys.time())
+	## set "stringsAsFactors" as FALSE
+	oldSetting <- options("stringsAsFactors")[[1]]
+	options(stringsAsFactors = FALSE)
 
 	## ---------------------------------------
 	## identify the Metadata lines 
@@ -50,18 +53,21 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	    warning("The raw data should not be normalized in BeadStudio.")
 	}
 	
-    allData <- read.table(file=fileName, header = TRUE, sep = sep, quote = "\"",
-               dec = ".", as.is = TRUE,
-               na.strings = "NaN", colClasses = NA, 	#nrows = 60000,
-               skip = nMetaDataLines, check.names = FALSE, 
-               strip.white = FALSE, blank.lines.skip = TRUE,
-               comment.char = "", allowEscapes = FALSE, flush = FALSE)
+    allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines,
+               as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="")
 	header <- names(allData)
 
-	# get target Id
+	## Get Id. The ProbeID (by default it is the second column) is preferred if provided, 
+	# otherwise the TargetID (by default it is the first column) is used.
 	targetID <- as.character(as.vector(allData[,1]))
-	rownames(allData) <- targetID
-	id <- targetID
+	if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
+		id <- as.character(as.vector(allData[,2]))
+		idName <- header[2]
+	} else {
+		id <- targetID
+		idName <- header[1]
+	}
+	rownames(allData) <- id
 
 	## identify where the signal column exists
 	ind <- grep("AVG_SIGNAL", header, ignore.case=TRUE)
@@ -134,14 +140,22 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	## reportInfo save the id information
 	if (!is.null(detection)) {
 		presentCount <- apply(detection, 1, function(x) sum(x >= detectionTh))
-		reporterInfo <- data.frame(targetID=targetID, presentCount=presentCount)	
-		varMetadata <- data.frame(labelDescription=c('The Illumina microarray gene ID', 
+		reporterInfo <- data.frame(id, presentCount)
+		names(reporterInfo) <- c(idName, 'presentCount')
+		varMetadata <- data.frame(labelDescription=c('The Illumina microarray identifier', 
 			'The number of detectable measurements of the gene'))
-		rownames(varMetadata) <- c('targetID', 'presentCount')
+		rownames(varMetadata) <- c(idName, 'presentCount')
 	} else {
-		reporterInfo <- data.frame(targetID=targetID)
-		varMetadata <- data.frame(labelDescription='The Illumina microarray gene ID')
-		rownames(varMetadata) <- 'targetID'
+		reporterInfo <- data.frame(id)
+		names(reporterInfo) <- idName
+		varMetadata <- data.frame(labelDescription='The Illumina microarray identifier')
+		rownames(varMetadata) <- idName
+	}
+	## if ProbeID is used as id, then also keep the TargetID information in the featureData
+	if (idName != header[1]) {
+		reporterInfo <- data.frame(reporterInfo, TargetID=targetID)
+		varMetadata <- rbind(varMetadata, data.frame(labelDescription='The Illumina TargetID'))
+		rownames(varMetadata)[nrow(varMetadata)] <- 'TargetID'
 	}
 	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
@@ -169,7 +183,6 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
     history.command <- capture.output(print(match.call(lumiR)))  
 	
 	## replace with the real file name
-	#history.command <- sub('[^(]fileName', paste('"', fileName, '"', sep=''), history.command)
 	if (length(grep(',', history.command)) > 0) {
 		history.command <- sub('\\(.+,', paste('("', fileName, '",', sep=''), history.command)
 	} else {
@@ -184,8 +197,11 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
     x.lumi@history<- rbind(x.lumi@history,
                        data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
 				
-	## Add nuID if the lib is provided
+	## Add nuID if the annotation library is provided
 	if (!is.null(lib))  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
+
+	## resume the old settings
+	options(stringsAsFactors = oldSetting)
     
     return(x.lumi)
 }
