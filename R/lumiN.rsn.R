@@ -44,12 +44,17 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			return(ww)			
 		}
 
-        if (ind != targetArray) {
+		if (ind != targetArray) {
 			## calculate the weights based on the fold change 
-            if (!is.null(excludeFold) & !is.null(exprs0)) {
-                fd <- exprs0[,ind] - exprs0[, targetArray]
-				wt <- (win(abs(fd), log2(excludeFold)/3))
-		        wt <- wt/max(wt)
+			if (!is.null(exprs0)) {
+				fd <- exprs0[,ind] - exprs0[, targetArray]
+				if (!is.null(excludeFold)) {
+					sigma <- log2(excludeFold)/3
+				} else {
+					sigma <- sd(fd)
+				}
+ 				wt <- win(abs(fd), sigma)
+				wt <- wt/max(wt)
 			} else {
 				wt <- rep(length(u1))
 			}
@@ -90,4 +95,3 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
     
     return(x.lumi)
 }
-

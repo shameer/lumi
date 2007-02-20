@@ -438,7 +438,7 @@ if (require(lumiHumanV1)) {
 \section{A use case: from raw data to functional analysis}
 Figure \ref{useCase} shows the data processing flow chart of the use case. Since the classes in \Rpackage{lumi} package are inherited from class {\bf ExpressionSet}, packages and functions compatible with class {\bf ExpressionSet} or accepting matrix as input   all can be used for \Rpackage{lumi} results. Here we just give two examples: using \Rpackage{limma} to identify differentiated genes and using \Rpackage{GOstats} to annotate the significant genes.
 
-We use the Barnes data set [3] as an example.  The Barnes data setmeasured a dilution series of two human tis-sues, brain and placenta, at the titration rate of 100\%, 95\%, 75\%, 50\%, 25\% and 0\%. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We used this data set to evaluate the detection of differential expressions.
+We use the Barnes data set [3] as an example.  The Barnes data set measured a dilution series of two human tis-sues, brain and placenta.  It includes six samples with the titration ratio of brain and placenta as 100:0, 95:5, 75:25, 50:50, 25:75 and 0:100. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We select samples with titration ratio, 100:0 and 95:5 (each has two technique replicates) in  this data set to evaluate the detection of differential expressions.
 
 \begin{figure}
 \includegraphics{useCaseFlowChart}
