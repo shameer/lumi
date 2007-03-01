@@ -97,7 +97,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		warning('Duplicated IDs found!')
+		warning('Duplicated IDs found and were merged!')
 		dupId <- unique(newId[duplicated(newId)])
 		rmIndex <- NULL
 		for (dupId.i in dupId) {

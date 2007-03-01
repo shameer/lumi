@@ -93,7 +93,7 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	## check for possible duplicated ids
 	dupId <- unique(id[duplicated(id)])
 	if (length(dupId) > 0) {
-		warning('Duplicated Ids found!')
+		warning('Duplicated IDs found and were merged!')
 		rmInd <- NULL
 		for (dupId.i in dupId) {
 			selInd.i <- which(id == dupId.i)
