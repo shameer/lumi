@@ -1,8 +1,8 @@
 Package: lumi
 Type: Package
 Title: Preprocessing Methods for Illumina Microarrays (BeadArray)
-Version: 1.0.7
-Date: 2007-02-20
+Version: 1.0.8
+Date: 2007-02-28
 Depends: R (>= 2.4.0), Biobase (>= 1.12.0), affy, mgcv, methods
 Suggests: vsn
 Author: Pan Du, Warren Kibbe, Simon Lin

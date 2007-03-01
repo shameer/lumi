@@ -97,7 +97,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		warning('Duplicated IDs found!!!')
+		# warning('Duplicated IDs found!')
 		dupId <- newId[duplicated(newId)]
 		rmIndex <- NULL
 		for (dupId.i in dupId) {
@@ -106,7 +106,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			beadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
 			detection <- apply(detection(x.lumi), 2, max)
 
-			temp <- colSums(se.exprs[dupIndex,]^2 * (beadNum[dupIndex,] - 1))
+			temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum[dupIndex,] - 1))
 			temp <- temp / (beadNum - length(dupIndex))
 			se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum[dupIndex,])))
 			exprs(x.lumi)[dupIndex[1],] <- ave.exp

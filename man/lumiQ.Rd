@@ -23,7 +23,7 @@ a LumiQC object
 
 \author{ Pan Du }
 
-\seealso{\code{\link{LumiQC}}, \code{\link{plot.LumiQC}} }
+\seealso{\code{\link{LumiQC}}, \code{\link{plot,LumiQC-method}} }
 \examples{
 ## load example data
 data(example.lumi)
@@ -35,7 +35,7 @@ lumi.Q <- lumiQ(example.lumi)
 ## plot the pairwise sample correlation
 plot(lumi.Q, what='pair')
 
-## see more examples in plot.LumiQC help documents
+## see more examples in "plot,LumiQC-method" help documents
 
 }
 \keyword{methods}
