@@ -67,7 +67,7 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 		id <- targetID
 		idName <- header[1]
 	}
-	rownames(allData) <- id
+	# rownames(allData) <- id
 
 	## identify where the signal column exists
 	ind <- grep("AVG_SIGNAL", header, ignore.case=TRUE)
@@ -94,29 +94,30 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	dupId <- unique(id[duplicated(id)])
 	if (length(dupId) > 0) {
 		warning('Duplicated Ids found!')
+		rmInd <- NULL
 		for (dupId.i in dupId) {
-			selInd.i <- id == dupId.i
-			exprs[dupId.i,] <- colMeans(exprs[selInd.i,])
+			selInd.i <- which(id == dupId.i)
+			exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,])
 			if (is.null(beadNum)) {
-				se.exprs[dupId.i,] <- colMeans(se.exprs[selInd.i,])
+				se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,])
 			} else {
 				totalBead.i <- colSums(beadNum[selInd.i,])
-				beadNum[dupId.i,] <- totalBead.i				
+				beadNum[selInd.i[1],] <- totalBead.i				
 				temp <- colSums(se.exprs[selInd.i,]^2 * (beadNum[selInd.i,] - 1))
-				temp <- temp / (totalBead.i - length(which(selInd.i)))
-				se.exprs[dupId.i,] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
+				temp <- temp / (totalBead.i - length(selInd.i))
+				se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
 			}
 			if (!is.null(detection)) {
-				detection[dupId.i,] <- apply(detection[selInd.i,], 2, max)				
+				detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)				
 			}
+			rmInd <- c(rmInd, selInd.i[-1])
 		}
 		## remove duplicated
-		dupId <- duplicated(id)
-		exprs <- exprs[!dupId,]
-		se.exprs <- se.exprs[!dupId,]
-		id <- id[!dupId]
-		if (!is.null(detection)) detection <- detection[!dupId,]
-		if (!is.null(beadNum)) beadNum <- beadNum[!dupId,]
+		exprs <- exprs[-rmInd,]
+		se.exprs <- se.exprs[-rmInd,]
+		id <- id[-rmInd]
+		if (!is.null(detection)) detection <- detection[-rmInd,]
+		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,]
 	}
 	
     if (na.rm) {
@@ -129,6 +130,7 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
         id <- id[keepInd]
 		targetID <- targetID[keepInd]
     }
+	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
     
     # get sample information
 	sampleName <-  sub('AVG_SIGNAL.', '', colnames(exprs), ignore.case=TRUE) 

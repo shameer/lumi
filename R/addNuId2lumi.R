@@ -97,21 +97,21 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		# warning('Duplicated IDs found!')
-		dupId <- newId[duplicated(newId)]
+		warning('Duplicated IDs found!')
+		dupId <- unique(newId[duplicated(newId)])
 		rmIndex <- NULL
 		for (dupId.i in dupId) {
 			dupIndex <- which(newId == dupId.i)
 			ave.exp <- colMeans(exprs(x.lumi)[dupIndex, ])
-			beadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
-			detection <- apply(detection(x.lumi), 2, max)
+			totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
+			maxDetection <- apply(detection(x.lumi), 2, max)
 
-			temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum[dupIndex,] - 1))
-			temp <- temp / (beadNum - length(dupIndex))
-			se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum[dupIndex,])))
+			temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum(x.lumi)[dupIndex,] - 1))
+			temp <- temp / (totalBeadNum - length(dupIndex))
+			se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum(x.lumi)[dupIndex,])))
 			exprs(x.lumi)[dupIndex[1],] <- ave.exp
-			detection(x.lumi)[dupIndex[1],] <- detection
-			beadNum(x.lumi)[dupIndex[1],] <- beadNum
+			detection(x.lumi)[dupIndex[1],] <- maxDetection
+			beadNum(x.lumi)[dupIndex[1],] <- totalBeadNum
 			rmIndex <- c(rmIndex, dupIndex[-1])
 		}
 
