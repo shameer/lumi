@@ -2,28 +2,45 @@
 function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
  		ifPlot=FALSE, ...) {
 
-	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
+	if (is(x.lumi, 'ExpressionSet')) {
+	    # x.lumi is a lumi object
+	    x.matrix <- exprs(x.lumi)		
+	} else if (is.numeric(x.lumi)) {
+		x.matrix <- as.matrix(x.lumi)
+	} else {
+		stop('The object should be a matrix or class "ExpressionSet" inherited!')
+	}
+
 	method <- match.arg(method)
-    history.submitted <- as.character(Sys.time())
-    new.lumi <- x.lumi 
     if (method == 'VSN') {
 		if(!require(vsn)) stop('Package "vsn" should be installed for "VSN" method!')
 	}
+	if (is(x.lumi, 'LumiBatch')) {
+		history.submitted <- as.character(Sys.time())
+	}
 
-	exprs(new.lumi) <- switch(method,
-		RSN = exprs(lumiN.rsn(x.lumi, targetArray=targetArray, ifPlot=ifPlot, ...)),
-		loess = normalize.loess(exprs(x.lumi), ...),
-		quantile = normalize.quantiles(x=exprs(x.lumi)),
-		VSN = exprs(vsn(intensities=exprs(x.lumi), ...)) )
-    
-	colnames(exprs(new.lumi)) <- colnames(exprs(x.lumi))
-	rownames(exprs(new.lumi)) <- rownames(exprs(x.lumi))
-    # history tracking
-    history.finished <- as.character(Sys.time())
-	history.command <- capture.output(print(match.call(lumiN)))
-	new.lumi@history<- rbind(new.lumi@history,
-	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
-    
-    return(new.lumi)
+	norm.matrix <- switch(method,
+		RSN = lumiN.rsn(x.matrix, targetArray=targetArray, ifPlot=ifPlot, ...),
+		loess = normalize.loess(x.matrix, ...),
+		quantile = normalize.quantiles(x=x.matrix),
+		VSN = exprs(vsn(intensities=x.matrix, ...)) )
+
+	colnames(norm.matrix) <- colnames(x.matrix)
+	rownames(norm.matrix) <- rownames(x.matrix)
+
+	if (is(x.lumi, 'ExpressionSet')) {
+		new.lumi <- x.lumi
+		exprs(new.lumi) <- norm.matrix
+	    # history tracking
+		if (is(x.lumi, 'LumiBatch')) {
+		    history.finished <- as.character(Sys.time())
+			history.command <- capture.output(print(match.call(lumiN)))
+			new.lumi@history<- rbind(new.lumi@history,
+			       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+		}
+	    return(new.lumi)
+	} else {
+		return(norm.matrix)
+	}
 }
 

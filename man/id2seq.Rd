@@ -21,7 +21,7 @@ Please refer to reference for more details.
 a string of nucleotide sequence
 }
 \references{
-Du, P., Kibbe, W.A. and Link, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.
+Du, P., Kibbe, W.A. and Link, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
 }
 \author{ Pan Du }
 \seealso{\code{\link{seq2id}}}

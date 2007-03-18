@@ -17,7 +17,7 @@ is.nuID(id)
   Return TRUE if id is a nuID, or else return FALSE.
 }
 \references{
-Du, P., Kibbe, W.A. and Link, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.
+Du, P., Kibbe, W.A. and Link, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
 }
 \author{ Pan Du }
 

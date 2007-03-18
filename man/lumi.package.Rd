@@ -23,9 +23,9 @@ Pan Du, Simon Lin
 Maintainer: Pan Du <dupan@northwestern.edu>
 }
 \references{
-1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", submitted
+1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Microarray Data", submitted
 
-2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.
+2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
 
 }
 \keyword{ package }

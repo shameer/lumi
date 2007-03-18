@@ -18,10 +18,10 @@ Formal class 'LumiBatch' with 7 slots
 }
 
 \details{
-The data is from (Chudin, et al., 2006). It used Sentrix Human-6 Expression BeadChip. Two samples "100US" and "95US.5P" (each has two technique replicates) were selected. In order to save space, 8000 genes were randomly selected. As a result, the example data includes 8000 genes, each has 4 measurements. 
+The data is from (Barnes, 2005). It used Sentrix HumanRef-8 Expression BeadChip. Two samples "100US" and "95US:5P" (each has two technique replicates) were selected. In order to save space, 8000 genes were randomly selected. As a result, the example data includes 8000 genes, each has 4 measurements. The full data set was included in the Bioconductor Experiment data package lumiBarnes.
 }
 \references{
-  Chudin, E., Kruglyak, S., Baker, S.C., Oeser, S., Barker, D. and McDaniel, T.K. (2006) A model of technical variation of microar-ray signals, J Comput Biol, 13, 996-1003.
+Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pavlidis, P. (2005) Ex-perimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms, Nucleic Acids Res, 33, 5914-5923.
 }
 \examples{
 ## load the data

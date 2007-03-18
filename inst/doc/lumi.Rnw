@@ -438,7 +438,7 @@ if (require(lumiHumanV1)) {
 \section{A use case: from raw data to functional analysis}
 Figure \ref{useCase} shows the data processing flow chart of the use case. Since the classes in \Rpackage{lumi} package are inherited from class {\bf ExpressionSet}, packages and functions compatible with class {\bf ExpressionSet} or accepting matrix as input   all can be used for \Rpackage{lumi} results. Here we just give two examples: using \Rpackage{limma} to identify differentiated genes and using \Rpackage{GOstats} to annotate the significant genes.
 
-We use the Barnes data set [3] as an example.  The Barnes data set measured a dilution series of two human tis-sues, brain and placenta.  It includes six samples with the titration ratio of brain and placenta as 100:0, 95:5, 75:25, 50:50, 25:75 and 0:100. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We select samples with titration ratio, 100:0 and 95:5 (each has two technique replicates) in  this data set to evaluate the detection of differential expressions.
+We use the Barnes data set [3] as an example.  The Barnes data set measured a dilution series of two human tis-sues, blood and placenta.  It includes six samples with the titration ratio of blood and placenta as 100:0, 95:5, 75:25, 50:50, 25:75 and 0:100. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We select samples with titration ratio, 100:0 and 95:5 (each has two technique replicates) in  this data set to evaluate the detection of differential expressions.
 
 \begin{figure}
 \includegraphics{useCaseFlowChart}
@@ -672,7 +672,7 @@ if (require(GOstats) & require(lumiHumanV1) & require(xtable)) {
 
 1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", submitted
 
-2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.
+2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
 
 3. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
 

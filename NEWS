@@ -1,4 +1,12 @@
 -----------------------------------------------------
+version 1.0.9
+release date: 03/18/2007
+
+1. Updated lumiN to make it accept ExpressionSet inherited object or data matrix
+2. Update the some help files
+
+
+-----------------------------------------------------
 version 1.0.7
 release date: 02/20/2007
 
