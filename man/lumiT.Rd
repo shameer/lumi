@@ -16,16 +16,15 @@ lumiT(x.lumi, method = c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot = 
   \item{\dots}{ other parameters used by \code{\link{vst}} }
 }
 \details{
-"vst.quadratic" method is a defunct method, and will be deleted in the future version.
+lumiT is an interface of difference variance stabilizing transformation. See \code{\link{vst}} for details of VST (Variance Stabilizing Transform) of Illumina data. "vst.quadratic" method is a defunct method, and will be deleted in the future version.
 }
 
 \value{
-	return a LumiBatch object with transformed expression values.
-	It also includes the VST transform function and its parameters as attributes: "transformFun", "parameter". See \code{\link{inverseVST}} for details.
+Return a LumiBatch object with transformed expression values. It also includes the VST transform function and its parameters as attributes: "transformFun", "parameter". See \code{\link{inverseVST}} for details.
 	
 }
 \references{
- Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data}, submitted
+ Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transformation for Illumina Microarray Data}, submitted
  }
 \author{ Pan Du, Simon Lin }
 

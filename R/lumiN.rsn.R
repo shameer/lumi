@@ -9,6 +9,20 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 		stop('The object should be a matrix or class "ExpressionSet" inherited!')
 	}
 	
+	externalTarget <- FALSE
+	if (!is.null(targetArray)) {
+		## check the format of the targetArray
+		if (is(targetArray, 'ExpressionSet')) {
+			targetArray <- exprs(targetArray)[,1]
+		} 
+		if (length(targetArray) > 1) {
+			if (length(targetArray) != nrow(exprs)) stop('targetArray should be an index or a vector has the same length as other samples.')
+			exprs <- cbind(targetArray, exprs)
+			targetArray <- 1
+			externalTarget <- TRUE
+		}
+	}
+	
 	## check whether the data was variance stabilized.
 	if (max(exprs, na.rm=TRUE) > 100) {
 		if (is(x.lumi, 'LumiBatch')) {
@@ -29,10 +43,10 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
         cat(as.character(Sys.time()), ", processing array ", ind, "\n")
     
         # normal array ind against targetArray      
-        u1 <- exprs[,ind]
-        u2 <- exprs[, targetArray]
-        u1.original <- u1
-        u2.original <- u2
+		u1 <- exprs[,ind]
+		u2 <- exprs[, targetArray]
+		u1.original <- u1
+		u2.original <- u2
         
 		## define window functions
 		win <- function(x, sigma=1, type=c('gaussian', 'tricube', 'bisqure')) {
@@ -41,10 +55,10 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 				gaussian = exp(-x^2/(2*sigma^2)) / (sqrt(2*pi)*sigma),
 				tricube = (1 - (abs(x)/(3 * sigma))^3)^3,
 				bisquare = (1 - (x/(3 * sigma))^2)^2 )
-			return(ww)			
+			return(ww)
 		}
 
-		if (ind != targetArray) {
+		if (ind != targetArray[1] | length(targetArray) > 1) {
 			## calculate the weights based on the fold change 
 			if (!is.null(exprs0)) {
 				fd <- exprs0[,ind] - exprs0[, targetArray]
@@ -67,9 +81,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
         return(u1.normalized)
     }
 
-    nArray <- ncol(exprs)
-	
-    if (ifPlot) par(mfrow=c(2,2))
+	if (ifPlot) par(mfrow=c(2,2))
     
 	## do quantile normalization for the purpose of estimating fold change
 	## Based on the estimated fold change, we can down-weight the differentiated genes.
@@ -81,16 +93,22 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 
     if (is.null(targetArray)) {
         # find the sample which is the most similar to the mean profile of all samples,
- 		meanProfile <- apply(exprs, 1, mean)
+		meanProfile <- apply(exprs, 1, mean)
 		targetArray <- which.min(abs(colSums(exprs - meanProfile)))
     }
 
-    normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs, method=method, 
+	nArray <- ncol(exprs)
+	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs, method=method, 
 					exprs0=exprs0, targetArray=targetArray, ifPlot=ifPlot)
+	normalized <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
+	
+	## if the targetArray is an external vector, it will be removed from the normalized data.
+	if (externalTarget) normalized <- normalized[,-1]
+	
 	if (is(x.lumi, 'ExpressionSet')) {
-		exprs(x.lumi) <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
+		exprs(x.lumi) <- normalized
 	} else {
-		x.lumi <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
+		x.lumi <- normalized
 	}
     
     return(x.lumi)

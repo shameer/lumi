@@ -17,7 +17,7 @@ lumiN(x.lumi, method = c("RSN", "loess", "quantile", "VSN"), targetArray=NULL, i
   	\item{\dots}{ other parameters used by \code{\link{lumiN.rsn}} }
 }
 \details{
-
+lumiN is an interface for different normalization methods. Currently it supports "RSN" (See \code{\link{lumiN.rsn}}), "loess" (See \code{\link[affy]{normalize.loess}}), "quantile" (See \code{\link[affy]{normalize.quantiles}}) and "VSN" (See \code{\link[vsn]{vsn}}). See details in individual functions.
 }
 
 \value{

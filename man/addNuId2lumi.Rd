@@ -16,12 +16,12 @@ addNuId2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib = NULL,  annotationCol
   \item{annotationColName}{ the annotation column name used for the probe sequence and TargetID and ProbeID }
 }
 \details{
-Since the default TargetID is not consistent between different arrays and batches, we invented a nuID, which is one-to-one matching with the probe sequence. This function is to replace the TargetID (or ProbeID) with the nuID. If the annotation library is provided, the function will automatically check whether the TargetID or ProbeID is provided for the microarray data. We recommend output the data using ProbeID when using Illumina BeadStudio software, because the TargetID are not unique. 
+Since the default TargetID and ProbeId are not consistent between different arrays and batches, we invented a nuID, which is one-to-one matching with the probe sequence. This function is to replace the TargetID (or ProbeID) with the nuID. If the annotation library is provided, the function will automatically check whether the TargetID or ProbeID is provided for the microarray data. We recommend output the data using ProbeID when using Illumina BeadStudio software, because the TargetID are not unique. 
 }
 \value{
 a LumiBatch object with TargetID (or ProbeID) replaced by nuID. 
 }
-\references{ Du, P., Kibbe, W.A., Lin, S.M., "nuID: A Novel Identifier for Oligos, Ideal for Oligonucleotide-based  Microarrays", submitted.}
+\references{ Du, P., Kibbe, W.A., Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.}
 \author{ Pan Du }
 
 \seealso{  \code{\link{lumiR}} }

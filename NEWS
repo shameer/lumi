@@ -1,4 +1,13 @@
 -----------------------------------------------------
+version 1.0.10
+release date: 03/20/2007
+
+1. Updated lumiN.rsn to allow the targetArray to be vector or LumiBatch object with one sample
+2. Update the help documents
+
+Thanks Jiexin Zhang (M.D. Anderson Cancer Center) provided the suggestion of targetArray.
+
+-----------------------------------------------------
 version 1.0.9
 release date: 03/18/2007
 
@@ -35,7 +44,7 @@ release date: 02/08/2007
 1. Updated lumiR function to make it compatible with R 2.5;
 2. Updated addNuId2lumi and lumiN function to fix some typos.
 
-Thanks Jean-Eudes DAZARD reporting this problem.
+Thanks Jean-Eudes DAZARD (Case Western Reserve University) reporting this problem.
 
 
 -----------------------------------------------------
@@ -55,7 +64,7 @@ release date: 01/01/2007
 4. Added varMetadata information in the LumiBatch object produced in "lumiR" function;
 5. Updated the help and tutorial files.
 
-Thanks Kevin Coombes for the testing and suggestions of the lumi package.
+Thanks Kevin Coombes (M.D. Anderson Cancer Center) for the testing and suggestions of the lumi package.
 
 -----------------------------------------------------
 version 1.0.1
@@ -64,7 +73,7 @@ release date: 12/11/2006
 2. Added subsetting code for the LumiQC and LumiBatch objects;
 3. Updated the help and tutorial files.
 
-Thanks Peter Bram for the testing and suggestions of the lumi package.
+Thanks Peter Bram (Leiden University Medical Center) for the testing and suggestions of the lumi package.
 
 -----------------------------------------------------
 version 1.0.0

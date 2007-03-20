@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Monotonic smooth method }
 \description{
-  Smoothing the curve with monotonic constraint
+  Fit the monotonic-constraint spline curve
 }
 \usage{
 monoSmu(x, y, newX = NULL, nSupport = min(200, length(x)), nKnots = max(length(nSupport)/10, 5), rotate = FALSE, ifPlot = FALSE, xlab = 'x', ylab = 'y', ...)
@@ -22,12 +22,14 @@ monoSmu(x, y, newX = NULL, nSupport = min(200, length(x)), nKnots = max(length(n
   \item{\dots}{ parameters used by \code{\link{supsmu}} and \code{\link{plot}} }
 }
 \details{
-
+function called by lumiN.rsn. The function first fits a monotonic spline between vector x and y, then transforms the vector newX based on the fitted spline. (After transformation the fitted spline is supposed to be a diagonal line, i.e., x=y)
 }
 \value{
 Return the transformed "newX" based on the smoothed curve
 }
-\references{ }
+\references{ 
+Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transformation for Illumina Microarray Data}, submitted
+}
 \author{ Simon Lin, Pan Du }
 
 \seealso{ \code{\link{monoSpline}}  }

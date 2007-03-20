@@ -17,7 +17,7 @@ vst(u, std, nSupport = min(length(u), 500), method = c('iterate', 'quadratic'), 
   \item{ifPlot}{ plot intermediate results or not }
 }
 \details{
- 
+ The variance-stabilizing transformation (VST) takes the advantage of larger number of technical replicates available on the Illumina microarray. It models the mean-variance relationship of the within-array technical replicates at the bead level of Illumina microarray. An arcsinh transform is then applied to stabilize the variance. See reference for more details.
 }
 \value{
 Return the transformed (variance stabilized) expression values.
