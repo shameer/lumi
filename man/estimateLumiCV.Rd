@@ -5,12 +5,13 @@
 \description{  }
 
 \usage{
-estimateLumiCV(x.lumi, ifPlot = FALSE)
+estimateLumiCV(x.lumi, ifPlot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ a LumiBatch object }
   \item{ifPlot}{ determince whether to plot the density plot or not }
+  \item{\dots}{ optional arguments to \code{\link[graphics]{plot}}.}
 }
 \details{
   The coefficient of variance is the ratio of the mean and variance of the bead expression values.

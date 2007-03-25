@@ -1,6 +1,5 @@
 `lumiN` <-
-function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
- 		ifPlot=FALSE, ...) {
+function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 
 	if (is(x.lumi, 'ExpressionSet')) {
 	    # x.lumi is a lumi object
@@ -12,18 +11,18 @@ function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
 	}
 
 	method <- match.arg(method)
-    if (method == 'VSN') {
-		if(!require(vsn)) stop('Package "vsn" should be installed for "VSN" method!')
+    if (method == 'vsn') {
+		if(!require(vsn)) stop('Package "vsn" should be installed for "vsn" method!')
 	}
 	if (is(x.lumi, 'LumiBatch')) {
 		history.submitted <- as.character(Sys.time())
 	}
 
 	norm.matrix <- switch(method,
-		RSN = lumiN.rsn(x.matrix, targetArray=targetArray, ifPlot=ifPlot, ...),
+		rsn = rsn(x.matrix, ...),
 		loess = normalize.loess(x.matrix, ...),
-		quantile = normalize.quantiles(x=x.matrix),
-		VSN = exprs(vsn(intensities=x.matrix, ...)) )
+		quantile = normalize.quantiles(x=x.matrix, ...),
+		vsn = exprs(vsn(intensities=x.matrix, ...)) )
 
 	colnames(norm.matrix) <- colnames(x.matrix)
 	rownames(norm.matrix) <- rownames(x.matrix)
@@ -35,8 +34,10 @@ function(x.lumi, method=c('RSN', 'loess', 'quantile', 'VSN'), targetArray=NULL,
 		if (is(x.lumi, 'LumiBatch')) {
 		    history.finished <- as.character(Sys.time())
 			history.command <- capture.output(print(match.call(lumiN)))
-			new.lumi@history<- rbind(new.lumi@history,
-			       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+			if (is.null(new.lumi@history$lumiVersion)) new.lumi@history$lumiVersion <- rep(NA, nrow(new.lumi@history))
+			lumiVersion <- packageDescription('lumi')$Version
+			new.lumi@history<- rbind(new.lumi@history, data.frame(submitted=history.submitted, 
+					finished=history.finished, command=history.command, lumiVersion=lumiVersion))
 		}
 	    return(new.lumi)
 	} else {

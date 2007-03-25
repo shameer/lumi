@@ -1,5 +1,5 @@
 `lumiT` <-
-function(x.lumi, method=c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot=FALSE, ...) {
+function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, ...) {
 	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 
 	method <- match.arg(method)
@@ -26,10 +26,12 @@ function(x.lumi, method=c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot=F
 					x <- vst(u=exprs[,i], std=se.exprs[,i], method='quadratic', ifPlot=ifPlot, ...)
 				}
 				transExpr <<- cbind(transExpr, x)
-				transPara <<- c(transPara, list(attr(x, 'parameter')))
+				transPara <<- rbind(transPara, attr(x, 'parameter'))
 				transFun <<- c(transFun, attr(x, 'transformFun'))
 		        return(TRUE)
 			})
+		rownames(transPara) <- colnames(exprs(x.lumi))
+		names(transFun) <- colnames(exprs(x.lumi))
 	    exprs(new.lumi) <- transExpr
 	}
 	colnames(exprs(new.lumi)) <- colnames(exprs(x.lumi))
@@ -38,11 +40,14 @@ function(x.lumi, method=c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot=F
 	# history tracking
 	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(lumiT)))
-	new.lumi@history<- rbind(new.lumi@history,
-	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+
+	if (is.null(new.lumi@history$lumiVersion)) new.lumi@history$lumiVersion <- rep(NA, nrow(new.lumi@history))
+	lumiVersion <- packageDescription('lumi')$Version
+	new.lumi@history<- rbind(new.lumi@history, data.frame(submitted=history.submitted, 
+			finished=history.finished, command=history.command, lumiVersion=lumiVersion))
 
 	if (method == 'vst') {
-		attr(new.lumi, 'parameter') <- transPara
+		attr(new.lumi, 'vstParameter') <- transPara
 		attr(new.lumi, 'transformFun') <- transFun
 	}
 

@@ -1,22 +1,22 @@
 \name{plot-methods}
 \docType{methods}
 \alias{plot-methods}
-\alias{plot.LumiQC}
-\alias{plot,LumiQC-method}
-\alias{plot,LumiQC,missing-method}
+\alias{plot.LumiBatch}
+\alias{plot,LumiBatch-method}
+\alias{plot,LumiBatch,missing-method}
 
-\title{Plot of a LumiQC object}
+\title{Plot of a LumiBatch object}
 \description{
-Creating quality control plots of a LumiQC object
+Creating quality control plots of a LumiBatch object
 }
 
 \usage{
-\S4method{plot}{LumiQC,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), 
+\S4method{plot}{LumiBatch,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), 
 parameterList = NULL, main, ...)
 }
 
 \arguments{
-\item{x}{ a LumiQC object returned by \code{\link{lumiQ}} }
+\item{x}{ a LumiBatch object returned by \code{\link{lumiQ}} }
 \item{what}{ one of the six kinds of QC plots }
 \item{parameterList}{ the parameters for the corresponding QC plots }
 \item{main}{ the title of the QC plot }
@@ -29,15 +29,15 @@ The parameter "what" of \code{plot} function controls the type of QC plots, whic
 \item{\bold{boxplot}:}{ box plot of the chip intensities, see \code{\link{boxplot-methods}}}
 \item{\bold{pair}:}{ the correlation among chips, plot as a hierarchical tree, see \code{\link{pairs-methods}}}
 \item{\bold{MAplot}:}{ the MAplot between chips, see \code{\link{MAplot-methods}}}
-\item{\bold{sampleRelation}:}{ plot the sample relations. See \code{\link{getSampleRelation}}}
+\item{\bold{sampleRelation}:}{ plot the sample relations. See \code{\link{plotSampleRelation}}}
 \item{\bold{outlier}:}{ detect the outliers based on the sample distance to the center. See 
 	\code{\link{detectOutlier}}}
 \item{\bold{cv}:}{ the density plot of the coefficients of variance of the chips. See \code{\link{estimateLumiCV}}}
 }
 
 \seealso{ 
-\code{\link{LumiQC-class}}, \code{\link{hist-methods}}, \code{\link{boxplot-methods}}, \code{\link{MAplot-methods}},
- 	\code{\link{pairs-methods}}, \code{\link{getSampleRelation}}, \code{\link{estimateLumiCV}}, \code{\link{detectOutlier}} 
+\code{\link{LumiBatch-class}}, \code{\link{hist-methods}}, \code{\link{boxplot-methods}}, \code{\link{MAplot-methods}},
+ 	\code{\link{pairs-methods}}, \code{\link{plotSampleRelation}}, \code{\link{estimateLumiCV}}, \code{\link{detectOutlier}} 
 }
 
 \examples{
@@ -61,7 +61,7 @@ plot(lumi.Q, what='pair')
 plot(lumi.Q, what='MAplot')
 
 ## sample relations
-plot(lumi.Q, what='sampleRelation', parameterList=list(method='mds', col=c('100US', '95US:5P', '100US', '95US:5P')))
+plot(lumi.Q, what='sampleRelation', method='mds', col=c('100US', '95US:5P', '100US', '95US:5P'))
 
 ## detect outlier based on the distance to the mean profile
 plot(lumi.Q, what='outlier')

@@ -118,9 +118,10 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 		## remove duplicated
 		x.lumi <- x.lumi[-rmIndex, ]
 		newId <- newId[-rmIndex]
-	}		
+	}
 
 	## update the feature names (probe ids)
+	names(newId) <- NULL
 	featureNames(x.lumi) <- newId
 	## update the feautre data
 	featureData <- featureData(x.lumi)
@@ -128,10 +129,12 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	featureData(x.lumi) <- featureData
 
 	## Add history tracking
-    history.finished <- as.character(Sys.time())
-    history.command <- capture.output(print(match.call(addNuId2lumi)))  
-    x.lumi@history<- rbind(x.lumi@history,
-                       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+	history.finished <- as.character(Sys.time())
+	history.command <- capture.output(print(match.call(addNuId2lumi)))
+	if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
+	lumiVersion <- packageDescription('lumi')$Version
+	x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
+			finished=history.finished, command=history.command, lumiVersion=lumiVersion))
 
 	return(x.lumi)
 }

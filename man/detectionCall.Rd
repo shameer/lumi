@@ -5,12 +5,12 @@
 \description{  }
 
 \usage{
-detectionCall(x.lumi, Th = 0.99)
+detectionCall(x.lumi, Th = 0.01)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ a LumiBatch object }
-  \item{Th}{ the threshold. By default, if the detection value is larger than 0.99, we suppose it is detectable.  }
+  \item{Th}{ the threshold. By default, when the detection p-value is less than 0.01, we suppose it is detectable. For the old version of BeadStudio output (version 2 or earlier), the threshold will automatically transferred as 1 - Th, because in the old format, value close to 1 is suppose to be detectable. }
 }
 
 \value{

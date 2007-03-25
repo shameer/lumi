@@ -7,14 +7,7 @@
 }
 \usage{data(example.lumi)}
 \format{
-Formal class 'LumiBatch' with 7 slots
-  \cr \code{history}     		: 'data.frame':	1 obs. of  3 variables:
-  \cr \code{assayData}			: length 4 <environment> 
-  \cr \code{phenoData}			: Formal class 'AnnotatedDataFrame' [package "Biobase"] with 4 slots
-  \cr \code{featureData}		: Formal class 'AnnotatedDataFrame' [package "Biobase"] with 4 slots
-  \cr \code{experimentData}		: Formal class 'MIAME' [package "Biobase"] with 13 slots
-  \cr \code{annotation}			: chr(0) 
-  \cr \code{.\_\_classVersion\_\_}: Formal class 'Versions' [package "Biobase"] with 1 slots
+A 'LumiBatch' object
 }
 
 \details{

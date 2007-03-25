@@ -1,5 +1,6 @@
 `lumiR` <-
-function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL) 
+{
     history.submitted <- as.character(Sys.time())
 	## set "stringsAsFactors" as FALSE
 	oldSetting <- options("stringsAsFactors")[[1]]
@@ -8,7 +9,7 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	## ---------------------------------------
 	## identify the Metadata lines 
 	info <- readLines(file(fileName), n=20)    # take the first 20 lines to have a taste
-    
+
 	## Use "AVG_SIGNAL" as an indicator of Where the metaData stops
 	##   intelligently find nMetaDataLines  
 	nMetaDataLines <- grep("AVG_SIGNAL", info, ignore.case=TRUE) - 1
@@ -35,26 +36,111 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	}
     
 	## ---------------------------------------
-    # get metaData
+    # get data info
     info <- readLines(file(fileName), n=nMetaDataLines)
 
-	## check the format
-	ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE) 
-	## find where is the row index
-	if (length(ind) == 0) {
-	    warning("The data file is not in the Illumia BeadStudio output format.")
+	## check the version of the beadStudio output
+	markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
+	if (length(markerInd) > 0) {
+		if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
+			warning('The data file may not be in the Illumia BeadStudio output format!')
+		if (length(markerInd) > 1) {
+			if (length(grep('^\\[Sample.*\\]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
+				warning('The data file may not be in the Illumia BeadStudio output format!')
+		}
+		version <- 3
+		info <- info[-markerInd]
+	} else {
+		version <- 2
 	}
+	## remove the blanks
+	info <- sub("[[:blank:]]+$", "", info)
+
+	## check the meta info of the file
+	if (version == 2) {
+		ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
+	} else {
+		ind <- grep("BSGX Version", info, ignore.case=TRUE)
+	}
+	if (length(ind) == 0) 
+	    warning("The data file is not in the Illumia BeadStudio output format.")
     
-	## must not normalized before
+	## should not be normalized in BeadStudio
 	ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
-	normalization <- strsplit(info, split='=')[[ind]][2]
-	normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+	if (version == 2) {
+		normalization <- strsplit(info, split='=')[[ind]][2]
+		normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+	} else {
+		normalization <- strsplit(info, split='\t')[[ind]][2]
+	}
 	if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
 	    warning("The raw data should not be normalized in BeadStudio.")
 	}
+
+	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines,
+		as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
 	
-    allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines,
-               as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="")
+	## retrieve the possible section line index
+	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
+		
+	if (length(sectionInd) > 0) {
+		otherData <- allData[sectionInd[1]:nrow(allData), ]
+		## we assume the first section is the expression data section
+		allData <- allData[1:(sectionInd[1]-1),]
+		## remove the all NA columns, which can be produced when saved in Excel
+		naCol <- apply(allData, 2, function(x) all(is.na(x) | x == ''))
+		allData <- allData[,!naCol]
+		
+		## process otherData
+		sectionInd <- sectionInd - sectionInd[1] + 1
+		sectionName <- otherData[sectionInd, 1]
+		
+		## retrieve the control data
+		controlInd <- grep('^\\[Control.*\\]', sectionName, ignore.case=TRUE)
+		if (length(controlInd) > 1) {
+			ind <- grep('^\\[Control probe.*\\]', sectionName[controlInd], ignore.case=TRUE)
+			if (length(ind) > 0) {
+				controlInd <- controlInd[ind[1]]
+			} else {
+				controlInd <- controlInd[1]
+			}
+		}
+		if (length(controlInd) > 0) {
+			startRow <- sectionInd[controlInd] + 1
+			if (length(sectionInd) > controlInd)
+				endRow <- sectionInd[controlInd + 1] - 1
+			else 
+				endRow <- nrow(otherData)
+			controlData <- otherData[startRow:endRow,]
+			## remove the all NA columns, which can be produced when save in Excel
+			naCol <- apply(controlData, 2, function(x) all(is.na(x) | x == ''))
+			controlData <- controlData[,!naCol]
+			colnames(controlData) <- controlData[1,]
+			controlData <- controlData[-1,]
+		} else {
+			controlData <- data.frame()
+		}
+
+		## retrieve the Sample Table
+		summaryInd <- grep('^\\[Sample.*Table\\]', sectionName, ignore.case=TRUE)
+		if (length(summaryInd) > 0) {
+			startRow <- sectionInd[summaryInd] + 1
+			if (length(sectionInd) > summaryInd)
+				endRow <- sectionInd[summaryInd + 1] - 1
+			else 
+				endRow <- nrow(otherData)
+			sampleSummary <- otherData[startRow:endRow,]
+			## remove the all NA columns, which can be produced when save in Excel
+			naCol <- apply(sampleSummary, 2, function(x) all(is.na(x) | x == ''))
+			sampleSummary <- sampleSummary[,!naCol]
+			colnames(sampleSummary) <- sampleSummary[1,]
+			sampleSummary <- sampleSummary[-1,]
+		} else {
+			sampleSummary <- data.frame()
+		}
+	} else {
+		controlData <- sampleSummary <- data.frame()
+	}
 	header <- names(allData)
 
 	## Get Id. The ProbeID (by default it is the second column) is preferred if provided, 
@@ -67,21 +153,24 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 		id <- targetID
 		idName <- header[1]
 	}
-	# rownames(allData) <- id
 
 	## identify where the signal column exists
 	ind <- grep("AVG_SIGNAL", header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
 	exprs <- as.matrix(allData[,ind])
-	## identify where the signal standard deviation column exists   
-	ind <- grep("BEAD_STDEV", header, ignore.case=TRUE)
+	## identify where the signal standard deviation column exists 
+	ind <- grep("BEAD_STD", header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
 	se.exprs <- as.matrix(allData[,ind])
 	ind <- grep("Detection", header, ignore.case=TRUE)
 	if (length(ind) == 0) {
 		detection <- NULL
 	} else {
-		detection <- as.matrix(allData[,ind])
+		if (length(grep("Detection Pval", header, ignore.case=TRUE)) > 0) {
+			detection <- as.matrix(allData[,ind])
+		} else {
+			detection <- 1 - as.matrix(allData[,ind])
+		}
 	}
 	ind <- grep("Avg_NBEADS", header, ignore.case=TRUE)
 	if (length(ind) == 0) {
@@ -131,9 +220,13 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 		targetID <- targetID[keepInd]
     }
 	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
-    
-    # get sample information
-	sampleName <-  sub('AVG_SIGNAL.', '', colnames(exprs), ignore.case=TRUE) 
+
+	# get sample information
+	if (version == 3) {
+		sampleName <-  sub('.AVG_SIGNAL', '', colnames(exprs), ignore.case=TRUE)
+	} else {
+		sampleName <-  sub('AVG_SIGNAL.', '', colnames(exprs), ignore.case=TRUE) 
+	}
     sampleNameInfo <- strsplit(sampleName, split="_")
 	sampleID <- NULL
 	label <- NULL
@@ -141,7 +234,10 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 	
 	## reportInfo save the id information
 	if (!is.null(detection)) {
-		presentCount <- apply(detection, 1, function(x) sum(x >= detectionTh))
+		if (version == 2) {
+			detection <- 1 - detection
+		}
+		presentCount <- apply(detection, 1, function(x) sum(x <= detectionTh))
 		reporterInfo <- data.frame(id, presentCount)
 		names(reporterInfo) <- c(idName, 'presentCount')
 		varMetadata <- data.frame(labelDescription=c('The Illumina microarray identifier', 
@@ -193,12 +289,19 @@ function(fileName, sep=NULL, detectionTh=0.99, na.rm=TRUE, lib=NULL) {
 
     x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, detection=detection, 
               featureData=featureData,  phenoData=pdata)
-
+	x.lumi@controlData <- controlData
+	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
+	
 	info <- gsub('\t+', '\t', info)
 	experimentData(x.lumi)@other <- list(info)
-    x.lumi@history<- rbind(x.lumi@history,
-                       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
-				
+
+	lumiVersion <- packageDescription('lumi')$Version
+	x.lumi@history<- data.frame(submitted=history.submitted, 
+			finished=history.finished, command=history.command, lumiVersion=lumiVersion)
+
+	## initialize the QC slot in the LumiBatch object
+	x.lumi <- lumiQ(x.lumi)
+
 	## Add nuID if the annotation library is provided
 	if (!is.null(lib))  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
 

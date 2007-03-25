@@ -3,21 +3,19 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Between chip normalization of a LumiBatch object }
 \description{
-  A main function of between chip normalization of a LumiBatch object. Currently, four methods ("RSN", "loess", "quantile", "VSN") are supported.
+  A main function of between chip normalization of a LumiBatch object. Currently, four methods ("rsn", "loess", "quantile", "vsn") are supported.
 }
 \usage{
-lumiN(x.lumi, method = c("RSN", "loess", "quantile", "VSN"), targetArray=NULL, ifPlot = FALSE, ...)
+lumiN(x.lumi, method = c("rsn", "loess", "quantile", "vsn"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 	\item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes}
-  	\item{method}{ four different between chips normalization methods ("RSN", "loess", "quantile", "VSN") are supported }
-	\item{targetArray}{ the target array to which others are aligned. If it is null, the one having the most similar profile with the mean profile is selected. }
-	\item{ifPlot}{ determine whether to plot intermediate results }
-  	\item{\dots}{ other parameters used by \code{\link{lumiN.rsn}} }
+  	\item{method}{ four different between chips normalization methods ("rsn", "loess", "quantile", "vsn") are supported }
+  	\item{\dots}{ other parameters used by corresponding method }
 }
 \details{
-lumiN is an interface for different normalization methods. Currently it supports "RSN" (See \code{\link{lumiN.rsn}}), "loess" (See \code{\link[affy]{normalize.loess}}), "quantile" (See \code{\link[affy]{normalize.quantiles}}) and "VSN" (See \code{\link[vsn]{vsn}}). See details in individual functions.
+lumiN is an interface for different normalization methods. Currently it supports "RSN" (See \code{\link{rsn}}), "loess" (See \code{\link[affy]{normalize.loess}}), "quantile" (See \code{\link[affy]{normalize.quantiles}}) and "VSN" (See \code{\link[vsn]{vsn}}). See details in individual functions.
 }
 
 \value{
@@ -29,7 +27,7 @@ If it is a LumiBatch object, it also includes the VST transform function and its
 \note{ 
 
 }
-\seealso{  \code{\link{lumiN.rsn}} }
+\seealso{  \code{\link{rsn}} }
 \examples{
 ## load example data
 data(example.lumi)

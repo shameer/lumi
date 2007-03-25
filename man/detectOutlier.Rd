@@ -5,11 +5,11 @@
 \description{  }
 
 \usage{
-detectOutlier(profile, metric = "euclidean", standardize = TRUE, Th = 2, ifPlot = FALSE)
+detectOutlier(x, metric = "euclidean", standardize = TRUE, Th = 2, ifPlot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{profile}{ an ExpressionSet inherited object or matrix with each column as a profile }
+  \item{x}{ a LumiBatch object, ExpressionSet object or a matrix with each column corresponding to a sample or other profile }
   \item{metric}{ the distance matric}
   \item{standardize}{ standardize the profile or not }
   \item{Th}{ the threshold of outlier,  }
@@ -26,7 +26,7 @@ The threshold is calculated as Th * median distances to the center.
 The profile relations can be visualized as a hierarchical tree.
 }
 \value{
-	return the outlier (a logic vector) with the distance matrix and threshold as attributes.
+Plot the results or	return the outlier (a logic vector) with the distance matrix and threshold as attributes.
 }
 
 \author{ Pan Du }

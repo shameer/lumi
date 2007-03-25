@@ -2,12 +2,13 @@
 ## Define LumiBatch object:
 
 setClass('LumiBatch', 
-	representation(history='data.frame'), 
+	representation(history='data.frame', controlData='data.frame', QC='list'), 
 	prototype=list(history=data.frame(
-	   	submitted   = I(vector()),
-	   	finished    = I(vector()),
-	   	command     = I(vector())
-	)),
+		submitted   = I(vector()),
+		finished    = I(vector()),
+		command     = I(vector()),
+		lumiVersion = I(vector())
+	), controlData = data.frame(), QC = list()),
 	contains='ExpressionSet')
 
 
@@ -62,9 +63,28 @@ setReplaceMethod("detection", signature(object="LumiBatch",value="matrix"),
 setMethod("getHistory",signature(object="LumiBatch"), function(object) object@history)
 
 
-setMethod("summary",signature(object="LumiBatch"), function(object) 
+setMethod("summary",signature(object="LumiBatch"), function(object, type=c('data', 'QC')) 
 {
-	show(object)
+	type <- match.arg(type)
+	if (type == 'data') {
+		show(object)		
+	} else {
+		if (is.null(object@QC$sampleSummary)) {
+			cat('Run Quality Control estimation ...\n')
+			object <- lumiQ(object)
+		}
+		if (!is.null(object@QC$sampleSummary)) {
+			QC <- object@QC
+			dimen <- dim(exprs(object))
+			cat(paste("Data dimension: ", paste(dimen[1], 'genes', 'x', dimen[2], 'samples', collapse=" "), '\n'))
+			sampleSummary <- QC$sampleSummary
+			cat(paste("\nSummary of Samples:\n", sep=''))
+			print(sampleSummary, quote=FALSE)
+
+			cat('\nMajor Operation History:\n')
+			print(QC$history, quote=FALSE) 
+		}
+	}
 })
 
 
@@ -130,12 +150,35 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 		featureData(x) <- feature.x
 	}
 
-    # history tracking
-    history.finished <- as.character(Sys.time())
-    history.command <- capture.output(print(match.call(combine)))  
+	## combining the QC information
+	if (length(x@QC) > 0 | length(y@QC) > 0) {
+		BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
+		sampleSummary <- rbind(x@QC$sampleSummary, y@QC$sampleSummary)
+		x@QC$BeadStudioSummary <- BeadStudioSummary
+		x@QC$sampleSummary <- sampleSummary
+		history.x <- x@QC$history
+		if (is.null(history.x)) history.x <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
+		if (is.null(history.x$lumiVersion)) history.x$lumiVersion <- rep(NA, nrow(history.x))
+		history.y <- y@QC$history
+		if (is.null(history.y)) history.y <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
+		if (is.null(history.y$lumiVersion)) history.y$lumiVersion <- rep(NA, nrow(history.y))
+		x@QC$history <- rbind(history.x, history.y)
+	}
+	
+	## VST transformation parameters
+	if (!is.null(attr(x, 'vstParameter')) & !is.null(attr(x, 'vstParameter'))) {
+		attr(x, 'vstParameter') <- rbind(attr(x, 'vstParameter'), attr(y, 'vstParameter'))
+		attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
+	}
+
+	# history tracking
+	history.finished <- as.character(Sys.time())
+	history.command <- capture.output(print(match.call(combine)))  
 	x@history<- rbind(x@history, y@history)
+	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
+	lumiVersion <- packageDescription('lumi')$Version
     x@history<- rbind(x@history, 
-	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command, lumiVersion=lumiVersion))
 	return(x)
 })
 
@@ -156,7 +199,6 @@ setMethod("boxplot",signature(x="ExpressionSet"),
   	if (logMode & max(exprs(x), na.rm=TRUE) > 50) {
 		exprs <- log2(exprs)
 	} 
-	#boxplot(data.frame(exprs[index,]), main=main, range=range, ...)
 
 	dataMatrix <- exprs[index,]
 	labels <- colnames(dataMatrix)
@@ -337,10 +379,61 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 		return(x)
 	}
 
+	## subsetting the QC information
+	if (!missing(j)) {
+		if (!is.null(x@QC)) {
+			QC <- x@QC
+			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j]
+			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,]
+			x@QC <- QC
+		}
+		if (!is.null(attr(x, 'vstParameter'))) {
+			attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,]
+			attr(x, 'transformFun') <- attr(x, 'transformFun')[j]
+		}
+	}
+
     # history tracking
     history.finished <- as.character(Sys.time())
-    x@history<- rbind(x@history, 
-	       data.frame(submitted=history.submitted, finished=history.finished, command=history.command))
+	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
+	lumiVersion <- packageDescription('lumi')$Version
+	x@history<- rbind(x@history, data.frame(submitted=history.submitted, finished=history.finished, 
+			command=history.command, lumiVersion=lumiVersion))
 
 	return(x)
+})
+
+
+setMethod('plot',
+	signature('LumiBatch', 'missing'),
+	function(x, what=c('density', 'boxplot', 'pair', 'MAplot', 'sampleRelation', 'outlier', 'cv'), main, ...)
+{
+
+	object <- x
+	if (!is(object, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
+	what <- match.arg(what)
+	
+	if (what == 'density') {
+		if (missing(main)) main <- 'Density plot of intensity'
+		hist(object, xlab="intensity", ylab="density", main=main, ...)
+	} else if (what == 'boxplot') {
+		if (missing(main)) main <- 'Boxplot of microarray intensity'
+		boxplot(object, xlab='microarrays', ylab='intensity', main=main, ...)
+	} else if (what == 'cv') {
+		if (missing(main)) main <- 'Density plot of coefficient of variance'
+		estimateLumiCV(object, ifPlot=TRUE, main=main, ...)
+	} else if (what == 'sampleRelation') {
+		plotSampleRelation(object, ...)
+	} else if (what == 'pair') {
+		if (missing(main)) main <- 'Pairwise plot with sample correlation'
+		pairs(object, main=main, ...)
+	} else if (what == 'MAplot') {
+		if (missing(main)) main <- 'Pairwise MA plots between samples'
+		MAplot(object, main=main, ...)
+	} else if (what == 'outlier') {
+		detectOutlier(object, ifPlot=TRUE, ...)
+	} else {
+		print('Unsupported !')
+	}
+	return(invisible(TRUE))	
 })

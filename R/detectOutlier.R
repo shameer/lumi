@@ -1,10 +1,10 @@
 `detectOutlier` <-
-function(profile, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
+function(x, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
 	
-	if (is(profile, 'ExpressionSet')) {
-	    profile <- exprs(profile)		
-	} else if (is.numeric(profile)) {
-		profile <- as.matrix(profile)
+	if (is(x, 'ExpressionSet')) {
+	    profile <- exprs(x)		
+	} else if (is.numeric(x)) {
+		profile <- as.matrix(x)
 	} else {
 		stop('The object should be a matrix or class "ExpressionSet" inherited!')
 	}
@@ -12,6 +12,7 @@ function(profile, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
 	center <- rowMeans(profile)
 	profile1 <- cbind(center, profile)
 	colnames(profile1) <- c('Center', colnames(profile))
+
 
 	if (metric == 'cor') {
 		d <- cor(profile1)
@@ -28,14 +29,15 @@ function(profile, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
 	outlier <- (d[2:nrow(d),1] >= Th)
 	attr(outlier, 'sampleDistance') <- d
 	attr(outlier, 'threshold') <- Th
+	main <- paste('Outlier detection based on sample distance to "Center"')
 
 	if (ifPlot) {
 		hc = hclust(as.dist(d), 'ave')
-		main <- paste('Outlier detection based on sample distance to "Center"')
 		plot(hc, xlab='Sample', ylab='Distance', main=main)
 		abline(h=Th, col=2, lty=2)
+		return(invisible(TRUE))	
+	} else {
+		return(outlier)
 	}
-
-	return(outlier)
 }
 

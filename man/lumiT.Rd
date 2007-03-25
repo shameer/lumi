@@ -6,17 +6,17 @@
   Transfer the Illumina data to stabilize the variance.
 }
 \usage{
-lumiT(x.lumi, method = c("vst", "vst.quadratic", 'log2', 'cubicRoot'), ifPlot = FALSE, ...)
+lumiT(x.lumi, method = c("vst", 'log2', 'cubicRoot'), ifPlot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ LumiBatch object }
-  \item{method}{ four methods are supported: "vst", "vst.quadratic", "log2", "cubicRoot" }
+  \item{method}{ four methods are supported: "vst", "log2", "cubicRoot" }
   \item{ifPlot}{ determine whether to plot the intermediate results }
   \item{\dots}{ other parameters used by \code{\link{vst}} }
 }
 \details{
-lumiT is an interface of difference variance stabilizing transformation. See \code{\link{vst}} for details of VST (Variance Stabilizing Transform) of Illumina data. "vst.quadratic" method is a defunct method, and will be deleted in the future version.
+lumiT is an interface of difference variance stabilizing transformation. See \code{\link{vst}} for details of VST (Variance Stabilizing Transform) of Illumina data.
 }
 
 \value{

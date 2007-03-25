@@ -105,7 +105,7 @@
 }
 
 \author{ Pan Du, Simon Lin }
-\seealso{ \code{\link{lumiR}}, \code{\link{lumiT}}, \code{\link{lumiN}}, \code{\link{LumiQC}}, 
+\seealso{ \code{\link{lumiR}}, \code{\link{lumiT}}, \code{\link{lumiN}},
 	\code{\link{boxplot-methods}}, \code{\link{pairs-methods}}, \code{\link{MAplot-methods}}
 }
 \examples{
