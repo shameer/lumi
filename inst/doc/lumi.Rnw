@@ -225,7 +225,7 @@ plot(example.lumi, what='sampleRelation', method='mds', color=c('100US', '95US:5
 
 
 \subsection{Background correction}
-The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. By default, \Rfunction{lumiB} does nothing but return the input LumiBatch object. 'bg.adjust' method is based on the \Rfunction{bg.adjust}} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
+The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. By default, \Rfunction{lumiB} does nothing but return the input LumiBatch object. 'bg.adjust' method is based on the \Rfunction{bg.adjust} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
 
 
 \subsection{Variance stabilizing transform}
@@ -423,7 +423,7 @@ The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} wit
 Here is some examples:
 \begin{Sinput}
 > ## load lumi annotation package
-> lib <- 'lumiHumanV1'		# Huamn lumi annotation package
+> lib <- 'example.lumi'		# Huamn lumi annotation package
 > if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 + 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
 + 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
