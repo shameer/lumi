@@ -32,7 +32,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Overview of lumi} 
-\Rpackage{lumi} R package is designed to preprocess the Illumina microarray data. The package covers data input, quality control, variance stabilization, normalization and gene annotation. It can be easily integrated with other microarray data analysis, like differentiated gene identification, gene ontology analysis or clustering analysis.  
+The \Rpackage{lumi} package is designed to preprocess the Illumina microarray data. The package covers data input, quality control, variance stabilization, normalization and gene annotation. It can be easily integrated with other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.  
 
 % \section{Citation}
 
@@ -465,7 +465,7 @@ if (require(annotate) & require(lib, character.only=TRUE)) {
 
 
 \subsection{Transfer Illumina microarray data as nuID annotated}
-As the annotation packages include the mappings between TargetID to nuID and ProbeID to nuID. we can easily map the targetID (or Probe Id) to nuID. The function can automatically check whether targetID or Probe Id  was used in the text data file, and convert them as nuID.
+As the annotation packages include the mappings between TargetID to nuID and ProbeID to nuID. we can easily map the targetID (or Probe Id) to nuID. The function can automatically check whether targetID or Probe Id  was used in the text data file, and convert them as nuID. Function \Rfunction{addNuId2lumi} can transfer a TargetID or Probe Id indexed  {\bf LumiBatch} object as an nuID indexed {\bf LumiBatch} object. If a {\bf LumiBatch} object has already been nuID indexed, the function will do nothing.
 <<quiet=T>>=
 if (require(lumiHumanV1)) {
 	lumi.N <- addNuId2lumi(lumi.N, lib='lumiHumanV1')
@@ -501,7 +501,7 @@ We use the Barnes data set [3] as an example, which has be created as a Biocondu
 > summary(example.lumi, 'QC')
 
 > ## preprocessing and quality control after normalization
-> lumi.N.Q <- lumiQ(example.lumi, QC.evaluation=TRUE)
+> lumi.N.Q <- lumiExpresso(example.lumi, QC.evaluation=TRUE)
 > ## summary of quality control information after preprocessing
 > summary(lumi.N.Q, 'QC')
 
