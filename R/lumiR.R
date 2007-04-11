@@ -5,6 +5,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	## set "stringsAsFactors" as FALSE
 	oldSetting <- options("stringsAsFactors")[[1]]
 	options(stringsAsFactors = FALSE)
+	version <- 2
 
 	## ---------------------------------------
 	## identify the Metadata lines 
@@ -37,53 +38,54 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
     
 	## ---------------------------------------
     # get data info
-    info <- readLines(file(fileName), n=nMetaDataLines)
-
-	## check the version of the beadStudio output
-	markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
-	if (length(markerInd) > 0) {
-		if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
-			warning('The data file may not be in the Illumia BeadStudio output format!')
-		if (length(markerInd) > 1) {
-			if (length(grep('^\\[Sample.*\\]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
+	if (nMetaDataLines > 0) {
+		info <- readLines(file(fileName), n=nMetaDataLines)
+		## check the version of the beadStudio output
+		markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
+		if (length(markerInd) > 0) {
+			if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
 				warning('The data file may not be in the Illumia BeadStudio output format!')
+			if (length(markerInd) > 1) {
+				if (length(grep('^\\[Sample.*\\]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
+					warning('The data file may not be in the Illumia BeadStudio output format!')
+			}
+			version <- 3
+			info <- info[-markerInd]
 		}
-		version <- 3
-		info <- info[-markerInd]
-	} else {
-		version <- 2
-	}
-	## remove the blanks
-	info <- sub("[[:blank:]]+$", "", info)
+		## remove the blanks
+		info <- sub("[[:blank:]]+$", "", info)
+		## check the meta info of the file
+		if (version == 2) {
+			ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
+		} else {
+			ind <- grep("BSGX Version", info, ignore.case=TRUE)
+		}
+		if (length(ind) == 0) 
+		    warning("The data file is not in the Illumia BeadStudio output format.")
 
-	## check the meta info of the file
-	if (version == 2) {
-		ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
+		## should not be normalized in BeadStudio
+		ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
+		if (version == 2) {
+			normalization <- strsplit(info, split='=')[[ind]][2]
+			normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+		} else {
+			normalization <- strsplit(info, split='\t')[[ind]][2]
+		}
+		if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
+		    warning("The raw data should not be normalized in BeadStudio.")
+		}
 	} else {
-		ind <- grep("BSGX Version", info, ignore.case=TRUE)
+		info <- NULL
 	}
-	if (length(ind) == 0) 
-	    warning("The data file is not in the Illumia BeadStudio output format.")
     
-	## should not be normalized in BeadStudio
-	ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
-	if (version == 2) {
-		normalization <- strsplit(info, split='=')[[ind]][2]
-		normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
-	} else {
-		normalization <- strsplit(info, split='\t')[[ind]][2]
-	}
-	if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
-	    warning("The raw data should not be normalized in BeadStudio.")
-	}
-
-	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines,
+	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL,
 		as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
 	
 	## retrieve the possible section line index
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
-		
+
 	if (length(sectionInd) > 0) {
+		if (is.na(version)) verion <- 3
 		otherData <- allData[sectionInd[1]:nrow(allData), ]
 		## we assume the first section is the expression data section
 		allData <- allData[1:(sectionInd[1]-1),]
@@ -157,7 +159,14 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	## identify where the signal column exists
 	ind <- grep("AVG_SIGNAL", header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
-	exprs <- as.matrix(allData[,ind])
+	exprs <- allData[,ind]
+	if (!is.numeric(exprs[1,1])) {
+		temp <- matrix(as.numeric(exprs), nrow=nrow(allData))
+		colnames(temp) <- colnames(exprs)
+		exprs <- temp
+	} else {
+		exprs <- as.matrix(exprs)
+	}
 	## identify where the signal standard deviation column exists 
 	ind <- grep("BEAD_STD", header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
@@ -166,10 +175,17 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	if (length(ind) == 0) {
 		detection <- NULL
 	} else {
-		if (length(grep("Detection Pval", header, ignore.case=TRUE)) > 0) {
-			detection <- as.matrix(allData[,ind])
+		detection <- allData[,ind]
+		if (!is.numeric(detection[1,1])) {
+			temp <- matrix(as.numeric(detection), nrow=nrow(allData))
+			colnames(temp) <- colnames(detection)
+			detection <- temp
 		} else {
-			detection <- 1 - as.matrix(allData[,ind])
+			detection <- as.matrix(detection)
+		}
+
+		if (length(grep("Detection Pval", header, ignore.case=TRUE)) == 0) {
+			detection <- 1 - detection
 		}
 	}
 	ind <- grep("Avg_NBEADS", header, ignore.case=TRUE)
@@ -222,12 +238,14 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
 
 	# get sample information
-	if (version == 3) {
+	if (length(grep('.AVG_SIGNAL', colnames(exprs)[1])) > 0) {
 		sampleName <-  sub('.AVG_SIGNAL', '', colnames(exprs), ignore.case=TRUE)
-	} else {
+	} else if (length(grep('AVG_SIGNAL.', colnames(exprs)[1])) > 0) {
 		sampleName <-  sub('AVG_SIGNAL.', '', colnames(exprs), ignore.case=TRUE) 
+	} else {
+		sampleName <-  sub('AVG_SIGNAL', '', colnames(exprs), ignore.case=TRUE) 
 	}
-    sampleNameInfo <- strsplit(sampleName, split="_")
+	sampleNameInfo <- strsplit(sampleName, split="_")
 	sampleID <- NULL
 	label <- NULL
 	temp <- lapply(sampleNameInfo, function(x) {sampleID <<- c(sampleID, x[1]); label <<- c(label, x[2])})
@@ -292,7 +310,9 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	x.lumi@controlData <- controlData
 	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
 	
-	info <- gsub('\t+', '\t', info)
+	if (!is.null(info)) {
+		info <- gsub('\t+', '\t', info)
+	}
 	experimentData(x.lumi)@other <- list(info)
 
 	lumiVersion <- packageDescription('lumi')$Version

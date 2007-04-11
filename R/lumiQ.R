@@ -10,6 +10,10 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	}
 
 	if (logMode & (max(exprs, na.rm=TRUE) > 50)) {
+		if (min(exprs) < 0) {
+			warning('Negative values found in the expression values!')
+			exprs <- exprs + abs(min(exprs)) + 1
+		}
 		exprs <- log2(exprs)
 	} 
 	sampleName <- colnames(exprs)
