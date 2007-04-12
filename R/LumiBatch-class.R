@@ -152,8 +152,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 
 	## combining the QC information
 	if (length(x@QC) > 0 | length(y@QC) > 0) {
-		BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
-		sampleSummary <- rbind(x@QC$sampleSummary, y@QC$sampleSummary)
+		BeadStudioSummary <- cbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
+		sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
 		x@QC$BeadStudioSummary <- BeadStudioSummary
 		x@QC$sampleSummary <- sampleSummary
 		history.x <- x@QC$history
@@ -373,7 +373,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 		history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
 	} else if (!missing(i)) {
 		history.command <- paste('Subsetting', ddim[1], 'features.')
-	} else if (!missing(i)) {
+	} else if (!missing(j)) {
 		history.command <- paste('Subsetting', ddim[2], 'samples.')
 	} else {
 		return(x)
