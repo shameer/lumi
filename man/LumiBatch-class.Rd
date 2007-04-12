@@ -126,7 +126,7 @@ temp <- example.lumi[,1]	## retrieve the first sample
 featureNames(example.lumi)[1:3]
 
 ## combine LumiBatch objects
-temp <- combine(example.lumi, example.lumi[,1])
+temp <- combine(example.lumi[,1], example.lumi[,3])
 temp
 
 }

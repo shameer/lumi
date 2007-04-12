@@ -106,17 +106,17 @@ if (is.null(getGeneric("combine")))
 
 setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y) 
 {
-    if (class(x) != class(y))
-      stop(paste("objects must be the same class, but are ",
+	if (class(x) != class(y))
+		stop(paste("objects must be the same class, but are ",
                  class(x), ", ", class(y), sep=""))
 	
 	if (any(sort(featureNames(x)) != sort(featureNames(y)))) stop('Two data sets have different row names!')
 
-   	history.submitted <- as.character(Sys.time())
+	history.submitted <- as.character(Sys.time())
 
-    assayData(x) <- combine(assayData(x), assayData(y))
-    experimentData(x) <- combine(experimentData(x),experimentData(y))
-	
+	assayData(x) <- combine(assayData(x), assayData(y))
+	experimentData(x) <- combine(experimentData(x),experimentData(y))
+
 	## combine pheno data
 	if (!is.null(phenoData(x)) | !is.null(phenoData(y))) {
 		phenoData.x <- phenoData(x)
@@ -152,8 +152,19 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 
 	## combining the QC information
 	if (length(x@QC) > 0 | length(y@QC) > 0) {
-		BeadStudioSummary <- cbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
-		sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
+		if (!is.null(x@QC$BeadStudioSummary) & !is.null(y@QC$BeadStudioSummary)) {
+			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary))
+			BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
+		} else {
+			BeadStudioSummary <- x@QC$BeadStudioSummary
+		}
+		if (!is.null(x@QC$sampleSummary) & !is.null(y@QC$sampleSummary)) {
+			if (nrow(x@QC$sampleSummary) == nrow(y@QC$sampleSummary))
+			sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
+		} else {
+			sampleSummary <- x@QC$sampleSummary
+		}
+		
 		x@QC$BeadStudioSummary <- BeadStudioSummary
 		x@QC$sampleSummary <- sampleSummary
 		history.x <- x@QC$history
@@ -383,12 +394,12 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	if (!missing(j)) {
 		if (!is.null(x@QC)) {
 			QC <- x@QC
-			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j]
-			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,]
+			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
+			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
 			x@QC <- QC
 		}
 		if (!is.null(attr(x, 'vstParameter'))) {
-			attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,]
+			attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,,drop=FALSE]
 			attr(x, 'transformFun') <- attr(x, 'transformFun')[j]
 		}
 	}
