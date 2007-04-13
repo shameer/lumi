@@ -11,7 +11,7 @@ function(x.lumi, Th = 0.01) {
 		AP <- colSums(detect<= Th) / nrow(detect)
 		attr(AP, 'threshold') <- Th
 	} else {
-		AP <- NULL
+		AP <- rep(NA, ncol(x.lumi))
 	}
 	return(AP)
 }
