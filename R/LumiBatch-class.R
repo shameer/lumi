@@ -15,12 +15,9 @@ setClass('LumiBatch',
 setMethod('initialize', 'LumiBatch', function(.Object, 
 	exprs = new('matrix'),
 	se.exprs = new('matrix'),		# standard deviation of the bead measurements of each gene
-	beadNum = new('matrix'),		# number of beads. Usually > 30
-	detection = new('matrix'),		# detection: a number from [0,1]. Usually > 0.99 inidicates good detection
 	...) 
 {
-	callNextMethod(.Object, exprs=exprs, se.exprs=se.exprs,
-		beadNum=beadNum, detection=detection, ...)
+	callNextMethod(.Object, exprs=exprs, se.exprs=se.exprs, ...)
 })
 
 
