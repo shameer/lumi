@@ -57,6 +57,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 		}
 		## remove the blanks
 		info <- sub("[[:blank:]]+$", "", info)
+		info <- gsub(sep, "", info)
 		## check the meta info of the file
 		if (version == 2) {
 			ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
@@ -162,21 +163,17 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	## identify where the signal column exists
 	ind <- grep(columnGrepPattern['exprs'], header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
-	exprs <- allData[,ind]
+	exprs <- as.matrix(allData[,ind])
 	if (!is.numeric(exprs[1])) {
 		exprs <- matrix(as.numeric(exprs), nrow=nrow(allData))
-	} else {
-		exprs <- as.matrix(exprs)
-	}
+	} 
 	colnames(exprs) <- header[ind]
 	## identify where the signal standard deviation column exists 
 	ind <- grep(columnGrepPattern['se.exprs'], header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
-	se.exprs <- allData[,ind]
+	se.exprs <- as.matrix(allData[,ind])
 	if (!is.numeric(se.exprs[1])) {
 		se.exprs <- matrix(as.numeric(se.exprs), nrow=nrow(allData))
-	} else {
-		se.exprs <- as.matrix(se.exprs)
 	}
 	colnames(se.exprs) <- header[ind]
 	## identify the detection columns
@@ -184,11 +181,9 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	if (length(ind) == 0) {
 		detection <- NULL
 	} else {
-		detection <- allData[,ind]
+		detection <- as.matrix(allData[,ind])
 		if (!is.numeric(detection[1])) {
 			detection <- matrix(as.numeric(detection), nrow=nrow(allData))
-		} else {
-			detection <- as.matrix(detection)
 		}
 		colnames(detection) <- header[ind]
     
@@ -201,12 +196,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	if (length(ind) == 0) {
 		beadNum <- NULL
 	} else {
-	    beadNum <- allData[,ind]
+	    beadNum <- as.matrix(allData[,ind])
 		if (!is.numeric(beadNum[1])) {
 			beadNum <- matrix(as.numeric(beadNum), nrow=nrow(allData))
-		} else {
-			beadNum <- as.matrix(beadNum)
-		}
+		} 
 		colnames(beadNum) <- header[ind]
 	}
     

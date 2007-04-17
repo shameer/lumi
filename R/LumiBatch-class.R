@@ -318,14 +318,6 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	function(x,..., logMode=TRUE, subset=5000) 
 {
 	upperPanel <- function(x, y, fold=2) {
-		if (!is.null(subset)) {
-			if (!is.numeric(subset)) stop('subset should be numeric!')
-			if (length(subset) == 1) {
-				subset <- sample(1:length(x), min(subset, length(x)))
-			} 
-		} else {
-			subset <- 1:length(x)
-		}
 		points(x[subset], y[subset])
 		abline(0, 1, col="red", lty=1)
 		if (logMode) {
@@ -363,6 +355,14 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	}
 
 	exprs <- exprs(x)
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (length(subset) == 1) {
+			subset <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+		} 
+	} else {
+		subset <- 1:nrow(exprs)
+	}
 	
 	if(logMode & (max(exprs, na.rm=TRUE) > 50)) {
     	pairs(log2(exprs),upper.panel=upperPanel, diag.panel=diagPanel, 
@@ -371,7 +371,6 @@ setMethod("pairs", signature(x="ExpressionSet"),
     	pairs(exprs,upper.panel=upperPanel, diag.panel=diagPanel, 
 				lower.panel=lowerPanel, ...)
 	}
-
 })
 
 

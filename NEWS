@@ -1,4 +1,13 @@
 -----------------------------------------------------
+version 1.1.4-6
+release date: 04/17/2007
+
+1. Updated lumiR function for better robustness.
+2. Added subset parameter to all plot functions.
+3. Add 'forcePositive' method to the lumiB function to avoid negative values.
+4. Other related updates.
+
+-----------------------------------------------------
 version 1.1.3
 release date: 04/12/2007
 
