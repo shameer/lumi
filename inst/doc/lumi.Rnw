@@ -62,7 +62,7 @@ If BeadStudio outputted the control probe data, their information will be kept i
 
 The BeadStudio can output gene profile or probe profile. When the probe profile is outputted, as show in Figure \ref{fig:dataFileSample}(B), the ProbeId column will be used as the identifier of {\bf LumiBatch} object.
 
-We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. And when output the gene annotation together with the data file, we suggest not outputting the DEFINITION and ONTOLOGY annotation columns, because occasionally they can cause problems of the \Rfunction{read.table} function. 
+We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
 
 If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the featureData of the {\bf LumiBatch} object.
 

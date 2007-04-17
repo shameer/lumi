@@ -9,7 +9,7 @@
 
 \usage{
 \S4method{hist}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l",
- 	index.highlight = NULL, color.highlight = 2, symmetry = NULL, addLegend = TRUE, ...)
+ 	index.highlight = NULL, color.highlight = 2, symmetry = NULL, addLegend = TRUE, subset = 5000, ...)
 }
 
 \arguments{
@@ -22,6 +22,7 @@
 	\item{color.highlight}{ color of highlighted density curve }
 	\item{symmetry}{ the boundary position suppose to be symmetric distributed  }
 	\item{addLegend}{ whether add legend to the plot or not }
+	\item{subset}{subset of rows used to plot. It can be an index vector, or the length of a random subset}
 	\item{\dots}{ additional parameters for matplot function }
 }
 

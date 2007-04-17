@@ -193,16 +193,21 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 
 ##some special handling of main is needed
 setMethod("boxplot",signature(x="ExpressionSet"),
-	function(x, range=0, main, logMode=TRUE, ...) 
+	function(x, range=0, main, logMode=TRUE, subset=5000, ...) 
 {
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
 	exprs <- exprs(x)
-	if (nrow(x) > 5000) {
-	  	index <- seq(1, nrow(x), len=5000)
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (length(subset) == 1) {
+			index <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+		} else {
+			index <- subset
+		}
 	} else {
-		index <- 1:nrow(x)
+		index <- 1:nrow(exprs)
 	}
   	if (logMode & max(exprs(x), na.rm=TRUE) > 50) {
 		exprs <- log2(exprs)
@@ -226,35 +231,45 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 
 
 setMethod('hist', signature(x='ExpressionSet'), 
-	function(x, logMode=TRUE, xlab = NULL, ylab = "density",
-	type = "l",  index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, ...) 
+	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", index.highlight=NULL, 
+	color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
 {
 	if (is(x, 'ExpressionSet')) {
-	    index <- round(seq(1, nrow(x), len=5000))
-	    mat <- exprs(x)[index, , drop = FALSE]
+	    exprs <- exprs(x)
 	} else if (is.numeric(x)) {
-		mat <- as.matrix(x)
+		exprs <- as.matrix(x)
 	} else {
 		stop('Un-supported class of x!')
 	}
-	
-    if (logMode & (max(mat, na.rm=TRUE) > 50)) {
-        mat <- log2(mat)
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (length(subset) == 1) {
+			ind <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+		} else {
+			ind <- subset
+		}
+	} else {
+		ind <- 1:nrow(exprs)
+	}
+	exprs <- exprs[ind,,drop=FALSE]
+
+    if (logMode & (max(exprs, na.rm=TRUE) > 50)) {
+        exprs <- log2(exprs)
         if (is.null(xlab)) 
             xlab <- "log2 intensity"
     } else if (is.null(xlab)) 
         xlab <- "intensity"
 
 	if (!is.null(symmetry)) {
-		x.range <- range(mat)
+		x.range <- range(exprs)
 		if (symmetry > x.range[1] & symmetry < x.range[2]) {
 			warning('symmetry point should not be within the range of x!')
 			symmetry <- NULL
 		} else {
-			mat <- rbind(mat, 2*symmetry - mat)
+			exprs <- rbind(exprs, 2*symmetry - exprs)
 		}
 	}
-	x.density <- apply(mat, 2, density)
+	x.density <- apply(exprs, 2, density)
     all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
     all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
 
@@ -279,8 +294,8 @@ setMethod('hist', signature(x='ExpressionSet'),
 	}
 	## add legend
 	if (addLegend) {
-		labels <- colnames(mat)
-		if (is.null(labels)) labels <- as.character(1:ncol(mat))
+		labels <- colnames(exprs)
+		if (is.null(labels)) labels <- as.character(1:ncol(exprs))
 
 		col <- 1:ncol(all.x)
 		lwd <- rep(1, ncol(all.x))
@@ -300,14 +315,18 @@ setMethod('hist', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x,...,logMode=TRUE) 
+	function(x,..., logMode=TRUE, subset=5000) 
 {
 	upperPanel <- function(x, y, fold=2) {
-		if (length(x) > 3000) {
-			ind <- sample(1:length(x), 3000)
-			x <- x[ind]; y <- y[ind]
+		if (!is.null(subset)) {
+			if (!is.numeric(subset)) stop('subset should be numeric!')
+			if (length(subset) == 1) {
+				subset <- sample(1:length(x), min(subset, length(x)))
+			} 
+		} else {
+			subset <- 1:length(x)
 		}
-		points(x, y)
+		points(x[subset], y[subset])
 		abline(0, 1, col="red", lty=1)
 		if (logMode) {
 			abline(log2(fold), 1, col="green", lty=2)
@@ -342,12 +361,14 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	    y <- h$counts; y <- y/max(y)
 	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
 	}
+
+	exprs <- exprs(x)
 	
-	if(logMode & (max(exprs(x), na.rm=TRUE) > 50)) {
-    	pairs(log2(exprs(x)),upper.panel=upperPanel, diag.panel=diagPanel, 
+	if(logMode & (max(exprs, na.rm=TRUE) > 50)) {
+    	pairs(log2(exprs),upper.panel=upperPanel, diag.panel=diagPanel, 
 				lower.panel=lowerPanel, ...)
 	} else {
-    	pairs(exprs(x),upper.panel=upperPanel, diag.panel=diagPanel, 
+    	pairs(exprs,upper.panel=upperPanel, diag.panel=diagPanel, 
 				lower.panel=lowerPanel, ...)
 	}
 
@@ -360,10 +381,19 @@ if(is.null(getGeneric("MAplot")))
   	
 
 setMethod("MAplot", signature(object="ExpressionSet"), 
-	function(object,...,logMode=TRUE) 
+	function(object, ..., logMode=TRUE, subset=5000) 
 {
 	expr <- exprs(object)
-	ind <- sample(1:nrow(expr), min(5000, nrow(expr)))
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (length(subset) == 1) {
+			ind <- sample(1:nrow(expr), min(subset, nrow(expr)))
+		} else {
+			ind <- subset
+		}
+	} else {
+		ind <- 1:nrow(expr)
+	}
 	mva.pairs(expr[ind, ], ...)
 })
 
