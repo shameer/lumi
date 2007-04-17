@@ -1,7 +1,10 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL) 
 {
-    history.submitted <- as.character(Sys.time())
+	## the patterns used to grep columns in the BeadStudio output text file 
+	## Advanced users can modify this based on the data file
+	columnGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
+	history.submitted <- as.character(Sys.time())
 	## set "stringsAsFactors" as FALSE
 	oldSetting <- options("stringsAsFactors")[[1]]
 	options(stringsAsFactors = FALSE)
@@ -13,7 +16,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 
 	## Use "AVG_SIGNAL" as an indicator of Where the metaData stops
 	##   intelligently find nMetaDataLines  
-	nMetaDataLines <- grep("AVG_SIGNAL", info, ignore.case=TRUE) - 1
+	nMetaDataLines <- grep(columnGrepPattern['exprs'], info, ignore.case=TRUE) - 1
     
 	if (is.null(sep)) {
 	    ## Find out the separator (sep) by taking the first two line of data, and comparing them.
@@ -46,7 +49,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 			if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
 				warning('The data file may not be in the Illumia BeadStudio output format!')
 			if (length(markerInd) > 1) {
-				if (length(grep('^\\[Sample.*\\]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
+				if (length(grep('^\\[.*\\Profile]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
 					warning('The data file may not be in the Illumia BeadStudio output format!')
 			}
 			version <- 3
@@ -79,24 +82,24 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	}
     
 	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL,
-		as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
+		quote='', as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
 	
 	## retrieve the possible section line index
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
-
+    
 	if (length(sectionInd) > 0) {
 		if (is.na(version)) verion <- 3
 		otherData <- allData[sectionInd[1]:nrow(allData), ]
 		## we assume the first section is the expression data section
-		allData <- allData[1:(sectionInd[1]-1),]
+		allData <- allData[1:(sectionInd[1]-1),, drop=FALSE]
 		## remove the all NA columns, which can be produced when saved in Excel
 		naCol <- apply(allData, 2, function(x) all(is.na(x) | x == ''))
 		allData <- allData[,!naCol]
-		
+    
 		## process otherData
 		sectionInd <- sectionInd - sectionInd[1] + 1
 		sectionName <- otherData[sectionInd, 1]
-		
+    
 		## retrieve the control data
 		controlInd <- grep('^\\[Control.*\\]', sectionName, ignore.case=TRUE)
 		if (length(controlInd) > 1) {
@@ -116,13 +119,13 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 			controlData <- otherData[startRow:endRow,]
 			## remove the all NA columns, which can be produced when save in Excel
 			naCol <- apply(controlData, 2, function(x) all(is.na(x) | x == ''))
-			controlData <- controlData[,!naCol]
+			controlData <- controlData[,!naCol, drop=FALSE]
 			colnames(controlData) <- controlData[1,]
 			controlData <- controlData[-1,]
 		} else {
 			controlData <- data.frame()
 		}
-
+    
 		## retrieve the Sample Table
 		summaryInd <- grep('^\\[Sample.*Table\\]', sectionName, ignore.case=TRUE)
 		if (length(summaryInd) > 0) {
@@ -144,7 +147,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 		controlData <- sampleSummary <- data.frame()
 	}
 	header <- names(allData)
-
+    
 	## Get Id. The ProbeID (by default it is the second column) is preferred if provided, 
 	# otherwise the TargetID (by default it is the first column) is used.
 	targetID <- as.character(as.vector(allData[,1]))
@@ -155,46 +158,58 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 		id <- targetID
 		idName <- header[1]
 	}
-
+    
 	## identify where the signal column exists
-	ind <- grep("AVG_SIGNAL", header, ignore.case=TRUE)
+	ind <- grep(columnGrepPattern['exprs'], header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
 	exprs <- allData[,ind]
-	if (!is.numeric(exprs[1,1])) {
-		temp <- matrix(as.numeric(exprs), nrow=nrow(allData))
-		colnames(temp) <- colnames(exprs)
-		exprs <- temp
+	if (!is.numeric(exprs[1])) {
+		exprs <- matrix(as.numeric(exprs), nrow=nrow(allData))
 	} else {
 		exprs <- as.matrix(exprs)
 	}
+	colnames(exprs) <- header[ind]
 	## identify where the signal standard deviation column exists 
-	ind <- grep("BEAD_STD", header, ignore.case=TRUE)
+	ind <- grep(columnGrepPattern['se.exprs'], header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
-	se.exprs <- as.matrix(allData[,ind])
-	ind <- grep("Detection", header, ignore.case=TRUE)
+	se.exprs <- allData[,ind]
+	if (!is.numeric(se.exprs[1])) {
+		se.exprs <- matrix(as.numeric(se.exprs), nrow=nrow(allData))
+	} else {
+		se.exprs <- as.matrix(se.exprs)
+	}
+	colnames(se.exprs) <- header[ind]
+	## identify the detection columns
+	ind <- grep(columnGrepPattern['detection'], header, ignore.case=TRUE)
 	if (length(ind) == 0) {
 		detection <- NULL
 	} else {
 		detection <- allData[,ind]
-		if (!is.numeric(detection[1,1])) {
-			temp <- matrix(as.numeric(detection), nrow=nrow(allData))
-			colnames(temp) <- colnames(detection)
-			detection <- temp
+		if (!is.numeric(detection[1])) {
+			detection <- matrix(as.numeric(detection), nrow=nrow(allData))
 		} else {
 			detection <- as.matrix(detection)
 		}
-
+		colnames(detection) <- header[ind]
+    
 		if (length(grep("Detection Pval", header, ignore.case=TRUE)) == 0) {
 			detection <- 1 - detection
 		}
 	}
-	ind <- grep("Avg_NBEADS", header, ignore.case=TRUE)
+	## identify the bead number columns
+	ind <- grep(columnGrepPattern['beadNum'], header, ignore.case=TRUE)
 	if (length(ind) == 0) {
 		beadNum <- NULL
 	} else {
-	    beadNum <- as.matrix(allData[,ind])
+	    beadNum <- allData[,ind]
+		if (!is.numeric(beadNum[1])) {
+			beadNum <- matrix(as.numeric(beadNum), nrow=nrow(allData))
+		} else {
+			beadNum <- as.matrix(beadNum)
+		}
+		colnames(beadNum) <- header[ind]
 	}
-	
+    
 	## check for possible duplicated ids
 	dupId <- unique(id[duplicated(id)])
 	if (length(dupId) > 0) {
@@ -218,43 +233,35 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 			rmInd <- c(rmInd, selInd.i[-1])
 		}
 		## remove duplicated
-		exprs <- exprs[-rmInd,]
-		se.exprs <- se.exprs[-rmInd,]
+		exprs <- exprs[-rmInd,,drop=FALSE]
+		se.exprs <- se.exprs[-rmInd,,drop=FALSE]
 		id <- id[-rmInd]
-		if (!is.null(detection)) detection <- detection[-rmInd,]
-		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,]
+		if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
+		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
 	}
-	
-    if (na.rm) {
+    
+	if (na.rm) {
 		## remove the probes with all of them as NA
-        keepInd <- apply(is.na(exprs), 1, sum) == 0
-        exprs <- exprs[keepInd,]
-        se.exprs <- se.exprs[keepInd,]	## bead measurement standard variance
-        beadNum <- beadNum[keepInd,]
-        detection <- detection[keepInd,]
-        id <- id[keepInd]
+	    keepInd <- apply(is.na(exprs), 1, sum) == 0
+	    exprs <- exprs[keepInd,,drop=FALSE]
+	    se.exprs <- se.exprs[keepInd,,drop=FALSE]	## bead measurement standard variance
+	    beadNum <- beadNum[keepInd,,drop=FALSE]
+	    detection <- detection[keepInd,,drop=FALSE]
+	    id <- id[keepInd]
 		targetID <- targetID[keepInd]
-    }
-	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
-
-	# get sample information
-	if (length(grep('.AVG_SIGNAL', colnames(exprs)[1])) > 0) {
-		sampleName <-  sub('.AVG_SIGNAL', '', colnames(exprs), ignore.case=TRUE)
-	} else if (length(grep('AVG_SIGNAL.', colnames(exprs)[1])) > 0) {
-		sampleName <-  sub('AVG_SIGNAL.', '', colnames(exprs), ignore.case=TRUE) 
-	} else {
-		sampleName <-  sub('AVG_SIGNAL', '', colnames(exprs), ignore.case=TRUE) 
 	}
+	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
+    
+	# get sample information
+	pattern <- paste('[^[:alnum:]]*', columnGrepPattern['exprs'], '[^[:alnum:]]*', sep='')
+	sampleName <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
 	sampleNameInfo <- strsplit(sampleName, split="_")
 	sampleID <- NULL
 	label <- NULL
 	temp <- lapply(sampleNameInfo, function(x) {sampleID <<- c(sampleID, x[1]); label <<- c(label, x[2])})
-	
+    
 	## reportInfo save the id information
 	if (!is.null(detection)) {
-		if (version == 2) {
-			detection <- 1 - detection
-		}
 		presentCount <- apply(detection, 1, function(x) sum(x <= detectionTh))
 		reporterInfo <- data.frame(id, presentCount)
 		names(reporterInfo) <- c(idName, 'presentCount')
@@ -275,8 +282,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	}
 	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
-	
-    ## set the colnames as the label or sampleName
+    
+	## set the colnames as the label or sampleName
 	if (length(unique(label)) == length(label) & length(label) > 0) {
 		colName <- label
 	} else {
@@ -293,6 +300,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	rownames(varMetadata) <- c('sampleID', 'label')
 	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
 
+    x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, detection=detection, 
+              featureData=featureData,  phenoData=pdata)
+	x.lumi@controlData <- controlData
+	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
+	
+	if (!is.null(info)) {
+		info <- gsub('\t+', '\t', info)
+	}
+	experimentData(x.lumi)@other <- list(info)
+
     # history tracking
     history.finished <- as.character(Sys.time())
 	#history.command <- match.call()
@@ -304,16 +321,6 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	} else {
 		history.command <- sub('\\(.+\\)', paste('("', fileName, '")', sep=''), history.command)
 	}
-
-    x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, detection=detection, 
-              featureData=featureData,  phenoData=pdata)
-	x.lumi@controlData <- controlData
-	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
-	
-	if (!is.null(info)) {
-		info <- gsub('\t+', '\t', info)
-	}
-	experimentData(x.lumi)@other <- list(info)
 
 	lumiVersion <- packageDescription('lumi')$Version
 	x.lumi@history<- data.frame(submitted=history.submitted, 

@@ -3,6 +3,12 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, ...) {
 	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 
 	method <- match.arg(method)
+	## check the negative values
+	if (method %in% c('vst', 'log2')) {
+		if (min(exprs(x.lumi)) < 0) {
+			x.lumi <- lumiB(x.lumi, method='forcePositive')
+		}
+	}
 	history.submitted <- as.character(Sys.time())
 
     new.lumi <- x.lumi 

@@ -11,14 +11,12 @@ Creating quality control plots of a LumiBatch object
 }
 
 \usage{
-\S4method{plot}{LumiBatch,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), 
-parameterList = NULL, main, ...)
+\S4method{plot}{LumiBatch,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), main, ...)
 }
 
 \arguments{
 \item{x}{ a LumiBatch object returned by \code{\link{lumiQ}} }
 \item{what}{ one of the six kinds of QC plots }
-\item{parameterList}{ the parameters for the corresponding QC plots }
 \item{main}{ the title of the QC plot }
 \item{\dots}{ additional parameters for the corresponding QC plots }
 }
@@ -61,7 +59,7 @@ plot(lumi.Q, what='pair')
 plot(lumi.Q, what='MAplot')
 
 ## sample relations
-plot(lumi.Q, what='sampleRelation', method='mds', col=c('100US', '95US:5P', '100US', '95US:5P'))
+plot(lumi.Q, what='sampleRelation', method='mds', color=c('100US', '95US:5P', '100US', '95US:5P'))
 
 ## detect outlier based on the distance to the mean profile
 plot(lumi.Q, what='outlier')

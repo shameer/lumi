@@ -6,7 +6,7 @@
   Background correction of Illumina data
 }
 \usage{
-lumiB(lumiBatch, method = c('none', 'bg.adjust'), ...)
+lumiB(lumiBatch, method = c('forcePositive', 'none', 'bg.adjust'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,7 +15,7 @@ lumiB(lumiBatch, method = c('none', 'bg.adjust'), ...)
   \item{\dots}{ other parameters used by the user provided background correction method  }
 }
 \details{
-  The default background correction method does nothing but return the input LumiBatch object. 'bg.adjust' method is based on the \code{\link[affy]{bg.adjust}} function in affy package. User can also provide their own function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected.
+  The default background correction method ('forcePositive') will force all expression values to be positive by adding an offset (minus minimum value plus one), it does nothing if all expression values are positive. 'none' does not but return the lumiBatch object. 'bg.adjust' method is based on the \code{\link[affy]{bg.adjust}} function in affy package. User can also provide their own function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected.
 
 Thanks Kevin Coombes (M.D. Anderson Cancer Center) suggested adding this function.
 }
