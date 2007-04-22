@@ -1,5 +1,5 @@
 `lumiT` <-
-function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, ...) {
+function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutput = TRUE, ...) {
 	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 
 	method <- match.arg(method)
@@ -43,6 +43,20 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, ...) {
 	colnames(exprs(new.lumi)) <- colnames(exprs(x.lumi))
 	rownames(exprs(new.lumi)) <- rownames(exprs(x.lumi))
 
+	if (simpleOutput) {
+		storage.mode <- storageMode(new.lumi)
+		if ("lockedEnvironment" == storage.mode) {
+			aData <- copyEnv(assayData(new.lumi))
+			rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+			lockEnvironment(aData, bindings = TRUE)
+			assayData(new.lumi) <- aData
+		} else {
+			aData <- assayData(new.lumi)
+			rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+			assayData(new.lumi) <- aData
+		}
+	}
+	
 	# history tracking
 	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(lumiT)))

@@ -1,12 +1,12 @@
 Package: lumi
 Type: Package
-Title: Preprocessing Methods for Illumina Microarrays (BeadArray)
-Version: 1.1.6
-Date: 2007-04-17
+Title: BeadArray Specific Methods for Illumina Microarrays
+Version: 1.1.7
+Date: 2007-04-20
 Depends: R (>= 2.4.0), Biobase (>= 1.12.0), affy, mgcv, methods
 Suggests: vsn
 Author: Pan Du, Warren Kibbe, Simon Lin
 Maintainer: Pan Du <dupan@northwestern.edu>
-Description: lumi R package is designed to preprocess the Illumina microarray data. It includes functions of Illumina data input, quality control, variance stabilization, normalization and gene annotation. 
+Description: The lumi package provides an integrated solution for the Illumina microarray data analysis. It includes functions of Illumina BeadStudio data input, quality control, BeadArray-specific variance stabilization, normalization and gene annotation at the probe level. 
 License: LGPL version 2 or newer
 biocViews: Microarray, OneChannel, Preprocessing

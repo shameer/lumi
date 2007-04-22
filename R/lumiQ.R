@@ -21,8 +21,19 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	## mean, variance, 'cv', 'AP', 'density', 'correlation', 'sample relation'
 	mm <- colMeans(exprs)
 	std <- apply(exprs, 2, sd)
+	
 	## AP calls
-	detectionRate <- detectionCall(x.lumi, Th=detectionTh)
+	if (!is.null(x.lumi@QC$sampleSummary)) {
+		detectionRate <- x.lumi@QC$sampleSummary[3,]
+		detectionName <- rownames(x.lumi@QC$sampleSummary)[3]
+	} else {
+		detectionName <- paste('detection rate(', detectionTh, ')', sep='')
+		if (!is.null(detection(x.lumi))) {
+			detectionRate <- detectionCall(x.lumi, Th=detectionTh)
+		} else {
+			detectionRate <- rep(NA, ncol(x.lumi))
+		}
+	}
 
 	## detect outlier
 	center <- rowMeans(exprs)
@@ -31,7 +42,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	distCenter <- as.matrix(dist(t(profile), method="euclidean"))
 
 	sampleSummary <- rbind(mm, std, detectionRate, distCenter[2:nrow(distCenter),1])
-	rownames(sampleSummary) <- c('mean', 'standard deviation', paste('detection rate(', detectionTh, ')', sep=''), 'distance to sample mean')
+	rownames(sampleSummary) <- c('mean', 'standard deviation', detectionName, 'distance to sample mean')
 	sampleSummary <- signif(sampleSummary, 4)
 
 	## record history

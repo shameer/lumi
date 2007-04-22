@@ -1,4 +1,12 @@
 -----------------------------------------------------
+version 1.1.7
+release date: 04/22/2007
+
+1. Major updates of the vignette.
+2. A simpleOutput option was added for the lumiT function.
+3. Added nuID and targetID/probeID mapping functions.
+
+-----------------------------------------------------
 version 1.1.4-6
 release date: 04/17/2007
 

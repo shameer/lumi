@@ -32,7 +32,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Overview of lumi} 
-The \Rpackage{lumi} package is designed to preprocess the Illumina microarray data. The package covers data input, quality control, variance stabilization, normalization and gene annotation. It can be easily integrated with other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.  
+Illumina microarray is becoming a popular microarray platform. The BeadArray technology from Illumina makes its preprocessing and quality control different from other microarray technologies. Unfortunately, until now, most analyses have not taken advantage of the unique properties of the BeadArray system. The \Rpackage{lumi} Bioconductor package especially designed to process the Illumina microarray data. The \Rpackage{lumi} package provides an integrated solution for the bead-level Illumina microarray data analysis. The package covers data input, quality control, variance stabilization, normalization and gene annotation. 
+
+The \Rpackage{lumi} package includes a new variance-stabilizing transformation (VST) algorithm that takes advantage of the technical replicates available on every Illumina microarray. A new robust spline normalization (RSN) algorithm, which combines the features of the quantile and loess normalization, is also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
+
 
 % \section{Citation}
 
@@ -55,18 +58,16 @@ The first thing is to load the  \Rpackage{lumi} package.
 library(lumi)
 @
 
-\subsection{Input data}
-The \Rfunction{lumiR} function supports directly reading the Illumina raw data output of the Illumina Bead Studio toolkit from version 1 to version 3.  It can automatically detect the format of the text file and create a new {\bf LumiBatch} object for it. An example of the input data format is shown in in Figure \ref{fig:dataFileSample}. For simplicity, only part of the data of first sample is shown. The data in the highlighted columns are kept in the corresponding slots of {\bf LumiBatch} object, as shown in Figure \ref{fig:dataFileSample}. The \Rfunction{lumiR} function will automatically determine the starting line of the data. The columns with header including \verb+AVG_Signal+ and \verb+BEAD_STD+ are required for the {\bf LumiBatch} object. The sample IDs and sample labels are extracted from the column names of the data file. For example, based on the column name: \verb+AVG_Signal-1304401001_A+, we will extract \verb+"1304401001"+ as the sample ID and \verb+"A"+ as the sample label (The function assumes the separation of the sample ID and the sample label is \verb+"_"+ if it exists in the column name.). The algorithm will check the uniqueness of sample IDs. If the sample ID is not unique, the entire portion after removing \verb+"AVG_Signal"+ will be used as a sample ID. A file format error will be reported if the uniqueness still cannot be satisfied in this way. The  \Rfunction{lumiR} will automatically initialize the QC slot of the {\bf LumiBatch} object by calling \Rfunction{lumiQ}.
+\subsection{Input data with "intelligent-load" technology}
+The \Rfunction{lumiR} function supports directly reading the Illumina raw data output of the Illumina Bead Studio toolkit from version 1 to version 3.  It can automatically detect the BeadStudio output version and format and create a new {\bf LumiBatch} object for it. An example of the input data format is shown in in Figure \ref{fig:dataFileSample}. For simplicity, only part of the data of first sample is shown. The data in the highlighted columns are kept in the corresponding slots of {\bf LumiBatch} object, as shown in Figure \ref{fig:dataFileSample}. The \Rfunction{lumiR} function will automatically determine the starting line of the data. The columns with header including \verb+AVG_Signal+ and \verb+BEAD_STD+ are required for the {\bf LumiBatch} object. The sample IDs and sample labels are extracted from the column names of the data file. For example, based on the column name: \verb+AVG_Signal-1304401001_A+, we will extract \verb+"1304401001"+ as the sample ID and \verb+"A"+ as the sample label (The function assumes the separation of the sample ID and the sample label is \verb+"_"+ if it exists in the column name.). The algorithm will check the uniqueness of sample IDs. If the sample ID is not unique, the entire portion after removing \verb+"AVG_Signal"+ will be used as a sample ID. A file format error will be reported if the uniqueness still cannot be satisfied in this way. The  \Rfunction{lumiR} will automatically initialize the QC slot of the {\bf LumiBatch} object by calling \Rfunction{lumiQ}.
 
 If BeadStudio outputted the control probe data, their information will be kept in the controlData slot of the {\bf LumiBatch} object. If BeadStudio outputted the sample summary information, which is called [Samples Table] in the output text file, the information will be kept in BeadStudioSummay within the QC slot of the {\bf LumiBatch} object.
 
-The BeadStudio can output gene profile or probe profile. When the probe profile is outputted, as show in Figure \ref{fig:dataFileSample}(B), the ProbeId column will be used as the identifier of {\bf LumiBatch} object.
+The BeadStudio can output the gene profile or the probe profile. As the probe profile provides unique mapping from the probe Id to the expression profile, outputting probe profile is preferred. When the probe profile is outputted, as show in Figure \ref{fig:dataFileSample}(B), the ProbeId column will be used as the identifier of {\bf LumiBatch} object.
 
 We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
 
 If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the featureData of the {\bf LumiBatch} object.
-
-In the featureData, it also records the presentCount of each probe, which measures the number of detectable measurements (the detection p-value less than the user provided threshold (0.01 by default)) of each probe.
  
 \begin{figure}
 \includegraphics{dataFileSample}
@@ -79,10 +80,10 @@ In the featureData, it also records the presentCount of each probe, which measur
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  	# Not Run
 > ## load the data
-> # x.lumi <- lumiR(fileName)		# Not Run
+> # x.lumi <- lumiR(fileName, lib='lumiHuamnV1')		# Not Run
 \end{Sinput}
 
-Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor.
+Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor. The example data includes four samples "A01", "A02", "B01" and "B02". "A" and "B" represent different Illumina slides (8 microarrays on each slide), and "01" and "02" represent different samples.  That means "A01" and "B01" are technique replicates at different slides, the same for "A02" and "B02". 
 
 \begin{Sinput}
 > ## load example data
@@ -99,6 +100,8 @@ example.lumi
 
 \subsection{Quality control of the raw data}
 The quality control of a {\bf LumiBatch} object includes a data summary (the mean and standard deviation, sample correlation,  detectable probe ratio of each sample (microarray)) and different quality control plots.
+
+In the featureData, it also records the presentCount of each probe, which measures the number of detectable measurements (the detection p-value less than the user provided threshold (0.01 by default)) of each probe.
 
 \Rfunction{LumiQ} function will produce the data summary of a {\bf LumiBatch} object and organize the results in a QC slot of {\bf LumiBatch} object. When creating the {\bf LumiBatch} object, the \Rfunction{LumiQ} function will be called to initialize the QC slot of the {\bf LumiBatch} object.
 
@@ -207,18 +210,18 @@ plot(example.lumi, what='sampleRelation')
 \end{figure}            
 
 % sample relations, MDS
-Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+'100US', '95US:5P', '100US', '95US:5P'+ for the sample data. Please see the help of \Rfunction{getSampleRelation} and \Rfunction{plot-methods} for more details.
+Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+"01", "02", "01", "02"+ for the sample data. Please see the help of \Rfunction{getSampleRelation} and \Rfunction{plot-methods} for more details.
 \begin{Sinput}
 > ## plot the sample relations
-> plot(example.lumi, what='sampleRelation', method='mds', color=c('100US', '95US:5P', '100US', '95US:5P'))	
+> plot(example.lumi, what='sampleRelation', method='mds', color=c("01", "02", "01", "02"))	
 > ## or
-> plotSampleRelation(example.lumi, method='mds', color=c('100US', '95US:5P', '100US', '95US:5P'))
+> plotSampleRelation(example.lumi, method='mds', color=c("01", "02", "01", "02"))
 \end{Sinput}
 
 \begin{figure}
 \centering
 <<fig=true, width=10, height=10, quiet=T, echo=F>>=
-plot(example.lumi, what='sampleRelation', method='mds', color=c('100US', '95US:5P', '100US', '95US:5P'))
+plot(example.lumi, what='sampleRelation', method='mds', color=c("01", "02", "01", "02"))
 @
 \caption{Sample relations before normalization}
 \label{fig:sampleRelation2}
@@ -226,7 +229,7 @@ plot(example.lumi, what='sampleRelation', method='mds', color=c('100US', '95US:5
 
 
 \subsection{Background correction}
-The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. By default, \Rfunction{lumiB} does nothing but return the input LumiBatch object. 'bg.adjust' method is based on the \Rfunction{bg.adjust} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
+The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. As both \Rfunction{vst} and \Rfunction{log2} transforms require the expression value to be positive. The default background correction method ('forcePositive') will force all expression values to be positive by adding an offset (minus minimum value plus one). It does nothing if all expression values are positive. Other options of \Rfunction{lumiB} include 'none' and 'bg.adjust'. 'bg.adjust' method is based on the \Rfunction{bg.adjust} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
 
 
 \subsection{Variance stabilizing transform}
@@ -355,7 +358,7 @@ plot(lumi.N.Q, what='sampleRelation')
 \centering
 <<fig=true, width=10, height=10, quiet=T>>=
 ## plot the sampleRelation using MDS
-plot(lumi.N.Q, what='sampleRelation', method='mds', color=c('100US', '95US:5P', '100US', '95US:5P'))
+plot(lumi.N.Q, what='sampleRelation', method='mds', color=c("01", "02", "01", "02"))
 @
 \caption{Sample relations after normalization}
 \label{fig:sampleRelation2.N}
@@ -379,7 +382,9 @@ lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='quantile'))
 
 
 \section{Gene annotation}
-Because the TargetID used by Illumina microarray is not consistent among different versions of arrays. For instance, the same 50mer sequence has two different TargetIDs used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips. Also the targetID is not meaningful for the user. We designed a nucleotide universal identifier (nuID), which encodes the 50mer oligonucleotide sequence and contains error checking and self-identification code. For details, please read [2]. 
+Illumina microarray provides the TargetID or the ProbeID to identify the measurements. The TargetID is used as a public identifier by Illumina and is supposed to be stable. The problem of the TargetID is that it can correspond to several different probes, which are supposed to match the same gene.  Due to the binding affinity difference or alternative splicing, the probes corresponding the the sample TargetID may have quite different expression levels and patterns. If we use TargetID to identify the measurements, then we cannot differentiate the difference between these probes. Another problem of using the TargetID is that the mapping between the TargetID and probes could be changed with our better understanding of the gene. Moreover, the TargetID used by Illumina microarray is not consistent among different versions of arrays. For instance, the same 50mer sequence has two different TargetIDs used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips. 
+
+In order to get unique mapping between microarray measurements and probes, using ProbeID is preferred. However, the ProbeID of Illumina is not stable. It is changing between different versions, even between different batches of Illumina microarrays. To solve these problems, we designed a nucleotide universal identifier (nuID), which encodes the 50mer oligonucleotide sequence and contains error checking and self-identification code. By using nuID, all the problems mentioned above can be easily solved. For details, please read [2]. 
 
 
 \subsection{Examples of nuID}
@@ -465,13 +470,32 @@ if (require(annotate) & require(lib, character.only=TRUE)) {
 @ 
 
 
-\subsection{Transfer Illumina microarray data as nuID annotated}
-As the annotation packages include the mappings between TargetID to nuID and ProbeID to nuID. we can easily map the targetID (or Probe Id) to nuID. The function can automatically check whether targetID or Probe Id  was used in the text data file, and convert them as nuID. Function \Rfunction{addNuId2lumi} can transfer a TargetID or Probe Id indexed  {\bf LumiBatch} object as an nuID indexed {\bf LumiBatch} object. If a {\bf LumiBatch} object has already been nuID indexed, the function will do nothing.
+Mapping from nuID to TargetID
+<<echo=T>>=
+nuId <- "WVUU7XyNw3ucXzwdEk"
+nuID2targetID(nuId, lib='lumiHumanV1')
+@ 
+
+Mapping from TargetID to nuID
+<<echo=T>>=
+targetID <- "GI_7262387-S"	
+targetID2nuID(targetID, lib='lumiHumanV1')
+@ 
+
+\subsection{Transfer Illumina identifier annotated data into nuID annotated}
+As the annotation packages include the mappings between TargetID to nuID and ProbeID to nuID. We can easily map the targetID (or Probe Id) to nuID. The function can automatically check whether targetID or Probe Id  was used in the text data file, and convert them as nuID. Function \Rfunction{addNuId2lumi} can transfer a TargetID or Probe Id indexed  {\bf LumiBatch} object as an nuID indexed {\bf LumiBatch} object. And the mapping between the nuID and TargetID is kept in the featureData of the {\bf LumiBatch} object. If a {\bf LumiBatch} object has already been nuID indexed, the function will do nothing.
 <<quiet=T>>=
 if (require(lumiHumanV1)) {
 	lumi.N <- addNuId2lumi(lumi.N, lib='lumiHumanV1')
 }
 @
+
+The {\bf LumiBatch} object can also be directly transferred as nuID indexed at the very beginning of inputting data using \Rfunction{lumiR}. For example:
+\begin{Sinput}
+> ## load the data
+>  example.lumi <- lumiR(fileName, lib='lumiHumanV1')	 # Not run
+\end{Sinput} 
+
 
 \section{A use case: from raw data to functional analysis}
 Figure \ref{useCase} shows the data processing flow chart of the use case. Since the classes in \Rpackage{lumi} package are inherited from class {\bf ExpressionSet}, packages and functions compatible with class {\bf ExpressionSet} or accepting matrix as input   all can be used for \Rpackage{lumi} results. Here we just give two examples: using \Rpackage{limma} to identify differentiated genes and using \Rpackage{GOstats} to annotate the significant genes.
@@ -516,7 +540,7 @@ Retrieve the normalized data
 dataMatrix <- exprs(lumi.N)
 @
 
-To speed up the processing and reduce FDR, remove the unexpressed genes
+To speed up the processing and reduce false positives, remove the unexpressed genes
 <<>>=
 presentCount <- pData(featureData(lumi.N))$presentCount
 selDataMatrix <- dataMatrix[presentCount > 0,]
@@ -526,15 +550,20 @@ selProbe <- rownames(selDataMatrix)
 
 \begin{Sinput}
 > ## Specify the sample type
-> sampleType <- c('100US', '95US:5P', '100US', '95US:5P')
-> if(require(limma)) {
-+ 	## compare  '95US:5P' and '100US'
+> sampleType <- c('100:0', '95:5', '100:0', '95:5')
+> if (require(limma)) {
++ 	## compare '95:5' and '100:0'
 + 	design <- model.matrix(~ factor(sampleType))
-+ 	colnames(design) <- c('100US', '95US:5P-100US')
++ 	colnames(design) <- c('100:0', '95:5-100:0')
 + 	fit <- lmFit(selDataMatrix, design)
 + 	fit <- eBayes(fit)
++       ## Add gene symbols to gene properties
++	if (require(lumiHumanV1) & require(annotate)) {
++             geneSymbol <- getSYMBOL(fit$genes$ID, 'lumiHumanV1')
++              fit$genes <- data.frame(fit$genes, geneSymbol=geneSymbol)
++        }
 + 	## print the top 10 genes
-+ 	topTable(fit, coef='95US:5P-100US', adjust='fdr', number=10)
++ 	topTable(fit, coef='95:5-100:0', adjust='fdr', number=10)
 + 	
 + 	## get significant gene list with FDR adjusted p.values less than 0.01
 + 	p.adj <- p.adjust(fit$p.value[,2])		
@@ -547,15 +576,20 @@ selProbe <- rownames(selDataMatrix)
 
 <<echo=F>>=
 ## Specify the sample type
-sampleType <- c('100US', '95US:5P', '100US', '95US:5P')
-if(require(limma)) {
-	## compare  '95US:5P' and '100US'
+sampleType <- c('100:0', '95:5', '100:0', '95:5')
+if (require(limma)) {
+	##  compare '95:5' and '100:0'
 	design <- model.matrix(~ factor(sampleType))
-	colnames(design) <- c('100US', '95US:5P-100US')
+	colnames(design) <- c('100:0', '95:5-100:0')
 	fit <- lmFit(selDataMatrix, design)
 	fit <- eBayes(fit)
+	## Add gene symbols to gene properties
+	if (require(lumiHumanV1) & require(annotate)) {
+              geneSymbol <- getSYMBOL(fit$genes$ID, 'lumiHumanV1')
+              fit$genes <- data.frame(fit$genes, geneSymbol=geneSymbol)
+          }
 	## print the top 10 genes
-	topTable(fit, coef='95US:5P-100US', adjust='fdr', number=10)
+	print(topTable(fit, coef='95:5-100:0', adjust='fdr', number=10))
 	
 	## get significant gene list with FDR adjusted p.values less than 0.01
 	p.adj <- p.adjust(fit$p.value[,2])		
@@ -565,7 +599,121 @@ if(require(limma)) {
 } 
 @
 
-Based on the significant genes identified using \Rpackage{limma} or t-test, we can further do Gene Ontology and other analysis. For example, we can use package \Rpackage{GOstats} to do the GO analysis, and use \Rpackage{MLInterface} for machine learning data analysis. Please refer to individual Bioconductor packages for more details of the analysis.
+Based on the significant genes identified using \Rpackage{limma} or t-test, we can do further analysis, like GO analysis (\Rpackage{GOstats} package) and machine learning (\Rpackage{MLInterface} package). Next, we will use GO analysis as an example.
+
+
+\subsection{Gene Ontology analysis}
+Based on the significant genes identified using \Rpackage{limma} or t-test, we can further do Gene Ontology annotation. We can use package \Rpackage{GOstats} to do the analysis.
+
+Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of BP (Biological Process). For other GO categories MF(Molecular Function) and CC (Cellular Component), it just follows the same procedure.
+
+\begin{Sinput}
+> if (require(GOstats) & require(lumiHumanV1)) {
++ 
++       ## Get the locuslink Id of the gene
++       sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1LOCUSID, ifnotfound=NA)))
++       sigLL <- as.character(sigLL[!is.na(sigLL)])
++       params <- new("GOHyperGParams",
++               geneIds= sigLL,
++               annotation="lumiHumanV1",
++               ontology="BP",
++               pvalueCutoff= 0.01,
++               conditional=FALSE,
++               testDirection="over")
++          
++       hgOver <- hyperGTest(params)
++          
++       ## Get the p-values of the test
++       gGhyp.pv <- pvalues(hgOver)
++ 	
++       ## select the Go terms with p-value less than 0.001
++       sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.001])
++ 	
++       ## Here only show the significant GO terms of BP (Molecular Function)
++       ## 	For other categories, just follow the same procedure.
++       sigGO.Term <- getGOTerm(sigGO.ID)[["BP"]]
++ }
+\end{Sinput}
+
+
+<<echo=F, eval=F>>=
+if (require(GOstats) & require(lumiHumanV1)) {
+
+	## Get the locuslink Id of the gene
+	sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1ENTREZID, ifnotfound=NA)))
+	sigLL <- as.character(sigLL[!is.na(sigLL)])
+	params <- new("GOHyperGParams",
+              geneIds= sigLL,
+              annotation="lumiHumanV1",
+              ontology="BP",
+              pvalueCutoff= 0.01,
+              conditional=FALSE,
+              testDirection="over")
+         
+         hgOver <- hyperGTest(params)
+         	
+	## Get the p-values of the test
+	gGhyp.pv <- pvalues(hgOver)
+	
+	## select the Go terms with p-value less than 0.001
+	sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.001])
+	
+	## Here only show the significant GO terms of BP (Molecular Function)
+	## 	For other categories, just follow the same procedure.
+	sigGO.Term <- getGOTerm(sigGO.ID)[["BP"]]
+}
+@
+
+
+% Produce the significant GO term table
+<<echo=FALSE, results=tex, eval=F>>=
+if (require(GOstats) & require(lumiHumanV1) & require(xtable)) {
+
+	##get gene counts at each GO category
+	gg.counts <- geneCounts(hgOver)[sigGO.ID]
+	total.counts <- universeCounts(hgOver)[sigGO.ID]
+
+	ggt <- unlist(sigGO.Term)
+	numCh <- nchar(ggt)
+	ggt2 <- substr(ggt, 1, 17)
+	ggt3 <- paste(ggt2, ifelse(numCh > 17, "...", ""), sep="")
+	
+	## output the significant GO categories as a table
+	ggMat <- matrix(c(names(sigGO.Term), ggt3, signif(gGhyp.pv[sigGO.ID],5), gg.counts, total.counts),
+    		byrow=FALSE, nc=5, dimnames=list(1:length(sigGO.Term), c("GO ID",
+   		"Term", "p-value","Significant Genes No.", "Total Genes No.")))
+	xtable.matrix(ggMat,
+  		caption="GO terms, p-values and counts.", label="ta:GOggterms")
+}
+@
+
+% Produce the significant GO term table
+% latex table generated in R 2.4.0 by xtable 1.4-2 package
+% Sat Dec  9 23:14:22 2006
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{rlllll}
+  \hline
+ & GO ID & Term & p-value & Significant Genes No. & Total Genes No. \\
+  \hline
+1 & GO:0009611 & response to wound... & 8.4244e-06 & 42 & 443 \\
+  2 & GO:0006955 & immune response & 8.8296e-06 & 68 & 859 \\
+  3 & GO:0006952 & defense response & 1.7525e-05 & 72 & 945 \\
+  4 & GO:0006950 & response to stres... & 1.9132e-05 & 81 & 1103 \\
+  5 & GO:0009607 & response to bioti... & 5.0811e-05 & 72 & 976 \\
+  6 & GO:0009613 & response to pest,... & 7.2813e-05 & 45 & 533 \\
+  7 & GO:0006954 & inflammatory resp... & 0.00025402 & 25 & 250 \\
+  8 & GO:0009605 & response to exter... & 0.00026005 & 46 & 580 \\
+  9 & GO:0051707 & response to other... & 0.00040553 & 45 & 575 \\
+  10 & GO:0051674 & localization of c... & 0.00082563 & 30 & 348 \\
+  11 & GO:0006928 & cell motility & 0.00082563 & 30 & 348 \\
+  12 & GO:0040011 & locomotion & 0.00099205 & 30 & 352 \\
+   \hline
+\end{tabular}
+\caption{GO terms, p-values and counts.}
+\label{ta:GOggterms}
+\end{center}
+\end{table}
 
 
 \section{Reference}

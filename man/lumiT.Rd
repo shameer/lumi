@@ -6,13 +6,14 @@
   Transfer the Illumina data to stabilize the variance.
 }
 \usage{
-lumiT(x.lumi, method = c("vst", 'log2', 'cubicRoot'), ifPlot = FALSE, ...)
+lumiT(x.lumi, method = c("vst", 'log2', 'cubicRoot'), ifPlot = FALSE, simpleOutput = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ LumiBatch object }
   \item{method}{ four methods are supported: "vst", "log2", "cubicRoot" }
   \item{ifPlot}{ determine whether to plot the intermediate results }
+  \item{simpleOutput}{ determine whether to simplify the output LumiBatch object, which will set the se.exprs, detection and beadNum slots as NULL. }
   \item{\dots}{ other parameters used by \code{\link{vst}} }
 }
 \details{

@@ -87,7 +87,7 @@ setMethod("summary",signature(object="LumiBatch"), function(object, type=c('data
 
 setMethod("show",signature(object="LumiBatch"), function(object) 
 {
-	cat('Data Information:\n\t')
+	cat('Summary of BeadStudio output:\n\t')
 	cat(notes(object)[[1]], sep='\n\t')
 	cat('Major Operation History:\n')
 	print(getHistory(object)) 
@@ -334,8 +334,8 @@ setMethod("pairs", signature(x="ExpressionSet"),
 			up <- length(which((x-y) > log2(fold)))
 			down <- length(which((y-x) > log2(fold)))
 		} else {
-			up <- length(which((x-y) > fold))
-			down <- length(which((y-x) > fold))
+			up <- length(which((x/y) > fold))
+			down <- length(which((y/x) > fold))
 		}
 		ex <- par("fin")[1]*0.9
 		txt <- paste("Cor =", as.character(round(cor(x,y),2)),"\n")
@@ -354,23 +354,27 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
 	}
 
-	exprs <- exprs(x)
+	expr <- exprs(x)
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
-			subset <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+			subset <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} 
 	} else {
-		subset <- 1:nrow(exprs)
+		subset <- 1:nrow(expr)
 	}
 	
-	if(logMode & (max(exprs, na.rm=TRUE) > 50)) {
-    	pairs(log2(exprs),upper.panel=upperPanel, diag.panel=diagPanel, 
-				lower.panel=lowerPanel, ...)
+	if(logMode) {
+		if (max(expr, na.rm=TRUE) > 50) {
+			expr <- log2(expr)
+		}
 	} else {
-    	pairs(exprs,upper.panel=upperPanel, diag.panel=diagPanel, 
-				lower.panel=lowerPanel, ...)
+		if (max(expr, na.rm=TRUE) < 50) {
+			expr <- 2^expr
+		}
 	}
+	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
+			lower.panel=lowerPanel, ...)
 })
 
 
@@ -393,7 +397,18 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	} else {
 		ind <- 1:nrow(expr)
 	}
-	mva.pairs(expr[ind, ], ...)
+	if(logMode) {
+		if (max(expr, na.rm=TRUE) > 50) {
+			mva.pairs(expr[ind, ], log.it=TRUE, ...)
+		} else {
+			mva.pairs(expr[ind, ], log.it=FALSE, ...)
+		}
+	} else {
+		if (max(expr, na.rm=TRUE) < 50) {
+			expr <- 2^expr
+		}
+		mva.pairs(expr[ind, ], log.it=FALSE, ...)
+	}
 })
 
 
