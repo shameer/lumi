@@ -6,7 +6,7 @@
   Fit the monotonic-constraint spline curve
 }
 \usage{
-monoSmu(x, y, newX = NULL, nSupport = min(200, length(x)), nKnots = max(length(nSupport)/10, 5), rotate = FALSE, ifPlot = FALSE, xlab = 'x', ylab = 'y', ...)
+monoSmu(x, y, newX = NULL, nSupport = min(200, length(x)), nKnots = 6, rotate = FALSE, ifPlot = FALSE, xlab = 'x', ylab = 'y', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,7 +15,7 @@ monoSmu(x, y, newX = NULL, nSupport = min(200, length(x)), nKnots = max(length(n
   \item{newX}{ the new values to be transformed. If not provided, "x" will be used. }
   \item{nSupport}{ downsampled data points }
   \item{nKnots}{ parameter used by \code{\link{monoSpline}} }
-  \item{rotate}{ determine whether to rotate the axis with 45 degrees in clockwise }
+  \item{rotate}{ determine whether to rotate the axis with 45 degrees in clockwise, i.e., fit the curve in the MA-plot. }
   \item{ifPlot}{ determine whether to plot intermediate results }
   \item{xlab}{ the xlab of the plot }
   \item{ylab}{ the ylab of the plot }

@@ -1,14 +1,14 @@
 `rsn` <-
 function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	if (is(x.lumi, 'ExpressionSet')) {
-	    # x.lumi is a lumi object
-	    exprs <- exprs(x.lumi)		
+		# x.lumi is a lumi object
+		exprs <- exprs(x.lumi)
 	} else if (is.numeric(x.lumi)) {
 		exprs <- as.matrix(x.lumi)
 	} else {
 		stop('The object should be a matrix or class "ExpressionSet" inherited!')
 	}
-	
+
 	externalTarget <- FALSE
 	if (!is.null(targetArray)) {
 		## check the format of the targetArray
@@ -22,7 +22,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			externalTarget <- TRUE
 		}
 	}
-	
+
 	## check whether the data was variance stabilized.
 	if (max(exprs, na.rm=TRUE) > 100) {
 		if (is(x.lumi, 'LumiBatch')) {
@@ -37,17 +37,17 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 		}
 	}
 
-    ## Define interal function 
-   	pairwiseN <- function(ind, exprs, targetArray, method=c('rsn', 'loess'), 
+	## Define interal function 
+	pairwiseN <- function(ind, exprs, targetArray, method=c('rsn', 'loess'), 
 				exprs0=NULL, ifPlot=FALSE) {
-        cat(as.character(Sys.time()), ", processing array ", ind, "\n")
-    
-        # normal array ind against targetArray      
+		cat(as.character(Sys.time()), ", processing array ", ind, "\n")
+
+		# normal array ind against targetArray      
 		u1 <- exprs[,ind]
 		u2 <- exprs[, targetArray]
 		u1.original <- u1
 		u2.original <- u2
-        
+
 		## define window functions
 		win <- function(x, sigma=1, type=c('gaussian', 'tricube', 'bisqure')) {
 			type <- match.arg(type)
@@ -72,30 +72,30 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			} else {
 				wt <- rep(length(u1))
 			}
-		
+
 			u1.normalized <- monoSmu(u1, u2, newX=u1.original, span=span, ifPlot=ifPlot, wt=wt, rotate=TRUE,
 					xlab=paste("array", ind), ylab=paste("array", targetArray), ...)
-        } else {
-            u1.normalized <- u1
-        }
-        return(u1.normalized)
-    }
+		} else {
+			u1.normalized <- u1
+		}
+		return(u1.normalized)
+	}
 
 	if (ifPlot) par(mfrow=c(2,2))
-    
+
 	## do quantile normalization for the purpose of estimating fold change
 	## Based on the estimated fold change, we can down-weight the differentiated genes.
-    if (!is.null(excludeFold)) {
-        exprs0 <- normalize.quantiles(exprs)
-    } else {
-        exprs0 <- NULL
-    }
+	if (!is.null(excludeFold)) {
+		exprs0 <- normalize.quantiles(exprs)
+	} else {
+		exprs0 <- NULL
+	}
 
-    if (is.null(targetArray)) {
-        # find the sample which is the most similar to the mean profile of all samples,
+	if (is.null(targetArray)) {
+		# find the sample which is the most similar to the mean profile of all samples,
 		meanProfile <- apply(exprs, 1, mean)
 		targetArray <- which.min(abs(colSums(exprs - meanProfile)))
-    }
+	}
 
 	nArray <- ncol(exprs)
 	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs, method=method, 
@@ -110,6 +110,6 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	} else {
 		x.lumi <- normalized
 	}
-    
-    return(x.lumi)
+
+	return(x.lumi)
 }

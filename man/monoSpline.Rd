@@ -6,7 +6,7 @@
 
 }
 \usage{
-monoSpline(x, y, newX=NULL, nKnots = 5, ifPlot = FALSE)
+monoSpline(x, y, newX=NULL, nKnots = 6, ifPlot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

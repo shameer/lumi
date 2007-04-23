@@ -1,7 +1,7 @@
 Package: lumi
 Type: Package
 Title: BeadArray Specific Methods for Illumina Microarrays
-Version: 1.1.7
+Version: 1.1.8
 Date: 2007-04-20
 Depends: R (>= 2.4.0), Biobase (>= 1.12.0), affy, mgcv, methods
 Suggests: vsn
