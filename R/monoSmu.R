@@ -33,7 +33,7 @@ function(x, y, newX=NULL,
 	rangeX <- range(xy1$x)
 	selInd <- round(seq(from=1, to = nrow(xy1), length =nSupport))
 	## make sure there are enough samples at high end
-	selX <- seq(rangeX[1] + diff(rangeX)/3, rangeX[2], length=nSupport/2)
+	selX <- seq(rangeX[1] + diff(rangeX)/2, rangeX[2], length=10)
 	selIndHigh <- sapply(selX, function(x) which.min(abs(xy1$x - x)))
 	selInd <- sort(c(selInd, selIndHigh))
 	xy1 <- xy1[selInd, ]
