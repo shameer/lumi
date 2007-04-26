@@ -27,17 +27,16 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 		minU <- log2(min(u))
 		maxU <- log2(max(u))
 		# uCutoff <- 2^((maxU + minU)/2)
-		uCutoff <- 2^(minU + (maxU - minU)/3)
-		#uCutoff <- quantile(u, 2/3)
-		#uCutoff <- quantile(u, 1/2)
-		selInd <- (u > uCutoff & u < quantile(u, .98))
-		selLowInd <- (u < uCutoff)
+		uCutoffLow <- 2^(minU + (maxU - minU)/3)
+		uCutoffHigh <- 2^(minU + (maxU - minU) * 3/4)
+		selInd <- (u > uCutoffLow & u < uCutoffHigh)
+		selLowInd <- (u < uCutoffLow)
 		iterNum <- 0
 		c3.i <- 0
 		while(iterNum < 3) {
 			selInd.i <- selInd & (std^2 > c3.i)
-			#selInd.i <- (std^2 > c3.i)
 			dd <- data.frame(y=sqrt(std[selInd.i]^2 - c3.i), x1=u[selInd.i])
+			if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
 			lm.i <- lm(y ~ x1, dd)
 			c1.i <- lm.i$coef[2]
 			c2.i <- lm.i$coef[1]
@@ -46,6 +45,7 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 			cc <- y^2 - (c1.i * x + c2.i)^2
 			c3.i <- mean(cc)
 			if (c3.i < 0) {
+				#c2.i <- c2.i + sqrt(-c3.i)
 				c3.i <- 0
 				break
 			}
@@ -71,7 +71,13 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 			g <- 1/c1
 			a <- c2
 			b <- c1
-			transformedU <- g * log(a + b * u.bak)
+			tmp <- a + b * u.bak
+			if (any(tmp) < 0) {
+				transformedU <- log(u.bak)
+				g <- 1; a <- 0; b <- 1
+			} else {
+				transformedU <- g * log(a + b * u.bak)
+			}
 			if (ifPlot) hy <- g * log(a + b * downSampledU) 
 			transFun <- 'log'
 		} else {
@@ -101,7 +107,7 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 
 	## rescale to the similar range with log2
 	if (method == 'iterate') {
-		cutInd <- which.min(abs(u.bak - uCutoff))
+		cutInd <- which.min(abs(u.bak - uCutoffLow))
 		maxInd <- which.max(u.bak)
 		y <- c(u.bak[cutInd], u.bak[maxInd])
 		x <- c(transformedU[cutInd], transformedU[maxInd])

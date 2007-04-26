@@ -252,6 +252,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	sampleID <- NULL
 	label <- NULL
 	temp <- lapply(sampleNameInfo, function(x) {sampleID <<- c(sampleID, x[1]); label <<- c(label, x[2])})
+	if (any(is.na(label))) {
+		sampleID <- sampleName
+		label <- sampleName
+	}
     
 	## reportInfo save the id information
 	if (!is.null(detection)) {
@@ -282,7 +286,33 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	} else {
 		colName <- sampleName
 	}
-	colnames(exprs) <- colnames(se.exprs) <- colnames(beadNum) <- colnames(detection) <- colName
+	
+	## check the dimensions of the input data
+	if (ncol(exprs) == ncol(se.exprs)) {
+		colnames(exprs) <- colnames(se.exprs) <- colName
+	} else {
+		stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
+	}
+	if (ncol(beadNum) == length(colName)) {
+		colnames(beadNum) <- colName
+	} else {
+		warning('The number of beadNum columns does not match! Please check the input data format.')
+		if (ncol(beadNum) > length(colName)) beadNum <- beadNum[,1:length(colName)]
+		if (ncol(beadNum) < length(colName)) {
+			for (i in 1:(length(colName) - ncol(beadNum)))
+				beadNum <- cbind(beadNum, rep(NA, nrow(beadNum)))
+		}
+	}
+	if (ncol(detection) == length(colName)) {
+		colnames(detection) <- colName
+	} else {
+		warning('The number of detection columns does not match! Please check the input data format.')
+		if (ncol(detection) > length(colName)) beadNum <- beadNum[,1:length(colName)]
+		if (ncol(detection) < length(colName)) {
+			for (i in 1:(length(colName) - ncol(detection)))
+				detection <- cbind(detection, rep(NA, nrow(detection)))
+		}
+	}
 
 	## produce the phenoData object
 	pData <- data.frame(sampleID=sampleID, label=label)
