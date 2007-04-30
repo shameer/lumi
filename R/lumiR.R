@@ -10,6 +10,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	options(stringsAsFactors = FALSE)
 	version <- 2
 
+	if (!file.exists(fileName)) stop('The file is not exist! Please check your file path!')
 	## ---------------------------------------
 	## identify the Metadata lines 
 	info <- readLines(file(fileName), n=20)    # take the first 20 lines to have a taste
@@ -37,6 +38,17 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!')
 			}
 		}
+	}
+	## determine whether the quote is used or not
+	dataLine1 <- strsplit(info[nMetaDataLines + 2], sep)[[1]]
+	quoteCount1 <- gregexpr('"', dataLine1[1])[[1]]
+	quoteCount2 <- gregexpr('\'', dataLine1[1])[[1]]
+	if (length(quoteCount1) == 2) {
+		quote <- '"'
+	} else if (length(quoteCount2) == 2) {
+		quote <- '\''
+	} else {
+		quote <- ''
 	}
     
 	## ---------------------------------------
@@ -83,7 +95,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	}
     
 	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL,
-		quote='', as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
+		quote=quote, as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
 	
 	## retrieve the possible section line index
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
@@ -221,7 +233,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 				se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
 			}
 			if (!is.null(detection)) {
-				detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)				
+				detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)
 			}
 			rmInd <- c(rmInd, selInd.i[-1])
 		}
