@@ -13,6 +13,9 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 	method <- match.arg(method)
     if (method == 'vsn') {
 		if(!require(vsn)) stop('Package "vsn" should be installed for "vsn" method!')
+		if (max(x.matrix, na.rm=TRUE) < 50) {
+			warning('The data seems log2 transformed. VSN should be directly applied to the raw data!')
+		}
 	}
 	if (is(x.lumi, 'LumiBatch')) {
 		history.submitted <- as.character(Sys.time())
@@ -22,7 +25,7 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 		rsn = rsn(x.matrix, ...),
 		loess = normalize.loess(x.matrix, ...),
 		quantile = normalize.quantiles(x=x.matrix, ...),
-		vsn = exprs(vsn(intensities=x.matrix, ...)) )
+		vsn = exprs(vsn2(intensities=x.matrix, ...)) )
 
 	colnames(norm.matrix) <- colnames(x.matrix)
 	rownames(norm.matrix) <- rownames(x.matrix)
