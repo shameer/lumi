@@ -48,7 +48,7 @@
   should include \code{exprs} and \code{se.exprs}, others can be 
   missing, in which case they are assigned default values.
 
-  Objects can be created using the function \code{\link{lumiR}}.}
+  Objects can be created using the function \code{\link{lumiR}}.
 }
 \section{Slots}{
    Slot specific to \code{LumiBatch}:
