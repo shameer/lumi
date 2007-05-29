@@ -50,9 +50,18 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	} else {
 		quote <- ''
 	}
-    
+
+	header <- strsplit(info[nMetaDataLines + 1], sep)[[1]]
+	probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
+	if (length(probeId.pos) > 0) {
+		colClasses <- rep(NA, length(header))
+		colClasses[probeId.pos] <- 'character'
+	} else {
+		colClasses <- NULL
+	}
+
 	## ---------------------------------------
-    # get data info
+	# get meta data info
 	if (nMetaDataLines > 0) {
 		info <- readLines(file(fileName), n=nMetaDataLines)
 		## check the version of the beadStudio output
@@ -67,36 +76,40 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 			version <- 3
 			info <- info[-markerInd]
 		}
-		## remove the blanks
-		info <- sub("[[:blank:]]+$", "", info)
-		info <- gsub(sep, "", info)
-		## check the meta info of the file
-		if (version == 2) {
-			ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
-		} else {
-			ind <- grep("BSGX Version", info, ignore.case=TRUE)
-		}
-		if (length(ind) == 0) 
-		    warning("The data file is not in the Illumia BeadStudio output format.")
+		if (length(info) > 0) {
+			## remove the blanks
+			info <- sub("[[:blank:]]+$", "", info)
+			info <- gsub(sep, "", info)
+			## check the meta info of the file
+			if (version == 2) {
+				ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
+			} else {
+				ind <- grep("BSGX Version", info, ignore.case=TRUE)
+			}
+			if (length(ind) == 0) 
+			    warning("The data file is not in the Illumia BeadStudio output format.")
 
-		## should not be normalized in BeadStudio
-		ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
-		if (version == 2) {
-			normalization <- strsplit(info, split='=')[[ind]][2]
-			normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+			## should not be normalized in BeadStudio
+			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
+			if (version == 2) {
+				normalization <- strsplit(info, split='=')[[ind]][2]
+				normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+			} else {
+				normalization <- strsplit(info, split='\t')[[ind]][2]
+			}
+			if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
+			    warning("The raw data should not be normalized in BeadStudio.")
+			}
 		} else {
-			normalization <- strsplit(info, split='\t')[[ind]][2]
-		}
-		if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
-		    warning("The raw data should not be normalized in BeadStudio.")
+			info <- NULL
 		}
 	} else {
 		info <- NULL
 	}
     
-	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL,
+	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL, colClasses=colClasses,
 		quote=quote, as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
-	
+
 	## retrieve the possible section line index
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
     

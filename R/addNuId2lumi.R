@@ -37,9 +37,20 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			}
 		}
 
+		dataLine1 <- strsplit(info[nMetaDataLines + 2], sep)[[1]]
+		quoteCount1 <- gregexpr('"', dataLine1[1])[[1]]
+		quoteCount2 <- gregexpr('\'', dataLine1[1])[[1]]
+		if (length(quoteCount1) == 2) {
+			quote <- '"'
+		} else if (length(quoteCount2) == 2) {
+			quote <- '\''
+		} else {
+			quote <- ''
+		}
+
 		## Read in annotation data
 		annotation <- read.table(annotationFile, sep=sep, colClasses="character", header=TRUE, skip=nMetaDataLines,
-		 	blank.lines.skip=TRUE, check.names=FALSE, fill=TRUE)
+		 	blank.lines.skip=TRUE, row.names=NULL, check.names=FALSE, quote=quote, comment.char="", strip.white=TRUE, fill=TRUE)
 
 		colnames(annotation) <- toupper(colnames(annotation))
 		## Create unique Id based on 50mer sequence
@@ -51,8 +62,12 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			## check the ProbeID if id does not match the TargetID
 			ann_target <- annotation[, toupper(annotationColName['probe'])]
 			comm_target <- id[id %in% ann_target]
-			if (length(comm_target) == 0)
-				stop('The annotation file does not match the data!')
+			if (length(comm_target) == 0) {
+				width <- nchar(ann_target[1])
+				id <- formatC(as.numeric(id), width=width, flag='0', format='d')
+				comm_target <- id[id %in% ann_target]
+				if (length(comm_target) == 0) stop('The annotation file does not match the data!')
+			}
 		} 
 		if (length(comm_target) != length(id)) {
 			warning('The annotation file does not match the data. Partial ids cannot be replaced!')
@@ -70,10 +85,15 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				## check the ProbeID if id does not match the TargetID
 				newId <- mget(id, get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'), ifnotfound=NA)
 				if (length(which(!is.na(newId))) == 0) {
-					targetID <- pData(featureData(x.lumi))$TargetID
-					newId <- mget(targetID, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
-					if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!')
-				}
+					width <- nchar(ls(envir=get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'))[1])
+					id <- formatC(as.numeric(id), width=width, flag='0', format='d')
+					newId <- mget(id, get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'), ifnotfound=NA)
+					if (length(which(!is.na(newId))) == 0) {
+						targetID <- pData(featureData(x.lumi))$TargetID
+						newId <- mget(targetID, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
+						if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!')
+					}
+				} 
 			}
 			## Check for the targetIDs cannot be found in the lib.
 			## Some known control genes will not be checked.

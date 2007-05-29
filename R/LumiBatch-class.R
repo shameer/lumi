@@ -108,6 +108,14 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
                  class(x), ", ", class(y), sep=""))
 	
 	if (any(sort(featureNames(x)) != sort(featureNames(y)))) stop('Two data sets have different row names!')
+	## determine whether there are duplicated sample names
+	sampleName.x <- sampleNames(x)
+	sampleName.y <- sampleNames(y)
+	if (any(sampleName.x %in% sampleName.y)) {
+		warning('Two data sets have some duplicated sample names!\n "_1" and "_2" were attached to the sample names!')
+		sampleNames(x) <- paste(sampleNames(x), '_1', sep='')
+		sampleNames(y) <- paste(sampleNames(y), '_2', sep='')
+	}
 
 	history.submitted <- as.character(Sys.time())
 
