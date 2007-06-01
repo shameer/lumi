@@ -21,7 +21,7 @@ lumiB <- function(lumiBatch, method = c('forcePositive', 'none', 'bg.adjust'), .
 		return(lumiBatch)
 	}
 
-	if (is(x.lumi, 'LumiBatch')) {
+	if (is(lumiBatch, 'LumiBatch')) {
 		# history tracking
 		history.finished <- as.character(Sys.time())
 		history.command <- capture.output(print(match.call(lumiB)))
