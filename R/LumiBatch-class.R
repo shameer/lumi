@@ -206,22 +206,25 @@ setMethod("boxplot",signature(x="ExpressionSet"),
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
-	exprs <- exprs(x)
+
+	expr <- exprs(x)
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
-			index <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
 			index <- subset
 		}
 	} else {
-		index <- 1:nrow(exprs)
+		index <- 1:nrow(expr)
 	}
   	if (logMode & max(exprs(x), na.rm=TRUE) > 50) {
-		exprs <- log2(exprs)
+		## force the expression value as positive in the logMode
+		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+		expr <- log2(expr)
 	} 
 
-	dataMatrix <- exprs[index,]
+	dataMatrix <- expr[index,]
 	labels <- colnames(dataMatrix)
 	if (is.null(labels)) labels <- as.character(1:ncol(dataMatrix))
 	## set the margin of the plot
@@ -243,41 +246,45 @@ setMethod('hist', signature(x='ExpressionSet'),
 	color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
 {
 	if (is(x, 'ExpressionSet')) {
-	    exprs <- exprs(x)
+	    expr <- exprs(x)
 	} else if (is.numeric(x)) {
-		exprs <- as.matrix(x)
+		expr <- as.matrix(x)
 	} else {
 		stop('Un-supported class of x!')
 	}
+		
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
-			ind <- sample(1:nrow(exprs), min(subset, nrow(exprs)))
+			ind <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
 			ind <- subset
 		}
 	} else {
-		ind <- 1:nrow(exprs)
+		ind <- 1:nrow(expr)
 	}
-	exprs <- exprs[ind,,drop=FALSE]
+	expr <- expr[ind,,drop=FALSE]
 
-    if (logMode & (max(exprs, na.rm=TRUE) > 50)) {
-        exprs <- log2(exprs)
-        if (is.null(xlab)) 
-            xlab <- "log2 intensity"
+    if (logMode & (max(expr, na.rm=TRUE) > 50)) {
+		## force the expression value as positive in the logMode
+		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+
+		expr <- log2(expr)
+		if (is.null(xlab)) 
+			xlab <- "log2 intensity"
     } else if (is.null(xlab)) 
         xlab <- "intensity"
 
 	if (!is.null(symmetry)) {
-		x.range <- range(exprs)
+		x.range <- range(expr)
 		if (symmetry > x.range[1] & symmetry < x.range[2]) {
 			warning('symmetry point should not be within the range of x!')
 			symmetry <- NULL
 		} else {
-			exprs <- rbind(exprs, 2*symmetry - exprs)
+			expr <- rbind(expr, 2*symmetry - expr)
 		}
 	}
-	x.density <- apply(exprs, 2, density)
+	x.density <- apply(expr, 2, density)
     all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
     all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
 
@@ -302,8 +309,8 @@ setMethod('hist', signature(x='ExpressionSet'),
 	}
 	## add legend
 	if (addLegend) {
-		labels <- colnames(exprs)
-		if (is.null(labels)) labels <- as.character(1:ncol(exprs))
+		labels <- colnames(expr)
+		if (is.null(labels)) labels <- as.character(1:ncol(expr))
 
 		col <- 1:ncol(all.x)
 		lwd <- rep(1, ncol(all.x))
@@ -374,6 +381,8 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
+			## force the expression value as positive in the logMode
+			if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 			expr <- log2(expr)
 		}
 	} else {
@@ -407,10 +416,11 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	}
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
-			mva.pairs(expr[ind, ], log.it=TRUE, ...)
-		} else {
-			mva.pairs(expr[ind, ], log.it=FALSE, ...)
-		}
+			## force the expression value as positive in the logMode
+			if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+			expr <- log2(expr)
+		} 
+		mva.pairs(expr[ind, ], log.it=FALSE, ...)
 	} else {
 		if (max(expr, na.rm=TRUE) < 50) {
 			expr <- 2^expr

@@ -272,15 +272,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
     
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnGrepPattern['exprs'], '[^[:alnum:]]*', sep='')
-	sampleName <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
-	sampleNameInfo <- strsplit(sampleName, split="_")
-	sampleID <- NULL
+	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
+	sampleIDInfo <- strsplit(sampleID, split="_")
 	label <- NULL
-	temp <- lapply(sampleNameInfo, function(x) {sampleID <<- c(sampleID, x[1]); label <<- c(label, x[2])})
-	if (any(is.na(label))) {
-		sampleID <- sampleName
-		label <- sampleName
-	}
+	temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
+	if (any(is.na(label)))  label <- sampleID
     
 	## reportInfo save the id information
 	if (!is.null(detection)) {
@@ -305,11 +301,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
-	## set the colnames as the label or sampleName
+	## set the colnames as the label or sampleID
 	if (length(unique(label)) == length(label) & length(label) > 0) {
 		colName <- label
 	} else {
-		colName <- sampleName
+		colName <- sampleID
 	}
 	
 	## check the dimensions of the input data
