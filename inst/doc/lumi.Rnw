@@ -381,6 +381,19 @@ lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='quantile'))
 @ 
 
 
+\section{Handling large data set}
+Several users asked about processing large data set, e.g., over 100 samples. Directly handling such big data set usually will cause "out of memory" error in most computers. The good news is that the \Rfunction{vst} and \Rfunction{rsn} functions in the \Rpackage{lumi} package can sequentially process the data and handle such large data set.  
+The solution can be like this:
+1. Read the data file by smaller batches (e.g. 10 or just one by one), and then do the variance stabilization, i.e., \Rfunction{lumiT} function, for each data batch. 
+2. Pick one sample as the target array for normalization and then using ÒRSNÓ normalization method. 
+3. Combine the normalized data. (In order to save memory, the user can first remove those probes not expressed in all samples.)
+
+    In the \Rfunction{rsn} function, there is a parameter called ÒtargetArrayÓ, which is the model for other chips to normalize. It can be a column index, a vector or a LumiBatch object with one sample. In our case, we need to use one LumiBatch object with one sample as the ÒtargetArrayÓ. The selection of the target array is flexible. We suggest to choose the one most similar to the mean of all samples. For convenience, we can also just select the first sample as ÒtargetArrayÓ (suppose it has no quality problem).  The selected target array will also be used for all other data batches. Since different data batches use the same target array as model, the results are comparable and can be combined!Here is the example code:
+\begin{Sinput}
+## Read in the Batch i data> x.lumi.i <- lumiR(ÔfileName.i.txtÕ)## variance stabilization (using vst or log2 transform)> x.lumiT.i <- lumiT(x.lumi.i)## select the ÒtargetArrayÓ ## This target array will also be used for other batches of data.## For convenience, here we just select the first sample as targetArray.> targetArray <- x.lumiT.i[,1]## Do RSN normalization> x.lumiN.i <- lumiN(x.lumiT.i, targetArray=targetArray)\end{Sinput}
+The normalized data batches can be combined by using function Rfunction{combine(x, y)}. 
+
+
 \section{Gene annotation}
 Illumina microarray provides the TargetID or the ProbeID to identify the measurements. The TargetID is used as a public identifier by Illumina and is supposed to be stable. The problem of the TargetID is that it can correspond to several different probes, which are supposed to match the same gene.  Due to the binding affinity difference or alternative splicing, the probes corresponding the the sample TargetID may have quite different expression levels and patterns. If we use TargetID to identify the measurements, then we cannot differentiate the difference between these probes. Another problem of using the TargetID is that the mapping between the TargetID and probes could be changed with our better understanding of the gene. Moreover, the TargetID used by Illumina microarray is not consistent among different versions of arrays. For instance, the same 50mer sequence has two different TargetIDs used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips. 
 
@@ -720,7 +733,7 @@ if (require(GOstats) & require(lumiHumanV1) & require(xtable)) {
 
 1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", submitted
 
-2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
+2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 
 3. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
 
