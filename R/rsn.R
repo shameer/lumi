@@ -38,8 +38,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	}
 
 	## Define interal function 
-	pairwiseN <- function(ind, exprs, targetArray, method=c('rsn', 'loess'), 
-				exprs0=NULL, ifPlot=FALSE) {
+	pairwiseN <- function(ind, exprs, targetArray, exprs0=NULL, ifPlot=FALSE) {
 		cat(as.character(Sys.time()), ", processing array ", ind, "\n")
 
 		# normal array ind against targetArray      
@@ -98,7 +97,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	}
 
 	nArray <- ncol(exprs)
-	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs, method=method, 
+	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs,
 					exprs0=exprs0, targetArray=targetArray, ifPlot=ifPlot)
 	normalized <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
 	
