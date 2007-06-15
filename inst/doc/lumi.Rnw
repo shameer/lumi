@@ -382,7 +382,16 @@ lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='quantile'))
 
 
 \section{Handling large data set}
-Several users asked about processing large data set, e.g., over 100 samples. Directly handling such big data set usually will cause "out of memory" error in most computers. The good news is that the \Rfunction{vst} and \Rfunction{rsn} functions in the \Rpackage{lumi} package can sequentially process the data and handle such large data set.  
+Several users asked about processing large data set, e.g., over 100 samples. Directly handling such big data set usually will cause "out of memory" error in most computers. 
+In this case, when read the BeadStudio output file, we can ignore the "detection" and "beadNum" related columns. The function \Rfunction{lumiR} provides a parameter called "columnNameGrepPattern". we can set the string grep pattern of "detection" and "beadNum"  as NA. 
+
+Here is some example code:
+\begin{Sinput}
+## load the data with empty detection and beadNum slots
+>  x.lumi <- lumiR("fileName.txt", columnNameGrepPattern=list(detection=NA, beadNum=NA))
+\end{Sinput}
+
+Another good news is that the \Rfunction{vst} and \Rfunction{rsn} functions in the \Rpackage{lumi} package can sequentially process the data and handle such large data set.  
 
 The solution can be like this:
 
@@ -393,12 +402,12 @@ The solution can be like this:
 3. Combine the normalized data. (In order to save memory, the user can first remove those probes not expressed in all samples.)
 
 
-    In the \Rfunction{rsn} function, there is a parameter called "targetArray", which is the model for other chips to normalize. It can be a column index, a vector or a LumiBatch object with one sample. In our case, we need to use one LumiBatch object with one sample as the "targetArray". The selection of the target array is flexible. We suggest to choose the one most similar to the mean of all samples. For convenience, we can also just select the first sample as "targetArray" (suppose it has no quality problem).  The selected target array will also be used for all other data batches. Since different data batches use the same target array as model, the results are comparable and can be combined!
+In the \Rfunction{rsn} function, there is a parameter called "targetArray", which is the model for other chips to normalize. It can be a column index, a vector or a LumiBatch object with one sample. In our case, we need to use one LumiBatch object with one sample as the "targetArray". The selection of the target array is flexible. We suggest to choose the one most similar to the mean of all samples. For convenience, we can also just select the first sample as "targetArray" (suppose it has no quality problem).  The selected target array will also be used for all other data batches. Since different data batches use the same target array as model, the results are comparable and can be combined!
 
 Here is the example code:
 \begin{Sinput}
 ## Read in the Batch i data
-> x.lumi.i <- lumiR(ÔfileName.i.txtÕ)
+> x.lumi.i <- lumiR("fileName.i.txt")
 ## variance stabilization (using vst or log2 transform)
 > x.lumiT.i <- lumiT(x.lumi.i)
 ## select the "targetArray" 
@@ -573,7 +582,7 @@ dataMatrix <- exprs(lumi.N)
 
 To speed up the processing and reduce false positives, remove the unexpressed genes
 <<>>=
-presentCount <- pData(featureData(lumi.N))$presentCount
+presentCount <- detectionCall(example.lumi)
 selDataMatrix <- dataMatrix[presentCount > 0,]
 selProbe <- rownames(selDataMatrix)
 @
@@ -601,7 +610,6 @@ selProbe <- rownames(selDataMatrix)
 + 	sigGene.adj <- selProbe[ p.adj < 0.01]
 + 	## without FDR adjustment
 + 	sigGene <- selProbe[ fit$p.value[,2] < 0.001]
-+
 + } 
 \end{Sinput}
 

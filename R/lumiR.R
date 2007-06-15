@@ -1,9 +1,24 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL) 
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
+	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
-	## Advanced users can modify this based on the data file
-	columnGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
+	## 'exprs' and 'se.exprs' related columns are required
+	if (is.null(columnNameGrepPattern$exprs)) columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
+	if (is.null(columnNameGrepPattern$se.exprs)) columnNameGrepPattern$se.exprs <- 'BEAD_STD'
+	if (is.null(columnNameGrepPattern$detection)) columnNameGrepPattern$detection <- 'Detection'
+	if (is.null(columnNameGrepPattern$beadNum)) columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
+
+	if (is.na(columnNameGrepPattern$exprs)) {
+		columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
+		warning('exprs slot is required and default pattern is used!')
+	}
+	if (is.na(columnNameGrepPattern$se.exprs)) {
+		columnNameGrepPattern$se.exprs <- 'BEAD_STD'
+		warning('se.exprs slot is required and default pattern is used!')
+	}
+
+	# columnNameGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
 	history.submitted <- as.character(Sys.time())
 	## set "stringsAsFactors" as FALSE
 	oldSetting <- options("stringsAsFactors")[[1]]
@@ -17,7 +32,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 
 	## Use "AVG_SIGNAL" as an indicator of Where the metaData stops
 	##   intelligently find nMetaDataLines  
-	nMetaDataLines <- grep(columnGrepPattern['exprs'], info, ignore.case=TRUE) - 1
+	nMetaDataLines <- grep(columnNameGrepPattern$exprs, info, ignore.case=TRUE) - 1
     
 	if (is.null(sep)) {
 	    ## Find out the separator (sep) by taking the first two line of data, and comparing them.
@@ -186,7 +201,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	}
     
 	## identify where the signal column exists
-	ind <- grep(columnGrepPattern['exprs'], header, ignore.case=TRUE)
+	ind <- grep(columnNameGrepPattern$exprs, header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
 	exprs <- as.matrix(allData[,ind])
 	if (!is.numeric(exprs[1])) {
@@ -194,7 +209,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	} 
 	colnames(exprs) <- header[ind]
 	## identify where the signal standard deviation column exists 
-	ind <- grep(columnGrepPattern['se.exprs'], header, ignore.case=TRUE)
+	ind <- grep(columnNameGrepPattern$'se.exprs', header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
 	se.exprs <- as.matrix(allData[,ind])
 	if (!is.numeric(se.exprs[1])) {
@@ -202,7 +217,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	}
 	colnames(se.exprs) <- header[ind]
 	## identify the detection columns
-	ind <- grep(columnGrepPattern['detection'], header, ignore.case=TRUE)
+	if (is.na(columnNameGrepPattern$detection)) {
+		ind <- NULL
+	} else {
+		ind <- grep(columnNameGrepPattern$detection, header, ignore.case=TRUE)
+	}
 	if (length(ind) == 0) {
 		detection <- NULL
 	} else {
@@ -217,7 +236,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 		}
 	}
 	## identify the bead number columns
-	ind <- grep(columnGrepPattern['beadNum'], header, ignore.case=TRUE)
+	if (is.na(columnNameGrepPattern$beadNum)) {
+		ind <- NULL
+	} else {
+		ind <- grep(columnNameGrepPattern$beadNum, header, ignore.case=TRUE)
+	}
 	if (length(ind) == 0) {
 		beadNum <- NULL
 	} else {
@@ -260,18 +283,20 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
     
 	if (na.rm) {
 		## remove the probes with all of them as NA
-	    keepInd <- apply(is.na(exprs), 1, sum) == 0
-	    exprs <- exprs[keepInd,,drop=FALSE]
-	    se.exprs <- se.exprs[keepInd,,drop=FALSE]	## bead measurement standard variance
-	    beadNum <- beadNum[keepInd,,drop=FALSE]
-	    detection <- detection[keepInd,,drop=FALSE]
-	    id <- id[keepInd]
+		keepInd <- apply(is.na(exprs), 1, sum) == 0
+		exprs <- exprs[keepInd,,drop=FALSE]
+		se.exprs <- se.exprs[keepInd,,drop=FALSE]
+		if (!is.null(beadNum))  beadNum <- beadNum[keepInd,,drop=FALSE]
+		if (!is.null(detection))  detection <- detection[keepInd,,drop=FALSE]
+		id <- id[keepInd]
 		targetID <- targetID[keepInd]
 	}
-	rownames(exprs) <- rownames(se.exprs) <- rownames(beadNum) <- rownames(detection) <- id
+	rownames(exprs) <- rownames(se.exprs) <- id
+	if (!is.null(beadNum)) rownames(beadNum) <- id
+	if (!is.null(detection)) rownames(detection) <- id
     
 	# get sample information
-	pattern <- paste('[^[:alnum:]]*', columnGrepPattern['exprs'], '[^[:alnum:]]*', sep='')
+	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
 	sampleIDInfo <- strsplit(sampleID, split="_")
 	label <- NULL
@@ -279,19 +304,19 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	if (any(is.na(label)))  label <- sampleID
     
 	## reportInfo save the id information
-	if (!is.null(detection)) {
-		presentCount <- apply(detection, 1, function(x) sum(x <= detectionTh))
-		reporterInfo <- data.frame(id, presentCount)
-		names(reporterInfo) <- c(idName, 'presentCount')
-		varMetadata <- data.frame(labelDescription=c('The Illumina microarray identifier', 
-			'The number of detectable measurements of the gene'))
-		rownames(varMetadata) <- c(idName, 'presentCount')
-	} else {
+	# if (!is.null(detection)) {
+	# 	presentCount <- apply(detection, 1, function(x) sum(x <= detectionTh))
+	# 	reporterInfo <- data.frame(id, presentCount)
+	# 	names(reporterInfo) <- c(idName, 'presentCount')
+	# 	varMetadata <- data.frame(labelDescription=c('The Illumina microarray identifier', 
+	# 		'The number of detectable measurements of the gene'))
+	# 	rownames(varMetadata) <- c(idName, 'presentCount')
+	# } else {
 		reporterInfo <- data.frame(id)
 		names(reporterInfo) <- idName
 		varMetadata <- data.frame(labelDescription='The Illumina microarray identifier')
 		rownames(varMetadata) <- idName
-	}
+	# }
 	## if ProbeID is used as id, then also keep the TargetID information in the featureData
 	if (idName != header[1]) {
 		reporterInfo <- data.frame(reporterInfo, TargetID=targetID)
@@ -314,24 +339,28 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	} else {
 		stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
 	}
-	if (ncol(beadNum) == length(colName)) {
-		colnames(beadNum) <- colName
-	} else {
-		warning('The number of beadNum columns does not match! Please check the input data format.')
-		if (ncol(beadNum) > length(colName)) beadNum <- beadNum[,1:length(colName)]
-		if (ncol(beadNum) < length(colName)) {
-			for (i in 1:(length(colName) - ncol(beadNum)))
-				beadNum <- cbind(beadNum, rep(NA, nrow(beadNum)))
+	if (!is.null(beadNum)) {
+		if (ncol(beadNum) == length(colName)) {
+			colnames(beadNum) <- colName
+		} else {
+			warning('The number of beadNum columns does not match! Please check the input data format.')
+			if (ncol(beadNum) > length(colName)) beadNum <- beadNum[,1:length(colName)]
+			if (ncol(beadNum) < length(colName)) {
+				for (i in 1:(length(colName) - ncol(beadNum)))
+					beadNum <- cbind(beadNum, rep(NA, nrow(beadNum)))
+			}
 		}
 	}
-	if (ncol(detection) == length(colName)) {
-		colnames(detection) <- colName
-	} else {
-		warning('The number of detection columns does not match! Please check the input data format.')
-		if (ncol(detection) > length(colName)) beadNum <- beadNum[,1:length(colName)]
-		if (ncol(detection) < length(colName)) {
-			for (i in 1:(length(colName) - ncol(detection)))
-				detection <- cbind(detection, rep(NA, nrow(detection)))
+	if (!is.null(detection)) {
+		if (ncol(detection) == length(colName)) {
+			colnames(detection) <- colName
+		} else {
+			warning('The number of detection columns does not match! Please check the input data format.')
+			if (ncol(detection) > length(colName)) beadNum <- beadNum[,1:length(colName)]
+			if (ncol(detection) < length(colName)) {
+				for (i in 1:(length(colName) - ncol(detection)))
+					detection <- cbind(detection, rep(NA, nrow(detection)))
+			}
 		}
 	}
 
@@ -344,8 +373,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 	rownames(varMetadata) <- c('sampleID', 'label')
 	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
 
-    x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, detection=detection, 
-              featureData=featureData,  phenoData=pdata)
+	if (!is.null(detection) & !is.null(beadNum)) {
+		x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
+			featureData=featureData,  phenoData=pdata)
+	} else {
+		if (is.null(detection))  
+			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
+		if (is.null(beadNum))  
+			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
+	}
+
 	x.lumi@controlData <- controlData
 	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
 	
@@ -371,7 +408,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL)
 			finished=history.finished, command=history.command, lumiVersion=lumiVersion)
 
 	## initialize the QC slot in the LumiBatch object
-	x.lumi <- lumiQ(x.lumi)
+	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
 
 	## Add nuID if the annotation library is provided
 	if (!is.null(lib))  x.lumi <- addNuId2lumi(x.lumi, lib=lib)

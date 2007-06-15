@@ -1,5 +1,6 @@
 `detectionCall` <-
-function(x.lumi, Th = 0.01) {
+function(x.lumi, Th = 0.01, type=c('probe', 'sample')) {
+	type <- match.arg(type)
 	if (is(x.lumi, 'matrix')) {
 		detect <- x.lumi
 	} else {
@@ -8,7 +9,8 @@ function(x.lumi, Th = 0.01) {
 		detect <- detection(x.lumi)
 	} 
 	if (!is.null(detect)) {
-		AP <- colSums(detect<= Th) / nrow(detect)
+		if (type == 'sample') AP <- colSums(detect<= Th)
+		if (type == 'probe') AP <- rowSums(detect<= Th)
 		attr(AP, 'threshold') <- Th
 	} else {
 		AP <- rep(NA, ncol(x.lumi))

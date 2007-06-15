@@ -1,4 +1,15 @@
 -----------------------------------------------------
+versions 1.3.0-1.3.10
+release date: 04/22/2007-06/15/2007
+Major updates:
+1. All the major functions compatible with ExpressionSet class
+2. presentCount was removed from the featureData. use detectionCall function to estimate presentCount
+3. lumiR function now allows user to select the input data columns
+4. Add lumiB function for background correction
+5. lumiExpresso function to encapsulate all preprocessing functions
+6. Vignette tutorial has major updates.
+
+-----------------------------------------------------
 version 1.1.7
 release date: 04/22/2007
 

@@ -12,7 +12,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	if (logMode & (max(exprs, na.rm=TRUE) > 50)) {
 		if (min(exprs) < 0) {
 			# warning('Negative values found in the expression values!')
-			print('Negative values found in the expression values and were force to be positive .')
+			print('Negative values found in the expression values and were force to be positive by adding an overall offset.')
 			exprs <- exprs + abs(min(exprs)) + 1
 		}
 		exprs <- log2(exprs)
@@ -30,7 +30,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	} else {
 		detectionName <- paste('detection rate(', detectionTh, ')', sep='')
 		if (!is.null(detection(x.lumi))) {
-			detectionRate <- detectionCall(x.lumi, Th=detectionTh)
+			detectionRate <- detectionCall(x.lumi, Th=detectionTh, type='sample') / ncol(x.lumi)
 		} else {
 			detectionRate <- rep(NA, ncol(x.lumi))
 		}
