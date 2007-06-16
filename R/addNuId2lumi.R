@@ -147,6 +147,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	featureData <- featureData(x.lumi)
 	rownames(pData(featureData)) <- newId
 	featureData(x.lumi) <- featureData
+	if (!is.null(ib)) annotation(x.lumi) <- lib
 
 	## Add history tracking
 	history.finished <- as.character(Sys.time())
