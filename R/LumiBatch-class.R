@@ -134,24 +134,21 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 		phenoData(x) <- phenoData.x
 	}	
 	
+	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
 	## combine feature data
 	if (!is.null(featureData(x)) | !is.null(featureData(y))) {
 		feature.x <- featureData(x)
 		feature.y <- featureData(y)
-
+    
 		pData.x <- pData(feature.x)
 		pData.y <- pData(feature.y)
 		if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are not incompatible!')
 		repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
-		# if ('presentCount' %in% intersect(colnames(pData(feature.x)), colnames(pData(feature.y)))) {
-		# 	colInd <- which(colnames(repInfo) %in% c('presentCount.x', 'presentCount.y'))
-		# 	presentCount <- rowSums(repInfo[, colInd])
-		# 	repInfo <- repInfo[, -colInd, drop=FALSE]
-		# 	repInfo <- data.frame(repInfo, presentCount=presentCount)
-		# }
 		pData(feature.x) <- repInfo
-		metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y))
-		varMetadata(feature.x) <- metaInfo[!duplicated(c(rownames(varMetadata(feature.x)), rownames(varMetadata(feature.y)))), ,drop=FALSE]
+		
+		metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
+		rownames(metaInfo) <- names(repInfo)
+		varMetadata(feature.x) <- metaInfo
 		featureData(x) <- feature.x
 	}
 
