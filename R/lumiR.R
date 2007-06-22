@@ -97,7 +97,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 			info <- gsub(sep, "", info)
 			## check the meta info of the file
 			if (version == 2) {
-				ind <- grep("Illumina Inc. BeadStudio version", info, ignore.case=TRUE)
+				ind <- grep("BeadStudio version", info, ignore.case=TRUE)
 			} else {
 				ind <- grep("BSGX Version", info, ignore.case=TRUE)
 			}
@@ -106,14 +106,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
-			if (version == 2) {
-				normalization <- strsplit(info, split='=')[[ind]][2]
-				normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
-			} else {
-				normalization <- strsplit(info, split='\t')[[ind]][2]
-			}
-			if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
-			    warning("The raw data should not be normalized in BeadStudio.")
+			if (length(ind) > 0) {
+				if (version == 2) {
+					normalization <- strsplit(info, split='=')[[ind]][2]
+					normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+				} else {
+					normalization <- strsplit(info, split='\t')[[ind]][2]
+				}
+				if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
+				    warning("The raw data should not be normalized in BeadStudio.")
+				}
 			}
 		} else {
 			info <- NULL
@@ -298,6 +300,15 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
+	if (any(duplicated(sampleID))) {
+		warning('Duplicated column names found in the raw data! \n A suffix number is added to the duplicated column names.')
+		dupId <- which(duplicated(sampleID))
+		dupName <- unique(sampleID[dupId])
+		for (dupName.i in dupName) {
+			dupInd.i <- which(sampleID == dupName.i)
+			sampleID[dupInd.i] <- paste(sampleID[dupInd.i], 1:length(dupInd.i), sep='.')
+		}
+	}
 	sampleIDInfo <- strsplit(sampleID, split="_")
 	label <- NULL
 	temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
