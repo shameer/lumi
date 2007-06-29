@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.',
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -44,7 +44,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 		sepNum2 <- gregexpr('\t', dataLine2)[[1]]
 		if (sepNum1[1] > 0 & length(sepNum1) == length(sepNum2)) {
 			sep <- '\t'
-		} else {
+		} else if (dec != ',') {
 			sepNum1 <- gregexpr(',', dataLine1)[[1]]
 			sepNum2 <- gregexpr(',', dataLine2)[[1]]
 			if (sepNum1[1] > 0 & length(sepNum1) == length(sepNum2)) {
@@ -52,6 +52,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 			} else {
 				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!')
 			}
+		} else {
+			stop('Please sepecify the seperator used in the file!')
 		}
 	}
 	## determine whether the quote is used or not
@@ -94,7 +96,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 		if (length(info) > 0) {
 			## remove the blanks
 			info <- sub("[[:blank:]]+$", "", info)
-			info <- gsub(sep, "", info)
+			info <- sub(paste(sep,"+$", sep=''), "", info)
+
 			## check the meta info of the file
 			if (version == 2) {
 				ind <- grep("BeadStudio version", info, ignore.case=TRUE)
@@ -102,7 +105,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 				ind <- grep("BSGX Version", info, ignore.case=TRUE)
 			}
 			if (length(ind) == 0) 
-			    warning("The data file is not in the Illumia BeadStudio output format.")
+			    warning("The data file may not be in the Illumia BeadStudio output format.")
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
@@ -111,7 +114,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 					normalization <- strsplit(info, split='=')[[ind]][2]
 					normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
 				} else {
-					normalization <- strsplit(info, split='\t')[[ind]][2]
+					normalization <- strsplit(info, split=sep)[[ind]][2]
 				}
 				if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
 				    warning("The raw data should not be normalized in BeadStudio.")
@@ -125,7 +128,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 	}
     
 	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL, colClasses=colClasses,
-		quote=quote, as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE)
+		quote=quote, as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE, dec=dec)
 
 	## retrieve the possible section line index
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
@@ -315,19 +318,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 	if (any(is.na(label)))  label <- sampleID
     
 	## reportInfo save the id information
-	# if (!is.null(detection)) {
-	# 	presentCount <- apply(detection, 1, function(x) sum(x <= detectionTh))
-	# 	reporterInfo <- data.frame(id, presentCount)
-	# 	names(reporterInfo) <- c(idName, 'presentCount')
-	# 	varMetadata <- data.frame(labelDescription=c('The Illumina microarray identifier', 
-	# 		'The number of detectable measurements of the gene'))
-	# 	rownames(varMetadata) <- c(idName, 'presentCount')
-	# } else {
-		reporterInfo <- data.frame(id)
-		names(reporterInfo) <- idName
-		varMetadata <- data.frame(labelDescription='The Illumina microarray identifier')
-		rownames(varMetadata) <- idName
-	# }
+	reporterInfo <- data.frame(id)
+	names(reporterInfo) <- idName
+	varMetadata <- data.frame(labelDescription='The Illumina microarray identifier')
+	rownames(varMetadata) <- idName
+
 	## if ProbeID is used as id, then also keep the TargetID information in the featureData
 	if (idName != header[1]) {
 		reporterInfo <- data.frame(reporterInfo, TargetID=targetID)
@@ -388,10 +383,14 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL,
 		x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
 			featureData=featureData,  phenoData=pdata)
 	} else {
-		if (is.null(detection))  
-			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
-		if (is.null(beadNum))  
-			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
+		if (is.null(beadNum) & is.null(detection)) {
+			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData,  phenoData=pdata)
+		} else {
+			if (is.null(detection))
+				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
+			if (is.null(beadNum))
+				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
+		}
 	}
 
 	x.lumi@controlData <- controlData

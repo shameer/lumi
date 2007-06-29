@@ -6,7 +6,7 @@
   Read in Illumina expression data. We assume the data was saved in a comma or tab separated text file.  
 }
 \usage{
-lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'))
+lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,6 +15,7 @@ lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, column
   \item{detectionTh}{ the p-value threshold of determining detectability of the expression. The detection value less than the detectionTh is claimed as detectable. }
   \item{na.rm}{ determine whether to remove NA }
   \item{lib}{ the annotation library used by \code{\link{addNuId2lumi}}  }
+  \item{dec}{ the character used in the file for decimal points.}
   \item{columnNameGrepPattern} { the string grep patterns used to determine the slot corresponding columns.}
 }
 \details{

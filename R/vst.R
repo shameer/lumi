@@ -43,9 +43,8 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 			y <- std[selLowInd]
 			x <- u[selLowInd]
 			cc <- y^2 - (c1.i * x + c2.i)^2
-			c3.i <- mean(cc)
+			c3.i <- mean(cc, trim=0.05)
 			if (c3.i < 0) {
-				#c2.i <- c2.i + sqrt(-c3.i)
 				c3.i <- 0
 				break
 			}
