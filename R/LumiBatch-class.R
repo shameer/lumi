@@ -39,6 +39,11 @@ if (is.null(getGeneric("beadNum<-"))) setGeneric("beadNum<-", function(object, v
 if (is.null(getGeneric("detection"))) setGeneric("detection", function(object) standardGeneric("detection"))
 if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(object, value) standardGeneric("detection<-"))
 
+if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
+if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
+if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
+if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
+
 setMethod("se.exprs", signature(object="LumiBatch"),
           function(object) assayDataElement(object,"se.exprs"))
 
@@ -95,11 +100,6 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 	callNextMethod()
 })
 
-
-##geneNames method
-if (is.null(getGeneric("combine")))
-  	setGeneric("combine", function(x, y, ...)
-		standardGeneric("combine"))
 
 setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y) 
 {
@@ -239,6 +239,13 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 
 
 setMethod('hist', signature(x='ExpressionSet'), 
+	function(x, ...) 
+{
+	density(x, ...)
+})
+
+
+setMethod('density', signature(x='ExpressionSet'), 
 	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", index.highlight=NULL, 
 	color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
 {
@@ -482,7 +489,7 @@ setMethod('plot',
 	
 	if (what == 'density') {
 		if (missing(main)) main <- 'Density plot of intensity'
-		hist(object, xlab="intensity", ylab="density", main=main, ...)
+		density(object, xlab="intensity", ylab="density", main=main, ...)
 	} else if (what == 'boxplot') {
 		if (missing(main)) main <- 'Boxplot of microarray intensity'
 		boxplot(object, xlab='microarrays', ylab='intensity', main=main, ...)

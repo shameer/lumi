@@ -5,7 +5,7 @@
 \alias{hist,ExpressionSet-method}
 
 \title{Density plot of a ExpressionSet object}
-\description{ Creating density plot of sample intensities in a ExpressionSet object }
+\description{ Creating density plot of sample intensities in a ExpressionSet object. It is equivalent to \link{density-methods}. }
 
 \usage{
 \S4method{hist}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l",
@@ -27,7 +27,7 @@
 }
 
 \seealso{
-  \code{\link{LumiBatch-class}}, \code{\link[graphics]{hist}}
+  \code{\link{LumiBatch-class}}, \link{density-methods}, \code{\link[graphics]{hist}}
 }
 \examples{
 ## load example data

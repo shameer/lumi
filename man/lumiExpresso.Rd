@@ -40,6 +40,9 @@ data(example.lumi)
 ## Do all the default preprocessing in one step
 lumi.N <- lumiExpresso(example.lumi)
 
+## Do customized preprocessing. No variance stabilizing or log transform, use Quantile normalization.
+lumi.N <- lumiExpresso(example.lumi, variance.stabilize=FALSE, normalize.param = list(method='quantile'))
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

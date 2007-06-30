@@ -37,6 +37,12 @@ The \Rpackage{lumi} package includes a new variance-stabilizing transformation (
 % \section{Citation}
 
 
+\section{Installation of lumi package} 
+In order to install the lumi package, the user need to first install R and some R packages: \Rpackage{Biobase}, \Rpackage{affy}, \Rpackage{mgcv}, \Rpackage{annotate}, \Rpackage{methods}. If the user is also interested in using vsn method, then \Rpackage{vsn} package needs to be installed.
+
+An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.
+
+
 \section{Object models of major classes}
 The \Rpackage{lumi} package has one major class: {\bf LumiBatch}. {\bf LumiBatch} is inherited from {\bf ExpressionSet} class in Bioconductor for better compatibility. Their relations are shown in Figure \ref{objects-lumi}. {\bf LumiBatch} class includes {\it se.exprs},  {\it beadNum} and {\it detection} in {\bf assayData} slot for additional informations unique to Illumina microarrays.  A controlData slot is used to keep the control probe information, and a QC slot is added for  keeping the quality control information. The S4 function \Rfunction{plot} supports different kinds of plots by specifying the  specific plot type of {\bf LumiBatch} object. See help of \Rfunction{plot-methods} function for details. The {\it history} slot records all the operations made on the {\bf LumiBatch} object. This provides data provenance. Function \Rfunction{getHistory} is to retrieve the {\it history} slot. Please see the help files of {\bf LumiBatch} class for more details. A series of functions: \Rfunction{lumiR},  \Rfunction{lumiB},  \Rfunction{lumiT},  \Rfunction{lumiN} and \Rfunction{lumiQ} were designed for data input, preprocessing and quality control. Function \Rfunction{lumiExpresso} encapsulates the preprocessing methods for easier usability.
 
@@ -83,7 +89,7 @@ If a lumi annotation library is provided, the \Rfunction{lumiR} function will au
 Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor. The example data includes four samples "A01", "A02", "B01" and "B02". "A" and "B" represent different Illumina slides (8 microarrays on each slide), and "01" and "02" represent different samples.  That means "A01" and "B01" are technique replicates at different slides, the same for "A02" and "B02". 
 
 \begin{Sinput}
-> ## load example data
+> ## load example data (a LumiBatch object)
 > data(example.lumi)	
 > ## summary of the example data
 > example.lumi
@@ -116,7 +122,7 @@ Plot the density plot of the {\bf LumiBatch} object. See Figure \ref{fig:density
 > ## plot the density
 > plot(example.lumi, what='density')			
 > ## or
-> hist(example.lumi)
+> density(example.lumi)
 \end{Sinput}
 
 \begin{figure}
@@ -207,7 +213,7 @@ plot(example.lumi, what='sampleRelation')
 \end{figure}            
 
 % sample relations, MDS
-Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+"01", "02", "01", "02"+ for the sample data. Please see the help of \Rfunction{getSampleRelation} and \Rfunction{plot-methods} for more details.
+Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+"01", "02", "01", "02"+ for the sample data. Please see the help of \Rfunction{plotSampleRelation} and \Rfunction{plot-methods} for more details.
 \begin{Sinput}
 > ## plot the sample relations
 > plot(example.lumi, what='sampleRelation', method='mds', color=c("01", "02", "01", "02"))	
@@ -403,7 +409,7 @@ In the \Rfunction{rsn} function, there is a parameter called "targetArray", whic
 
 Here is the example code:
 \begin{Sinput}
-## Read in the Batch i data
+## Read in the Batch ith data file, suppose named as "fileName.i.txt"
 > x.lumi.i <- lumiR("fileName.i.txt")
 ## variance stabilization (using vst or log2 transform)
 > x.lumiT.i <- lumiT(x.lumi.i)
@@ -416,6 +422,19 @@ Here is the example code:
 \end{Sinput}
 
 The normalized data batches can be combined by using function Rfunction{combine(x, y)}. 
+
+
+\section{Performance comparison}
+We have selected the Barnes data set [3], which is a series dilution of two tissues at five different dilutions, to compare different preprocessing methods. In order to better compare the algorithms, we selected the samples with the smallest dilution difference (the most challenging comparison), i.e., the samples with the dilution ratios of 100:0 and 95:5 (each condition has two technical replicates) for comparison. For the purpose of comparing the results between the different preprocessing methods, we used a t-test to calculate the p-values for all the results. For the Barnes data set, because we do not know which of the signals are coming from 'true' differentially expressed genes, we cannot use an ROC curve to compare the performance of different algorithms. Instead, we evaluated the methods based on the concordance of normalized intensity profile and real dilution profile of the selected probes.  More detailed evaluations with other criteria and based on other data sets can by found in our paper [1]. 
+
+Following Barnes et al. (2005)[3], we defined a concordant gene (really a concordant probe) as a signal from a probe with a correlation coefficient larger than 0.8 between the normalized intensity profile and the real dilution profile (five dilution ratios with two replicates at each dilution). If a selected differentially expressed probe (based on p-value and fold-change criteria) is also a concordant one, it is more likely to be truly differentially expressed. Figure \ref{fig:corConcordanceComparison} shows the percentage of concordant probes among the selected probes, which were selected by ranking the probes' absolute fold-changes from high to low and with a p-value cutoff of 0.01. We can see the VST transformed data outperforms the Log2-transformed and VSN processed data. For the normalization methods, RSN and quantile normalization have similar performance for the VST transformed data, and RSN outperforms quantile for the Log transformed data. 
+
+
+\begin{figure}
+\includegraphics{corConcordanceComparison}
+\caption{Comparison of the concordance between the expression and dilution profiles of the selected differentially expressed genes}
+\label{fig:corConcordanceComparison}
+\end{figure}
 
 
 \section{Gene annotation}
@@ -458,6 +477,7 @@ An random sequence
 is.nuID('adfqeqe')
 @
 
+
 \subsection{Illumina microarray annotation package}
 Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  Annotation packages indexed by nuID for different Illumina expression chips can be downloaded from Bioconductor. 
 
@@ -466,12 +486,12 @@ The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} wit
 Here is some examples:
 \begin{Sinput}
 > ## load lumi annotation package
-> lib <- 'example.lumi'		# Huamn lumi annotation package
+> lib <- 'lumiHumanV1'		# Huamn lumi annotation package version one
 > if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 + 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
 + 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
 + 	# probes under 'GO:0004816'  category
-+ 	print(probe)
++ 	probe
 + }
 \end{Sinput} 
 
@@ -502,7 +522,7 @@ if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 nuId <- 'WVUU7XyNw3ucXzwdEk'	
 if (require(annotate) & require(lib, character.only=TRUE)) {
 	# get the gene symbol of nuId
-	getSYMBOL(nuId, lib)
+	print(getSYMBOL(nuId, lib))
 }
 @ 
 
@@ -510,13 +530,15 @@ if (require(annotate) & require(lib, character.only=TRUE)) {
 Mapping from nuID to TargetID
 <<echo=T>>=
 nuId <- "WVUU7XyNw3ucXzwdEk"
-nuID2targetID(nuId, lib='lumiHumanV1')
+if (require(lib, character.only=TRUE))
+	nuID2targetID(nuId, lib=lib)
 @ 
 
 Mapping from TargetID to nuID
 <<echo=T>>=
 targetID <- "GI_7262387-S"	
-targetID2nuID(targetID, lib='lumiHumanV1')
+if (require(lib, character.only=TRUE))
+	targetID2nuID(targetID, lib=lib)
 @ 
 
 \subsection{Transfer Illumina identifier annotated data into nuID annotated}
@@ -530,7 +552,7 @@ if (require(lumiHumanV1)) {
 The {\bf LumiBatch} object can also be directly transferred as nuID indexed at the very beginning of inputting data using \Rfunction{lumiR}. For example:
 \begin{Sinput}
 > ## load the data
->  example.lumi <- lumiR(fileName, lib='lumiHumanV1')	 # Not run
+> # example.lumi <- lumiR(fileName, lib='lumiHumanV1')	    # Not run
 \end{Sinput} 
 
 
@@ -556,7 +578,7 @@ We use the Barnes data set [3] as an example, which has be created as a Biocondu
 > # example.lumi <- lumiR(fileName, lib='lumiHumanV1')	 # Not run
  
 > ## load saved data
-> load(example.lumi) 
+> data(example.lumi) 
 > ## sumary of the daa
 > example.lumi
 > ## summary of quality control information
@@ -569,7 +591,7 @@ We use the Barnes data set [3] as an example, which has be created as a Biocondu
 
 \end{Sinput}
 
-\subsection{Identify differentiate genes}
+\subsection{Identify differentially expressed genes}
 Identify the differentiated genes based on moderated t-test using \Rpackage{limma}.
 
 Retrieve the normalized data
@@ -647,7 +669,7 @@ Do Hypergeometric test of Gene Ontology based on the significant gene list (for 
 > if (require(GOstats) & require(lumiHumanV1)) {
 + 
 +       ## Get the locuslink Id of the gene
-+       sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1LOCUSID, ifnotfound=NA)))
++       sigLL <- unique(unlist(mget(sigGene, env=lumiHumanV1ENTREZID, ifnotfound=NA)))
 +       sigLL <- as.character(sigLL[!is.na(sigLL)])
 +       params <- new("GOHyperGParams",
 +               geneIds= sigLL,

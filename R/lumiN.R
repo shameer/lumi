@@ -24,8 +24,8 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 	norm.matrix <- switch(method,
 		rsn = rsn(x.matrix, ...),
 		loess = normalize.loess(x.matrix, ...),
-		quantile = normalize.quantiles(x=x.matrix, ...),
-		vsn = exprs(vsn::vsn2(intensities=x.matrix, ...)) )
+		quantile = normalize.quantiles(x.matrix, ...),
+		vsn = exprs(vsn::vsn2(x.matrix, ...)) )
 
 	colnames(norm.matrix) <- colnames(x.matrix)
 	rownames(norm.matrix) <- rownames(x.matrix)
