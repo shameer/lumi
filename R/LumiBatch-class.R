@@ -113,8 +113,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	sampleName.y <- sampleNames(y)
 	if (any(sampleName.x %in% sampleName.y)) {
 		warning('Two data sets have some duplicated sample names!\n "_1" and "_2" were attached to the sample names!')
-		sampleNames(x) <- paste(sampleNames(x), '_1', sep='')
-		sampleNames(y) <- paste(sampleNames(y), '_2', sep='')
+		sampleName.x <- paste(sampleNames(x), '_1', sep='')
+		sampleName.y <- paste(sampleNames(y), '_2', sep='')
 	}
 
 	history.submitted <- as.character(Sys.time())
@@ -123,16 +123,17 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	experimentData(x) <- combine(experimentData(x),experimentData(y))
 
 	## combine pheno data
-	if (!is.null(phenoData(x)) | !is.null(phenoData(y))) {
-		phenoData.x <- phenoData(x)
-		phenoData.y <- phenoData(y)
-
-		pData(phenoData.x) <- rbind(pData(phenoData.x), pData(phenoData.y))
-		metaInfo <- rbind(varMetadata(phenoData.x), varMetadata(phenoData.y))
-		varMetadata(phenoData.x) <- metaInfo[!duplicated(c(rownames(varMetadata(phenoData.x)),
-		 		rownames(varMetadata(phenoData.y)))), ,drop=FALSE]
-		phenoData(x) <- phenoData.x
-	}	
+	phenoData(x) <- combine(phenoData(x),phenoData(y))
+	# if (!is.null(phenoData(x)) | !is.null(phenoData(y))) {
+	# 	phenoData.x <- phenoData(x)
+	# 	phenoData.y <- phenoData(y)
+    # 
+	# 	pData(phenoData.x) <- rbind(pData(phenoData.x), pData(phenoData.y))
+	# 	metaInfo <- rbind(varMetadata(phenoData.x), varMetadata(phenoData.y))
+	# 	varMetadata(phenoData.x) <- metaInfo[!duplicated(c(rownames(varMetadata(phenoData.x)),
+	# 	 		rownames(varMetadata(phenoData.y)))), ,drop=FALSE]
+	# 	phenoData(x) <- phenoData.x
+	# }	
 	
 	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
 	## combine feature data
@@ -183,6 +184,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 		attr(x, 'vstParameter') <- rbind(attr(x, 'vstParameter'), attr(y, 'vstParameter'))
 		attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
 	}
+	
+	sampleNames(x) <- c(sampleName.x, sampleName.y)
 
 	# history tracking
 	history.finished <- as.character(Sys.time())

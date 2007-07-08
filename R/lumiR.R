@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.',
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=TRUE,
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -312,10 +312,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 			sampleID[dupInd.i] <- paste(sampleID[dupInd.i], 1:length(dupInd.i), sep='.')
 		}
 	}
-	sampleIDInfo <- strsplit(sampleID, split="_")
-	label <- NULL
-	temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
-	if (any(is.na(label)))  label <- sampleID
+	if (parseColumnName) {
+		sampleIDInfo <- strsplit(sampleID, split="_")
+		label <- NULL
+		temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
+		if (length(unique(label)) != length(label) | length(label) == 0 | any(is.na(label)))
+			label <- sampleID
+	} else {
+		sampleIDInfo <- NULL
+		label <- sampleID
+	}
     
 	## reportInfo save the id information
 	reporterInfo <- data.frame(id)
@@ -332,69 +338,80 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
-	## set the colnames as the label or sampleID
-	if (length(unique(label)) == length(label) & length(label) > 0) {
-		colName <- label
-	} else {
-		colName <- sampleID
-	}
-	
 	## check the dimensions of the input data
 	if (ncol(exprs) == ncol(se.exprs)) {
-		colnames(exprs) <- colnames(se.exprs) <- colName
+		colnames(exprs) <- colnames(se.exprs) <- label
 	} else {
 		stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
 	}
 	if (!is.null(beadNum)) {
-		if (ncol(beadNum) == length(colName)) {
-			colnames(beadNum) <- colName
+		if (ncol(beadNum) == length(label)) {
+			colnames(beadNum) <- label
 		} else {
 			warning('The number of beadNum columns does not match! Please check the input data format.')
-			if (ncol(beadNum) > length(colName)) beadNum <- beadNum[,1:length(colName)]
-			if (ncol(beadNum) < length(colName)) {
-				for (i in 1:(length(colName) - ncol(beadNum)))
+			if (ncol(beadNum) > length(label)) beadNum <- beadNum[,1:length(label)]
+			if (ncol(beadNum) < length(label)) {
+				for (i in 1:(length(label) - ncol(beadNum)))
 					beadNum <- cbind(beadNum, rep(NA, nrow(beadNum)))
 			}
 		}
 	}
 	if (!is.null(detection)) {
-		if (ncol(detection) == length(colName)) {
-			colnames(detection) <- colName
+		if (ncol(detection) == length(label)) {
+			colnames(detection) <- label
 		} else {
 			warning('The number of detection columns does not match! Please check the input data format.')
-			if (ncol(detection) > length(colName)) beadNum <- beadNum[,1:length(colName)]
-			if (ncol(detection) < length(colName)) {
-				for (i in 1:(length(colName) - ncol(detection)))
+			if (ncol(detection) > length(label)) beadNum <- beadNum[,1:length(label)]
+			if (ncol(detection) < length(label)) {
+				for (i in 1:(length(label) - ncol(detection)))
 					detection <- cbind(detection, rep(NA, nrow(detection)))
 			}
 		}
 	}
 
 	## produce the phenoData object
-	pData <- data.frame(sampleID=sampleID, label=label)
-	rownames(pData) <- colName
-	#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
-	varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
-		'The label of the sample'))
-	rownames(varMetadata) <- c('sampleID', 'label')
-	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
+	if (parseColumnName) {
+		pData <- data.frame(sampleID=sampleID, label=label)
+		rownames(pData) <- label
+		#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
+		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
+			'The label of the sample'))
+		rownames(varMetadata) <- c('sampleID', 'label')
+		pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
 
-	if (!is.null(detection) & !is.null(beadNum)) {
-		x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
-			featureData=featureData,  phenoData=pdata)
-	} else {
-		if (is.null(beadNum) & is.null(detection)) {
-			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData,  phenoData=pdata)
+		if (!is.null(detection) & !is.null(beadNum)) {
+			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
+				featureData=featureData,  phenoData=pdata)
 		} else {
-			if (is.null(detection))
-				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
-			if (is.null(beadNum))
-				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
+			if (is.null(beadNum) & is.null(detection)) {
+				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData,  phenoData=pdata)
+			} else {
+				if (is.null(detection))
+					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
+				if (is.null(beadNum))
+					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
+			}
+		}
+	} else {
+		## No phenoData in this case
+		if (!is.null(detection) & !is.null(beadNum)) {
+			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
+				featureData=featureData)
+		} else {
+			if (is.null(beadNum) & is.null(detection)) {
+				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData)
+			} else {
+				if (is.null(detection))
+					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData)
+				if (is.null(beadNum))
+					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData)
+			}
 		}
 	}
 
 	x.lumi@controlData <- controlData
 	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
+	sampleNames(x.lumi) <- label
 	
 	if (!is.null(info)) {
 		info <- gsub('\t+', '\t', info)

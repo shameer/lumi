@@ -10,11 +10,11 @@ function (lumiBatch, bg.correct = FALSE, bgcorrect.param = list(), variance.stab
 		}
 		if (variance.stabilize) {
 			vstMethod <- ifelse(is.null(varianceStabilize.param$method), 'vst', varianceStabilize.param$method)
-			cat("Variance Stabilizing Transform:", vstMethod, "\n")
+			cat("Variance Stabilizing Transform method:", vstMethod, "\n")
 		}
 		if (normalize) {
 			normMethod <- ifelse(is.null(normalize.param$method), 'rsn', normalize.param$method)
-			cat("normalization:", normMethod, "\n")
+			cat("Normalization method:", normMethod, "\n")
 		}
 		cat('\n')
 	}

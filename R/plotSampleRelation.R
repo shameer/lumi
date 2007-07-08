@@ -15,12 +15,12 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 		cv.gene <- apply(dataMatrix, 1, function(x) sd(x)/mean(x))
 		probeList <- rownames(dataMatrix)
 		selProbe <- probeList[cv.gene > cv.Th]
+		main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
+	} else {
+		main <- paste('Sample relations based on', length(selProbe), 'selected genes')
 	}
 
 	dd <- dist(t(dataMatrix[selProbe,]))
-	geneNum <- length(selProbe)
-	main <- paste('Clusters of the samples based on', geneNum, 'genes with sd/mean >', cv.Th)
-	
 	method <- match.arg(method)
 	if (method == 'cluster') {
 		hc = hclust(dd, 'ave')

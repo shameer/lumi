@@ -6,7 +6,8 @@
   Read in Illumina expression data. We assume the data was saved in a comma or tab separated text file.  
 }
 \usage{
-lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'))
+lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=TRUE, 
+columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,6 +17,7 @@ lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.
   \item{na.rm}{ determine whether to remove NA }
   \item{lib}{ the annotation library used by \code{\link{addNuId2lumi}}  }
   \item{dec}{ the character used in the file for decimal points.}
+  \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (assume the naming of the column names are meaningful.) }
   \item{columnNameGrepPattern} { the string grep patterns used to determine the slot corresponding columns.}
 }
 \details{

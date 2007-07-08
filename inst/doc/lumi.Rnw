@@ -38,7 +38,7 @@ The \Rpackage{lumi} package includes a new variance-stabilizing transformation (
 
 
 \section{Installation of lumi package} 
-In order to install the lumi package, the user need to first install R and some R packages: \Rpackage{Biobase}, \Rpackage{affy}, \Rpackage{mgcv}, \Rpackage{annotate}, \Rpackage{methods}. If the user is also interested in using vsn method, then \Rpackage{vsn} package needs to be installed.
+In order to install the lumi package, the user need to first install R, some Bioconductor packages ( \Rpackage{Biobase}, \Rpackage{affy}, \Rpackage{annotate}) and R packages ( \Rpackage{mgcv},  \Rpackage{methods}). If the user is also interested in using vsn method, then the Bioconductor package \Rpackage{vsn} needs to be installed.
 
 An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.
 
