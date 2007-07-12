@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=TRUE,
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', stdCorrection=TRUE, parseColumnName=TRUE,
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -11,11 +11,15 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 
 	if (is.na(columnNameGrepPattern$exprs)) {
 		columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
-		warning('exprs slot is required and default pattern is used!')
+		warning('exprs slot is required and default pattern will be used!')
 	}
 	if (is.na(columnNameGrepPattern$se.exprs)) {
 		columnNameGrepPattern$se.exprs <- 'BEAD_STD'
-		warning('se.exprs slot is required and default pattern is used!')
+		warning('se.exprs slot is required and default pattern will be used!')
+	}
+	if (is.na(columnNameGrepPattern$beadNum) & stdCorrection) {
+		columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
+		warning('beadNum is required when "stdCorrection=TRUE". The default pattern will be used!')
 	}
 
 	# columnNameGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
@@ -300,6 +304,9 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (!is.null(beadNum)) rownames(beadNum) <- id
 	if (!is.null(detection)) rownames(detection) <- id
     
+	if (stdCorrection) {
+		se.exprs <- se.exprs * sqrt(beadNum)
+	} 
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 

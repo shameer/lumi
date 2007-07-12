@@ -40,6 +40,8 @@ The \Rpackage{lumi} package includes a new variance-stabilizing transformation (
 \section{Installation of lumi package} 
 In order to install the lumi package, the user need to first install R, some Bioconductor packages ( \Rpackage{Biobase}, \Rpackage{affy}, \Rpackage{annotate}) and R packages ( \Rpackage{mgcv},  \Rpackage{methods}). If the user is also interested in using vsn method, then the Bioconductor package \Rpackage{vsn} needs to be installed.
 
+For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website.
+
 An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.
 
 
@@ -61,16 +63,18 @@ The first thing is to load the  \Rpackage{lumi} package.
 library(lumi)
 @
 
-\subsection{Input data with "intelligent-load" technology}
-The \Rfunction{lumiR} function supports directly reading the Illumina raw data output of the Illumina Bead Studio toolkit from version 1 to version 3.  It can automatically detect the BeadStudio output version and format and create a new {\bf LumiBatch} object for it. An example of the input data format is shown in in Figure \ref{fig:dataFileSample}. For simplicity, only part of the data of first sample is shown. The data in the highlighted columns are kept in the corresponding slots of {\bf LumiBatch} object, as shown in Figure \ref{fig:dataFileSample}. The \Rfunction{lumiR} function will automatically determine the starting line of the data. The columns with header including \verb+AVG_Signal+ and \verb+BEAD_STD+ are required for the {\bf LumiBatch} object. The sample IDs and sample labels are extracted from the column names of the data file. For example, based on the column name: \verb+AVG_Signal-1304401001_A+, we will extract \verb+"1304401001"+ as the sample ID and \verb+"A"+ as the sample label (The function assumes the separation of the sample ID and the sample label is \verb+"_"+ if it exists in the column name.). The algorithm will check the uniqueness of sample IDs. If the sample ID is not unique, the entire portion after removing \verb+"AVG_Signal"+ will be used as a sample ID. A file format error will be reported if the uniqueness still cannot be satisfied in this way. The  \Rfunction{lumiR} will automatically initialize the QC slot of the {\bf LumiBatch} object by calling \Rfunction{lumiQ}.
+\subsection{Intelligently read the BeadStudio output file}
+The \Rfunction{lumiR} function supports directly reading the Illumina raw data output of the Illumina Bead Studio toolkit from version 1 to version 3.  It can automatically detect the BeadStudio output version and format and create a new {\bf LumiBatch} object for it. An example of the input data format is shown in in Figure \ref{fig:dataFileSample}. For simplicity, only part of the data of first sample is shown. The data in the highlighted columns are kept in the corresponding slots of {\bf LumiBatch} object, as shown in Figure \ref{fig:dataFileSample}. The \Rfunction{lumiR} function will automatically determine the starting line of the data. The columns with header including \verb+AVG_Signal+ and \verb+BEAD_STD+ are required for the {\bf LumiBatch} object. By default, the sample IDs and sample labels are extracted from the column names of the data file. For example, based on the column name: \verb+AVG_Signal-1304401001_A+, we will extract \verb+"1304401001"+ as the sample ID and \verb+"A"+ as the sample label (The function assumes the separation of the sample ID and the sample label is \verb+"_"+ if it exists in the column name.). The function will check the uniqueness of sample IDs. If the sample ID is not unique, the entire portion after removing \verb+"AVG_Signal"+ will be used as a sample ID. The user can suppress this parsing by setting the parameter "parseColumnName" as FALSE. 
 
-If BeadStudio outputted the control probe data, their information will be kept in the controlData slot of the {\bf LumiBatch} object. If BeadStudio outputted the sample summary information, which is called [Samples Table] in the output text file, the information will be kept in BeadStudioSummay within the QC slot of the {\bf LumiBatch} object.
+The STDEV (or STDERR) columns of the BeadStudio output file is the standard error of the mean of the bead intensities corresponding to the same probe. (Thanks Gordon Smyth kindly provided this information!). As the variance stabilization (see help of \Rfunction{vst} function) requires the information of the standard deviation instead of the standard error of the mean, the value correction is required. The corrected value will be x * sqrt(N), where x is the old value (standard error of the mean), N is the number of beads corresponding to the probe.
+
+The  \Rfunction{lumiR} will automatically initialize the QC slot of the {\bf LumiBatch} object by calling \Rfunction{lumiQ}. If BeadStudio outputted the control probe data, their information will be kept in the controlData slot of the {\bf LumiBatch} object. If BeadStudio outputted the sample summary information, which is called [Samples Table] in the output text file, the information will be kept in BeadStudioSummay within the QC slot of the {\bf LumiBatch} object.
 
 The BeadStudio can output the gene profile or the probe profile. As the probe profile provides unique mapping from the probe Id to the expression profile, outputting probe profile is preferred. When the probe profile is outputted, as show in Figure \ref{fig:dataFileSample}(B), the ProbeId column will be used as the identifier of {\bf LumiBatch} object.
 
 We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
 
-If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the featureData of the {\bf LumiBatch} object.
+If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the {\bf featureData} of the {\bf LumiBatch} object.
  
 \begin{figure}
 \includegraphics{dataFileSample}
@@ -104,7 +108,7 @@ example.lumi
 \subsection{Quality control of the raw data}
 The quality control of a {\bf LumiBatch} object includes a data summary (the mean and standard deviation, sample correlation,  detectable probe ratio of each sample (microarray)) and different quality control plots.
 
-In the featureData, it also records the presentCount of each probe, which measures the number of detectable measurements (the detection p-value less than the user provided threshold (0.01 by default)) of each probe.
+For BeadStudio version 3 output file, if it includes the control probe (gene) information. The controlData slot in LumiBatch class was added to keep the control probe (gene) information, and a QC slot to keep the quality control information.
 
 \Rfunction{LumiQ} function will produce the data summary of a {\bf LumiBatch} object and organize the results in a QC slot of {\bf LumiBatch} object. When creating the {\bf LumiBatch} object, the \Rfunction{LumiQ} function will be called to initialize the QC slot of the {\bf LumiBatch} object.
 
@@ -113,11 +117,11 @@ Summary of the quality control information of example.lumi data. If the QC slot 
 summary(example.lumi, 'QC')	## summary of the quality control
 @
 
-The S4 method \Rfunction{plot} can produce the quality control plots of {\bf LumiBatch} object. The quality control plots includes: the density plot (Figure \ref{fig:density}), box plot (Figure \ref{fig:box}), pairwise correlation between microarrays (Figure \ref{fig:pairs}), pairwise MAplot between microarrays (Figure \ref{fig:MAplot}), density plot of coefficient of varience, (Figure \ref{fig:cv}), and the sample relations (Figure \ref{fig:sampleRelation1}). More details are in the help of \Rfunction{plot,LumiBatch-method} function. Most of these plots can also be plotted by the extended general functions: \Rfunction{hist} (for density plot), \Rfunction{boxplot}, \Rfunction{MAplot}, \Rfunction{pairs}.
+The S4 method \Rfunction{plot} can produce the quality control plots of {\bf LumiBatch} object. The quality control plots includes: the density plot (Figure \ref{fig:density}), box plot (Figure \ref{fig:box}), pairwise correlation between microarrays (Figure \ref{fig:pairs}), pairwise MAplot between microarrays (Figure \ref{fig:MAplot}), density plot of coefficient of varience, (Figure \ref{fig:cv}), and the sample relations (Figure \ref{fig:sampleRelation1}). More details are in the help of \Rfunction{plot,LumiBatch-method} function. Most of these plots can also be plotted by the extended general functions: \Rfunction{density} (for density plot), \Rfunction{boxplot}, \Rfunction{MAplot}, \Rfunction{pairs} and \Rfunction{plotSampleRelation}.
 
 
 % density plot
-Plot the density plot of the {\bf LumiBatch} object. See Figure \ref{fig:density}.
+Figure \ref{fig:density} shows the density plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{density} functions.
 \begin{Sinput}
 > ## plot the density
 > plot(example.lumi, what='density')			
@@ -135,7 +139,7 @@ plot(example.lumi, what='density')	## plot the density
 \end{figure}            
 
 % box plot
-Plot the box plot of the {\bf LumiBatch} object. See Figure \ref{fig:box}.
+Figure \ref{fig:box} shows the box plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{boxplot} functions.
 \begin{Sinput}
 > ## plot the box plot
 > plot(example.lumi, what='boxplot')			
@@ -153,7 +157,7 @@ plot(example.lumi, what='boxplot') 	## box plot
 \end{figure}            
 
 % pair plot with microarray correlation
-Plot the pairwise sample correlation of the {\bf LumiBatch} object. See Figure \ref{fig:pairs}.
+Figure \ref{fig:pairs} shows the pairwise sample correlation of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{pairs} functions.
 \begin{Sinput}
 > ## plot the pair plot
 > plot(example.lumi, what='pair')			
@@ -171,7 +175,7 @@ plot(example.lumi, what='pair')		## pairwise plots
 \end{figure}            
 
 % MA plot
-The MA plot of the {\bf LumiBatch} object. See Figure \ref{fig:MAplot}.
+Figure \ref{fig:MAplot} shows the MA plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{MAplot} functions.
 \begin{Sinput}
 > ## plot the MAplot
 > plot(example.lumi, what='MAplot')			
@@ -191,6 +195,7 @@ plot(example.lumi, what='MAplot')	## pairwise MAplot
 
 % plot the density plot of coefficient of variance
 The density plot of the coefficient of variance of the {\bf LumiBatch} object. See Figure \ref{fig:cv}.
+Figure \ref{fig:cv} shows the density plot of the coefficient of variance of the {\bf LumiBatch} object by using \Rfunction{plot}  function.
 \begin{figure}
 \centering
 <<fig=true, width=10, height=10, quiet=T>>=
@@ -202,7 +207,7 @@ plot(example.lumi, what='cv')	## density plot of coefficient of varience
 
 
 % sample relations, hierarchical clustering
-Plot sample relations using hierarchical clustering, see Figure \ref{fig:sampleRelation1}
+Figure \ref{fig:sampleRelation1} shows the sample relations using hierarchical clustering.
 \begin{figure}
 \centering
 <<fig=true, width=10, height=10, quiet=T>>=
@@ -213,7 +218,7 @@ plot(example.lumi, what='sampleRelation')
 \end{figure}            
 
 % sample relations, MDS
-Plot the sampleRelation using MDS, see Figure \ref{fig:sampleRelation2}. The color of the sample is based on the sample type, which is \verb+"01", "02", "01", "02"+ for the sample data. Please see the help of \Rfunction{plotSampleRelation} and \Rfunction{plot-methods} for more details.
+Figure \ref{fig:sampleRelation2} shows the sampleRelation using MDS. The color of the sample is based on the sample type, which is \verb+"01", "02", "01", "02"+ for the sample data. Please see the help of \Rfunction{plotSampleRelation} and \Rfunction{plot-methods} for more details.
 \begin{Sinput}
 > ## plot the sample relations
 > plot(example.lumi, what='sampleRelation', method='mds', color=c("01", "02", "01", "02"))	
@@ -232,7 +237,7 @@ plot(example.lumi, what='sampleRelation', method='mds', color=c("01", "02", "01"
 
 
 \subsection{Background correction}
-The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. As both \Rfunction{vst} and \Rfunction{log2} transforms require the expression value to be positive. The default background correction method ('forcePositive') will force all expression values to be positive by adding an offset (minus minimum value plus one). It does nothing if all expression values are positive. Other options of \Rfunction{lumiB} include 'none' and 'bg.adjust'. 'bg.adjust' method is based on the \Rfunction{bg.adjust} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
+The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background correction. As both \Rfunction{vst} and \Rfunction{log2} transforms require the expression value to be positive. The default background correction method ('forcePositive') will force all expression values to be positive by adding an offset (minus minimum value plus one) if there is any negative values. It does nothing if all expression values are positive. Other options of \Rfunction{lumiB} include 'none' and 'bg.adjust'. 'bg.adjust' method is based on the \Rfunction{bg.adjust} function in \Rpackage{affy} package. User can also provide their own background correction function with a LumiBatch Object as the first argument and return a LumiBatch Object with background corrected. See \Rfunction{lumiB} help document for more details.
 
 
 \subsection{Variance stabilizing transform}
@@ -276,9 +281,9 @@ abline(a=0, b=1, col=2)
 
 
 \subsection{Data normalization}
-We proposed a robust spline normalization (RSN) algorithm, which combines the features of quanitle and loess nor-malization, is designed to normalize the variance-stabilized data. Please see [1] for details of the algorithm.
+We proposed a robust spline normalization (RSN) algorithm, which combines the features of quanitle and loess nor-malization. The advantages of quantile normalization include computational efficiency and preserving the rank order of genes. However, the intensity transformation of a quantile normalization is discontinuous because the normalization forces the intensity values for different samples (microarrrays) having exactly the same distribution. This can cause small differences among intensity values to be lost. In contrast, the loess or spline normalization provides a continuous transformation. However, these methods cannot ensure that the rank of the probes remain unchanged across samples. Moreover, the loess normalization assumes the majority of the genes measured by the probes are non-differentially expressed and their distribution is approximately symmetric, which may not be a good assumption. To address some of these concerns, we developed a Robust Spline Normalization (RSN) method, which combines features from loess and quantile normalization methods. We use a monotonic spline to calibrate one microarray to the reference microarray. To increase the robustness of the spline method, we down-weight the contributions of probes of putatively differentially expressed genes. The probe intensities that are from potentially differentially expressed genes are heuristically determined as follows: First, we run a quantile normalization. Next, we estimate the fold-change of a gene measured by a probe based on the quantile-normalized data. The weighting factor for a probe is calculated based on a Gaussian window function. More details will be shown in a separate manuscript.
 
-Function \Rfunction{lumiN} performs robust spline normalization (RSN) algorithm with both input and output being {\bf LumiBatch} object. \Rfunction{lumiN} also provides options to do \verb+"loess", "quantile", "vsn"+ normalization. See help of \Rfunction{lumiN} for details.
+By default, function \Rfunction{lumiN} performs robust spline normalization (RSN) algorithm. \Rfunction{lumiN} also provides options to do \verb+"quantile", "loess", "vsn"+ normalization. See help of \Rfunction{lumiN} for details.
 
 Do default RSN between microarray normaliazation
 <<>>=
@@ -425,9 +430,9 @@ The normalized data batches can be combined by using function Rfunction{combine(
 
 
 \section{Performance comparison}
-We have selected the Barnes data set [3], which is a series dilution of two tissues at five different dilutions, to compare different preprocessing methods. In order to better compare the algorithms, we selected the samples with the smallest dilution difference (the most challenging comparison), i.e., the samples with the dilution ratios of 100:0 and 95:5 (each condition has two technical replicates) for comparison. For the purpose of comparing the results between the different preprocessing methods, we used a t-test to calculate the p-values for all the results. For the Barnes data set, because we do not know which of the signals are coming from 'true' differentially expressed genes, we cannot use an ROC curve to compare the performance of different algorithms. Instead, we evaluated the methods based on the concordance of normalized intensity profile and real dilution profile of the selected probes.  More detailed evaluations with other criteria and based on other data sets can by found in our paper [1]. 
+We have selected the Barnes data set [3], which is a series dilution of two tissues at five different dilutions, to compare different preprocessing methods. In order to better compare the algorithms, we selected the samples with the smallest dilution difference (the most challenging comparison), i.e., the samples with the dilution ratios of 100:0 and 95:5 (each condition has two technical replicates) for comparison. For the Barnes data set, because we do not know which of the signals are coming from 'true' differentially expressed genes, we cannot use an ROC curve to compare the performance of different algorithms. Instead, we evaluated the methods based on the concordance of normalized intensity profile and real dilution profile of the selected probes.  More detailed evaluations with other criteria and based on other data sets can by found in our paper [1]. 
 
-Following Barnes et al. (2005)[3], we defined a concordant gene (really a concordant probe) as a signal from a probe with a correlation coefficient larger than 0.8 between the normalized intensity profile and the real dilution profile (five dilution ratios with two replicates at each dilution). If a selected differentially expressed probe (based on p-value and fold-change criteria) is also a concordant one, it is more likely to be truly differentially expressed. Figure \ref{fig:corConcordanceComparison} shows the percentage of concordant probes among the selected probes, which were selected by ranking the probes' absolute fold-changes from high to low and with a p-value cutoff of 0.01. We can see the VST transformed data outperforms the Log2-transformed and VSN processed data. For the normalization methods, RSN and quantile normalization have similar performance for the VST transformed data, and RSN outperforms quantile for the Log transformed data. 
+Following Barnes et al. (2005)[3], we defined a concordant gene (really a concordant probe) as a signal from a probe with a correlation coefficient larger than 0.8 between the normalized intensity profile and the real dilution profile (five dilution ratios with two replicates at each dilution ratio). If a selected differentially expressed probe is also a concordant one, it is more likely to be truly differentially expressed. Figure \ref{fig:corConcordanceComparison} shows the percentage of concordant probes among the selected probes, which were selected by ranking the probes' p-value (calculated based on \Rpackage{limma} package) from low to high. We can see the VST transformed data outperforms the Log2-transformed and VSN processed data. For the normalization methods, RSN and quantile normalization have similar performance for the VST transformed data, and RSN outperforms quantile for the Log transformed data. 
 
 
 \begin{figure}
@@ -478,7 +483,7 @@ is.nuID('adfqeqe')
 @
 
 
-\subsection{Illumina microarray annotation package}
+\subsection{Illumina microarray annotation packages}
 Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  Annotation packages indexed by nuID for different Illumina expression chips can be downloaded from Bioconductor. 
 
 The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} with small modification. As a result, the format of the package is the same as Affymetrix annotation package, lots of packages designed for Affymetrix can also be used for Illumina annotation package. The mappings between TargetID to nuID and ProbeID to nuID are also included in the Illumina annotation packages. Thus, we can easily mapping between the nuID and TargetID or ProbeID.
