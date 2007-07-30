@@ -8,6 +8,10 @@ function(x.lumi, Th = 0.01, type=c('probe', 'sample')) {
 			stop('The object should be class "LumiBatch"!')
 		detect <- detection(x.lumi)
 	} 
+	if (Th > 0.8) {
+		detect <- 1 - detect
+		Th <- 1 - Th
+	}
 	if (!is.null(detect)) {
 		if (type == 'sample') AP <- colSums(detect<= Th)
 		if (type == 'probe') AP <- rowSums(detect<= Th)
