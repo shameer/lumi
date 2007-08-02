@@ -21,8 +21,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
     new.lumi <- x.lumi 
 	exprs <- exprs(x.lumi) 
 	if (method == 'log2') {
-		offset <- ifelse(min(exprs) < 0, -min(exprs), 0)
-		exprs(new.lumi) <- log2(exprs + offset + 1)
+		exprs(new.lumi) <- log2(exprs)
 	} else if (method == 'cubicRoot') {
 		exprs(new.lumi) <- sign(exprs) * (abs(exprs))^1/3
 	} else {

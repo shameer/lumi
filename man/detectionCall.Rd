@@ -5,7 +5,7 @@
 \description{  }
 
 \usage{
-detectionCall(x.lumi, Th = 0.01, type = c('probe', 'sample'))
+detectionCall(x.lumi, Th = 0.01, type = c('probe', 'sample', 'matrix'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,9 +15,9 @@ detectionCall(x.lumi, Th = 0.01, type = c('probe', 'sample'))
 }
 
 \value{
-Return the detectable probe ratio of each sample
+If the type is 'probe', then returns the presentCount of each probe. If the type is 'sample', then return the detectable probe ratio of each sample. If the type is 'matrix', then return the AP matrix, in which 'A' represents absent (the detect p-value less than threshold) and 'P' represents present.
 }
-\references{  }
+
 \author{ Pan Du }
 
 \seealso{  \code{\link{lumiQ}} }

@@ -14,8 +14,13 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 		## Filter the genes with most of the experiments "Absent"
 		cv.gene <- apply(dataMatrix, 1, function(x) sd(x)/mean(x))
 		probeList <- rownames(dataMatrix)
-		selProbe <- probeList[cv.gene > cv.Th]
-		main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
+		if (cv.Th > 0) {
+			selProbe <- probeList[cv.gene > cv.Th]
+			main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
+		} else {
+			selProbe <- probeList
+			main <- paste('Sample relations based on', length(selProbe), 'genes')
+		}
 	} else {
 		main <- paste('Sample relations based on', length(selProbe), 'selected genes')
 	}
@@ -34,7 +39,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 			if (!is.numeric(color)) {
 				allColor <- colors()
 				if (!all(is.element(color, allColor))) {
-					color <- as.numeric(factor(color))
+					color <- as.numeric(factor(color, levels=unique(color)))
 				} 
 			}
 		}

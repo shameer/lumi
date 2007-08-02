@@ -143,14 +143,14 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
     
 		pData.x <- pData(feature.x)
 		pData.y <- pData(feature.y)
-		if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are not incompatible!')
-		repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
-		pData(feature.x) <- repInfo
-		
-		metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
-		rownames(metaInfo) <- names(repInfo)
-		varMetadata(feature.x) <- metaInfo
-		featureData(x) <- feature.x
+		if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are incompatible!')
+		#repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
+		#pData(feature.x) <- repInfo
+		#
+		#metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
+		#rownames(metaInfo) <- names(repInfo)
+		#varMetadata(feature.x) <- metaInfo
+		#featureData(x) <- feature.x
 	}
 
 	## combining the QC information
@@ -185,6 +185,11 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 		attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
 	}
 	
+	## controlData information
+	if (nrow(x@controlData) > 0) {
+		controlData <- cbind(x@controlData, y@controlData)
+		x@controlData <- as.data.frame(controlData)
+	}
 	sampleNames(x) <- c(sampleName.x, sampleName.y)
 
 	# history tracking
@@ -468,6 +473,13 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 			attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,,drop=FALSE]
 			attr(x, 'transformFun') <- attr(x, 'transformFun')[j]
 		}
+
+		## controlData information
+		if (nrow(x@controlData) > 0) {
+			if (is.numeric(j))  j <- sampleNames(x)[j]
+			x@controlData <- x@controlData[,j, drop=FALSE]
+		}
+
 	}
 
     # history tracking

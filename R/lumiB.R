@@ -1,7 +1,7 @@
-lumiB <- function(lumiBatch, method = c('forcePositive', 'none', 'bg.adjust'), ...) 
+lumiB <- function(lumiBatch, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...) 
 {
-	if (!(is.function(method)) & !(method %in% c('forcePositive', 'none', 'bg.adjust'))) {
-		print('The method is not supported yet!')
+	if (!(is.function(method)) & !(method %in% c('bgAdjust', 'none', 'forcePositive', 'bgAdjust.affy'))) {
+		print('This method is not supported!')
 		return(lumiBatch)
 	} else if (method == 'none') {
 		return(lumiBatch)
@@ -10,7 +10,9 @@ lumiB <- function(lumiBatch, method = c('forcePositive', 'none', 'bg.adjust'), .
 	}
 	
 	history.submitted <- as.character(Sys.time())
-	if (method == 'bg.adjust') {
+	if (method == 'bgAdjust') {
+		return(bgAdjust(lumiBatch, ...))
+	} else if (method == 'bgAdjust.affy') {
 		exprs(lumiBatch) <- apply(exprs(lumiBatch), 2, bg.adjust, ...) 
 	} else if (method == 'forcePositive') {
 		exprs(lumiBatch) <- exprs(lumiBatch) - min(exprs(lumiBatch)) + 1
