@@ -25,16 +25,12 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 
 	## check whether the data was variance stabilized.
 	if (max(exprs, na.rm=TRUE) > 100) {
-		if (is(x.lumi, 'LumiBatch')) {
-			warning('The data has not been variance stabilized!')
-			print('Perform VST transform ...')
-			x.lumi <- lumiT(x.lumi)
-			exprs <- exprs(x.lumi)
-		} else {
-			warning('The data has not been variance stabilized!')
-			print('Perform log2 transform ...')
-			exprs <- log2(exprs)
-		}
+		log2Trans <- FALSE
+		
+		offset <- ifelse(min(exprs) < 0, min(exprs) - 1, 0)
+		exprs <- log2(exprs - offset)
+	} else {
+		log2Trans <- TRUE
 	}
 
 	## Define interal function 
@@ -103,6 +99,8 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	
 	## if the targetArray is an external vector, it will be removed from the normalized data.
 	if (externalTarget) normalized <- normalized[,-1]
+	## transformed as original scale in not log2transformed
+	if (!log2Trans) normalized <- 2^normalized
 	
 	if (is(x.lumi, 'ExpressionSet')) {
 		exprs(x.lumi) <- normalized

@@ -446,7 +446,8 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 {
 	if (missing(drop)) drop <- FALSE
    	history.submitted <- as.character(Sys.time())
-		
+	
+	sampleName <- sampleNames(x)
 	## do default processing of 'ExpressionSet'
 	x <- callNextMethod()
 
@@ -476,7 +477,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 
 		## controlData information
 		if (nrow(x@controlData) > 0) {
-			if (is.numeric(j))  j <- sampleNames(x)[j]
+			if (is.numeric(j))  j <- sampleName[j]
 			x@controlData <- x@controlData[,j, drop=FALSE]
 		}
 
