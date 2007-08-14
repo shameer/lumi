@@ -30,7 +30,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	} else {
 		detectionName <- paste('detection rate(', detectionTh, ')', sep='')
 		if (!is.null(detection(x.lumi))) {
-			detectionRate <- detectionCall(x.lumi, Th=detectionTh, type='sample') / ncol(x.lumi)
+			detectionRate <- detectionCall(x.lumi, Th=detectionTh, type='sample') / nrow(x.lumi)
 		} else {
 			detectionRate <- rep(NA, ncol(x.lumi))
 		}

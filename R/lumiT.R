@@ -30,18 +30,17 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 		transExpr <- NULL
 		transPara <- NULL
 		transFun <- NULL
-	    temp <- lapply(1:nArray, function(i) {
-				cat(as.character(Sys.time()), ", processing array ", i, "\n")
-				if (method == 'vst') {
-			        x <- vst(u=exprs[,i], std=se.exprs[,i], method='iterate', ifPlot=ifPlot, ...)
-				} else {
-					x <- vst(u=exprs[,i], std=se.exprs[,i], method='quadratic', ifPlot=ifPlot, ...)
-				}
-				transExpr <<- cbind(transExpr, x)
-				transPara <<- rbind(transPara, attr(x, 'parameter'))
-				transFun <<- c(transFun, attr(x, 'transformFun'))
-		        return(TRUE)
-			})
+	    for (i in 1:nArray) {
+			cat(as.character(Sys.time()), ", processing array ", i, "\n")
+			if (method == 'vst') {
+		        x <- vst(u=exprs[,i], std=se.exprs[,i], method='iterate', ifPlot=ifPlot, ...)
+			} else {
+				x <- vst(u=exprs[,i], std=se.exprs[,i], method='quadratic', ifPlot=ifPlot, ...)
+			}
+			transExpr <- cbind(transExpr, x)
+			transPara <- rbind(transPara, attr(x, 'parameter'))
+			transFun <- c(transFun, attr(x, 'transformFun'))
+		}
 		rownames(transPara) <- colnames(exprs(x.lumi))
 		names(transFun) <- colnames(exprs(x.lumi))
 	    exprs(new.lumi) <- transExpr

@@ -24,7 +24,7 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 		lm2 <- lm(y ~ x2 + x1, dd)
 		smoothStd <- predict(lm2, data.frame(x2=downSampledU^2, x1=downSampledU))
 	} else {
-		minU <- log2(min(u))
+		minU <- max(log2(100), log(min(u)))
 		maxU <- log2(max(u))
 		# uCutoff <- 2^((maxU + minU)/2)
 		uCutoffLow <- 2^(minU + (maxU - minU)/3)
@@ -88,6 +88,8 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 			if (ifPlot) hy <- g * asinh(a + b * downSampledU) 
 			transFun <- 'asinh'
 		}
+		transform.parameter <- c(a, b, g, 0)
+		names(transform.parameter) <- c('a', 'b', 'g', 'Intercept')
 	} else {
 		dd <- diff(downSampledU)	## the interval between samples
 		dd <- c(dd[1], dd)
@@ -95,6 +97,7 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 		# get a smoothed version and interpolation of original data order
 	    transformedU <- monoSpline(x=downSampledU, y=hy, newX=u.bak, nKnots=20, ifPlot=FALSE)
 		transFun <- 'quadratic'
+		transform.parameter <- NULL
 	}	
 
     if (ifPlot) {
@@ -123,7 +126,6 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 		x <- c(quantile(transformedU, low), quantile(transformedU, 0.95))
 		m <- lm(log2(y) ~ x)
 		transformedU <- predict(m, data.frame(x=transformedU))
-		transform.parameter <- NULL
 	}
 	attr(transformedU, 'parameter') <- transform.parameter
 	attr(transformedU, 'transformFun') <- transFun

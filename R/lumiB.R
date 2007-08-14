@@ -15,7 +15,12 @@ lumiB <- function(lumiBatch, method = c('none', 'bgAdjust', 'forcePositive', 'bg
 	} else if (method == 'bgAdjust.affy') {
 		exprs(lumiBatch) <- apply(exprs(lumiBatch), 2, bg.adjust, ...) 
 	} else if (method == 'forcePositive') {
-		exprs(lumiBatch) <- exprs(lumiBatch) - min(exprs(lumiBatch)) + 1
+		expr <- exprs(lumiBatch)
+		offset <- apply(expr, 2, min)
+		offset[offset <= 0] <- offset[offset <= 0] - 1.01
+		offset[offset > 0] <- 0
+		offset <- rep(1, nrow(expr)) %*% t(offset)
+		exprs(lumiBatch) <- exprs(lumiBatch) - offset
 	} else if (is.function(method)) {
 		lumiBatch <- method(lumiBatch, ...)
 	} else {
