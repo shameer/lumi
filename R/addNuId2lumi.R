@@ -6,7 +6,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	## check whether the object is nuID annotated.
 	exprs <- exprs(x.lumi)
 	id <- rownames(exprs)
-	if(is.nuID(id[1]) & is.nuID(id[2])) {
+	if(all(sapply(id[1:10], is.nuID))) {
 		print('The lumiBatch object is already nuID annotated!')
 		return(x.lumi)
 	}
@@ -82,6 +82,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			newId <- mget(id, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
 			newId <- unlist(newId)
 			if (length(which(!is.na(newId))) == 0) {
+				usingTargetID <- FALSE
 				## check the ProbeID if id does not match the TargetID
 				newId <- mget(id, get(paste(lib, 'PROBEID2NUID', sep=''), mode='environment'), ifnotfound=NA)
 				if (length(which(!is.na(newId))) == 0) {
@@ -94,14 +95,27 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 						if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!')
 					}
 				} 
+			} else {
+				usingTargetID <- TRUE
 			}
 			## Check for the targetIDs cannot be found in the lib.
 			## Some known control genes will not be checked.
 			naInd <- is.na(newId)
 			controlId <- c('lysA','pheA','thrB','trpF', 'bla1','bla2','cat1','cat2','cre1','cre2','e1a1',
 			'e1a2','gfp1','gfp2','gst1','gst2','gus1','gus2','lux1','lux2','lysA','neo1',
-			'neo2','pheA','thrB','trpF')		
-			if (!all(id[naInd] %in% controlId)) {
+			'neo2','pheA','thrB','trpF')
+			if (!usingTargetID) {
+				TargetID <- featureData(x.lumi)$TargetID
+				if (is.null(TargetID)) {
+					if (!all(TargetID[naInd] %in% controlId)) {
+						if (length(which(naInd)) < 10) {
+							warning(paste('Identifiers:', paste(TargetID[naInd], collapse=','), ' cannot be found in the ', lib, '!', sep=''))
+						} else {
+							warning(paste('Some identifiers cannot be found in the ', lib, '!', sep=''))
+						}
+					}
+				}
+			} else if (!all(id[naInd] %in% controlId)) {
 				if (length(which(naInd)) < 10) {
 					warning(paste('Identifiers:', paste(id[naInd], collapse=','), ' cannot be found in the ', lib, '!', sep=''))
 				} else {

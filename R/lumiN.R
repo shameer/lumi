@@ -6,6 +6,7 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 	    x.matrix <- exprs(x.lumi)		
 	} else if (is.numeric(x.lumi)) {
 		x.matrix <- as.matrix(x.lumi)
+		if (method == 'rsn') x.lumi <- as.matrix(x.lumi)
 	} else {
 		stop('The object should be a matrix or class "ExpressionSet" inherited!')
 	}
@@ -22,17 +23,22 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 	}
 
 	norm.matrix <- switch(method,
-		rsn = rsn(x.matrix, ...),
+		rsn = rsn(x.lumi, ...),
 		loess = normalize.loess(x.matrix, ...),
 		quantile = normalize.quantiles(x.matrix, ...),
 		vsn = exprs(vsn::vsn2(x.matrix, ...)) )
-
-	colnames(norm.matrix) <- colnames(x.matrix)
-	rownames(norm.matrix) <- rownames(x.matrix)
+	
+	if (is.matrix(norm.matrix)) {
+		colnames(norm.matrix) <- colnames(x.matrix)
+		rownames(norm.matrix) <- rownames(x.matrix)
+	} else if (!is.null(attr(norm.matrix, 'vstParameter'))) {
+		attr(x.lumi, 'vstParameter') <- attr(norm.matrix, 'vstParameter')
+		attr(x.lumi, 'transformFun') <- attr(norm.matrix, 'transformFun')
+	}
 
 	if (is(x.lumi, 'ExpressionSet')) {
 		new.lumi <- x.lumi
-		exprs(new.lumi) <- norm.matrix
+		exprs(new.lumi) <- if (is(norm.matrix, 'ExpressionSet')) exprs(norm.matrix) else norm.matrix
 	    # history tracking
 		if (is(x.lumi, 'LumiBatch')) {
 		    history.finished <- as.character(Sys.time())

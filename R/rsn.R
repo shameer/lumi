@@ -96,6 +96,8 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs,
 					exprs0=exprs0, targetArray=targetArray, ifPlot=ifPlot)
 	normalized <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
+	colnames(normalized) <- colnames(exprs)
+	rownames(normalized) <- rownames(exprs)
 	
 	## if the targetArray is an external vector, it will be removed from the normalized data.
 	if (externalTarget) normalized <- normalized[,-1]
@@ -104,9 +106,18 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	
 	if (is(x.lumi, 'ExpressionSet')) {
 		exprs(x.lumi) <- normalized
+		if (is.numeric(targetArray)) {
+			if (!is.null(attr(x.lumi, 'vstParameter'))) {
+				attr(x.lumi, 'vstParameter') <- attr(x.lumi, 'vstParameter')[targetArray,]
+				attr(x.lumi, 'transformFun') <- attr(x.lumi, 'transformFun')[targetArray]
+			}
+		} else if (!is.null(attr(targetArray, 'vstParameter'))) {
+			attr(x.lumi, 'vstParameter') <- attr(targetArray, 'vstParameter')
+			attr(x.lumi, 'transformFun') <- attr(targetArray, 'transformFun')
+		}
 	} else {
 		x.lumi <- normalized
 	}
-
+	
 	return(x.lumi)
 }
