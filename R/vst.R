@@ -1,9 +1,12 @@
 `vst` <-
-function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'), ifPlot=FALSE) {
+function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('iterate', 'quadratic'), ifPlot=FALSE) {
 	# u is the mean of probe beads
 	# std is the standard deviation of the probe beads
 	
 	method <- match.arg(method)
+	## Estimate the background variance c3
+	c3 <- ifelse (is.null(backgroundIndex), 0, mean(std[backgroundIndex]))
+	
 	ord <- order(u); u.bak <- u
 	u <- u[ord]; std <- std[ord]
 	
@@ -31,27 +34,36 @@ function(u, std, nSupport=min(length(u), 500), method=c('iterate', 'quadratic'),
 		uCutoffHigh <- 2^(minU + (maxU - minU) * 3/4)
 		selInd <- (u > uCutoffLow & u < uCutoffHigh)
 		selLowInd <- (u < uCutoffLow)
-		iterNum <- 0
-		c3.i <- 0
-		while(iterNum < 3) {
-			selInd.i <- selInd & (std^2 > c3.i)
-			dd <- data.frame(y=sqrt(std[selInd.i]^2 - c3.i), x1=u[selInd.i])
+		if (c3 != 0) {
+			selInd <- selInd & (std^2 > c3)
+			dd <- data.frame(y=sqrt(std[selInd]^2 - c3), x1=u[selInd])
 			if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
-			lm.i <- lm(y ~ x1, dd)
-			c1.i <- lm.i$coef[2]
-			c2.i <- lm.i$coef[1]
-			y <- std[selLowInd]
-			x <- u[selLowInd]
-			cc <- y^2 - (c1.i * x + c2.i)^2
-			c3.i <- mean(cc, trim=0.05)
-			if (c3.i < 0) {
-				c3.i <- 0
-				break
+			lmm <- lm(y ~ x1, dd)
+			c1 <- lmm$coef[2]
+			c2 <- lmm$coef[1]
+		} else {
+			iterNum <- 0
+			c3.i <- 0
+			while(iterNum < 3) {
+				selInd.i <- selInd & (std^2 > c3.i)
+				dd <- data.frame(y=sqrt(std[selInd.i]^2 - c3.i), x1=u[selInd.i])
+				if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
+				lm.i <- lm(y ~ x1, dd)
+				c1.i <- lm.i$coef[2]
+				c2.i <- lm.i$coef[1]
+				y <- std[selLowInd]
+				x <- u[selLowInd]
+				cc <- y^2 - (c1.i * x + c2.i)^2
+				c3.i <- mean(cc, trim=0.05)
+				if (c3.i < 0) {
+					c3.i <- 0
+					break
+				}
+				iterNum <- iterNum + 1
 			}
-			iterNum <- iterNum + 1
+			c1 <- c1.i; c2 <- c2.i; c3 <- c3.i
+			if (c3 < 0) c3 <- 0
 		}
-		c1 <- c1.i; c2 <- c2.i; c3 <- c3.i
-		if (c3 < 0) c3 <- 0
 		smoothStd <- ((c1 * downSampledU + c2)^2 + c3)^(1/2)
 	}
 

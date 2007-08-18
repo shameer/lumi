@@ -14,7 +14,7 @@ setClass('LumiBatch',
 
 setMethod('initialize', 'LumiBatch', function(.Object, 
 	exprs = new('matrix'),
-	se.exprs = new('matrix'),		# standard deviation of the bead measurements of each gene
+	se.exprs = new('matrix'),		# standard deviation of the bead measurements of each probe
 	...) 
 {
 	callNextMethod(.Object, exprs=exprs, se.exprs=se.exprs, ...)

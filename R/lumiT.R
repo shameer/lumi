@@ -25,15 +25,21 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 	} else if (method == 'cubicRoot') {
 		exprs(new.lumi) <- sign(exprs) * (abs(exprs))^1/3
 	} else {
-	    se.exprs <- se.exprs(x.lumi)
-	    nArray <- ncol(exprs)
+		se.exprs <- se.exprs(x.lumi)
+		nArray <- ncol(exprs)
+		detectCall <- detectionCall(x.lumi, Th=0.01, type='matrix')
 		transExpr <- NULL
 		transPara <- NULL
 		transFun <- NULL
-	    for (i in 1:nArray) {
+		for (i in 1:nArray) {
 			cat(as.character(Sys.time()), ", processing array ", i, "\n")
 			if (method == 'vst') {
-		        x <- vst(u=exprs[,i], std=se.exprs[,i], method='iterate', ifPlot=ifPlot, ...)
+				if (!is.null(detectCall)) {
+					backgroundIndex <- which(detectCall[,i] == 'A')
+				} else {
+					backgroundIndex <- NULL
+				}
+		        x <- vst(u=exprs[,i], std=se.exprs[,i], method='iterate', backgroundInd=backgroundIndex, ifPlot=ifPlot, ...)
 			} else {
 				x <- vst(u=exprs[,i], std=se.exprs[,i], method='quadratic', ifPlot=ifPlot, ...)
 			}
@@ -43,7 +49,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 		}
 		rownames(transPara) <- colnames(exprs(x.lumi))
 		names(transFun) <- colnames(exprs(x.lumi))
-	    exprs(new.lumi) <- transExpr
+		exprs(new.lumi) <- transExpr
 	}
 	colnames(exprs(new.lumi)) <- colnames(exprs(x.lumi))
 	rownames(exprs(new.lumi)) <- rownames(exprs(x.lumi))

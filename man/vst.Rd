@@ -6,13 +6,14 @@
   Stabilizing the expression variance based on the bead level expression variance and mean relations
 }
 \usage{
-vst(u, std, nSupport = min(length(u), 500), method = c('iterate', 'quadratic'), ifPlot = FALSE)
+vst(u, std, nSupport = min(length(u), 500), backgroundIndex=NULL, method = c('iterate', 'quadratic'), ifPlot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{u}{ mean expression of the beads with same sequence }
   \item{std}{ expression standard deviation of the beads with same sequence }
   \item{nSupport}{ the number of down-sampling to speed processing }
+  \item{backgroundIndex}{ the index of background probes, which are determined based on the detection p-values.}
   \item{method}{ methods of fitting the relations between expression variance and mean relations }
   \item{ifPlot}{ plot intermediate results or not }
 }

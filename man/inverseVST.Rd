@@ -10,12 +10,13 @@ inverseVST(x, fun = c('asinh', 'log'), parameter)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ a vector of VST transformed data }
+  \item{x}{ a VST transformed LumiBatch object or a numeric matrix or vector}
   \item{fun}{ function used in VST transform }
   \item{parameter}{ parameter of VST function }
 }
 \details{
 Recover the raw data from VST transformed data returned by \code{\link{vst}}.
+This function can be directly applied to the VST transformed or VST + RSN normalized LumiBatch object to reverse transform the data to the original scale. 
 }
 \value{
 Return the raw data before VST transform
@@ -48,6 +49,11 @@ recoveredU <- inverseVST(transformedU, fun=transformFun, parameter=parameter)
 print(u[1:5])
 print(recoveredU[1:5])
 
+## do inverse transform of the VST + RSN processed data
+lumi.N <- lumiExpresso(example.lumi[,1:2])
+## Inverse transform. 
+## Note: as the normalization is involved, the processed data will be different from the raw data.
+lumi.N.raw <- inverseVST(lumi.N)
 
 }
 \keyword{ methods }

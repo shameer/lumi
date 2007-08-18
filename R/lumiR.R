@@ -14,12 +14,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		warning('exprs slot is required and default pattern will be used!')
 	}
 	if (is.na(columnNameGrepPattern$se.exprs)) {
-		columnNameGrepPattern$se.exprs <- 'BEAD_STD'
-		warning('se.exprs slot is required and default pattern will be used!')
+		stdCorrection <- FALSE
+		columnNameGrepPattern$beadNum <- columnNameGrepPattern$detection <- NA
+		warning('se.exprs slot is required for the VST transformation!\n We strongly suggest to include BEAD_STD columns!')
+		# columnNameGrepPattern$se.exprs <- 'BEAD_STD'
+		# warning('se.exprs slot is required and default pattern will be used!')
 	}
-	if (is.na(columnNameGrepPattern$beadNum) & stdCorrection) {
-		columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
-		warning('beadNum is required when "stdCorrection=TRUE". The default pattern will be used!')
+	if (is.na(columnNameGrepPattern$beadNum)) {
+		stdCorrection <- FALSE
+		# columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
+		# warning('beadNum is required if "stdCorrection=TRUE". The default pattern will be used!')
 	}
 
 	# columnNameGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
@@ -217,14 +221,23 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		exprs <- matrix(as.numeric(exprs), nrow=nrow(allData))
 	} 
 	colnames(exprs) <- header[ind]
+	
 	## identify where the signal standard deviation column exists 
-	ind <- grep(columnNameGrepPattern$'se.exprs', header, ignore.case=TRUE)
-	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
-	se.exprs <- as.matrix(allData[,ind])
-	if (!is.numeric(se.exprs[1])) {
-		se.exprs <- matrix(as.numeric(se.exprs), nrow=nrow(allData))
+	if (is.na(columnNameGrepPattern$'se.exprs')) {
+		ind <- NULL
+	} else {
+		ind <- grep(columnNameGrepPattern$'se.exprs', header, ignore.case=TRUE)
 	}
-	colnames(se.exprs) <- header[ind]
+	if (length(ind) == 0) {
+		se.exprs <- NULL
+		 # stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
+	} else {
+		se.exprs <- as.matrix(allData[,ind])
+		if (!is.numeric(se.exprs[1])) {
+			se.exprs <- matrix(as.numeric(se.exprs), nrow=nrow(allData))
+		}
+		colnames(se.exprs) <- header[ind]
+	}
 	## identify the detection columns
 	if (is.na(columnNameGrepPattern$detection)) {
 		ind <- NULL
@@ -284,7 +297,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		}
 		## remove duplicated
 		exprs <- exprs[-rmInd,,drop=FALSE]
-		se.exprs <- se.exprs[-rmInd,,drop=FALSE]
+		if (!is.null(se.exprs)) se.exprs <- se.exprs[-rmInd,,drop=FALSE]
 		id <- id[-rmInd]
 		if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
 		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
@@ -300,7 +313,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		id <- id[keepInd]
 		targetID <- targetID[keepInd]
 	}
-	rownames(exprs) <- rownames(se.exprs) <- id
+	rownames(exprs) <- id
+	if (!is.null(se.exprs)) rownames(se.exprs) <- id
 	if (!is.null(beadNum)) rownames(beadNum) <- id
 	if (!is.null(detection)) rownames(detection) <- id
     
@@ -346,10 +360,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
 	## check the dimensions of the input data
-	if (ncol(exprs) == ncol(se.exprs)) {
-		colnames(exprs) <- colnames(se.exprs) <- label
-	} else {
-		stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
+	colnames(exprs) <- label
+	if (!is.null(se.exprs)) {
+		if (ncol(exprs) != ncol(se.exprs)) 
+			stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
+		colnames(se.exprs) <- label
 	}
 	if (!is.null(beadNum)) {
 		if (ncol(beadNum) == length(label)) {
@@ -376,6 +391,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		}
 	}
 
+	## If no se.exprs imported, the it will create a ExpressionSet class, instead of LumiBatch class.
+	if (is.null(se.exprs)) {
+		cmd <- 'x.lumi <- new("ExpressionSet", exprs=exprs'
+	} else {
+		cmd <- 'x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs'
+		if (!is.null(detection)) cmd <- paste(cmd, ', detection=detection')
+		if (!is.null(beadNum)) cmd <- paste(cmd, ', beadNum=beadNum')
+		cmd <- paste(cmd, ', featureData=featureData')		
+	}
+	
 	## produce the phenoData object
 	if (parseColumnName) {
 		pData <- data.frame(sampleID=sampleID, label=label)
@@ -385,37 +410,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 			'The label of the sample'))
 		rownames(varMetadata) <- c('sampleID', 'label')
 		pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
+		cmd <- paste(cmd, ', phenoData=pdata')
+	} 
+	cmd <- paste(cmd, ')')
+	eval(parse(text=cmd))
 
-		if (!is.null(detection) & !is.null(beadNum)) {
-			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
-				featureData=featureData,  phenoData=pdata)
-		} else {
-			if (is.null(beadNum) & is.null(detection)) {
-				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData,  phenoData=pdata)
-			} else {
-				if (is.null(detection))
-					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData,  phenoData=pdata)
-				if (is.null(beadNum))
-					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData,  phenoData=pdata)
-			}
-		}
-	} else {
-		## No phenoData in this case
-		if (!is.null(detection) & !is.null(beadNum)) {
-			x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum,
-				featureData=featureData)
-		} else {
-			if (is.null(beadNum) & is.null(detection)) {
-				x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, featureData=featureData)
-			} else {
-				if (is.null(detection))
-					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, beadNum=beadNum, featureData=featureData)
-				if (is.null(beadNum))
-					x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs, detection=detection, featureData=featureData)
-			}
-		}
+	if (is.null(se.exprs)) {
+		## resume the old settings
+		options(stringsAsFactors = oldSetting)
+		return(x.lumi)
 	}
-
 	x.lumi@controlData <- controlData
 	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
 	sampleNames(x.lumi) <- label
