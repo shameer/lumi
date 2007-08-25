@@ -8,6 +8,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 		stop('The class of "x" should be matrix or LumiBatch!')
 	}
 	
+	## Standardize each sample
 	if (standardize) dataMatrix <- scale(dataMatrix)
 
 	if (is.null(selProbe)) {

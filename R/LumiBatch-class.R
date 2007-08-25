@@ -101,6 +101,63 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 })
 
 
+setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE) 
+{
+	if (missing(drop)) drop <- FALSE
+   	history.submitted <- as.character(Sys.time())
+	
+	sampleName <- sampleNames(x)
+	## do default processing of 'ExpressionSet'
+	x <- callNextMethod()
+
+	ddim <- dim(x)
+	if (!missing(i) & !missing(j)) {
+		history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
+	} else if (!missing(i)) {
+		history.command <- paste('Subsetting', ddim[1], 'features.')
+	} else if (!missing(j)) {
+		history.command <- paste('Subsetting', ddim[2], 'samples.')
+	} else {
+		return(x)
+	}
+
+	## subsetting the QC information
+	if (!missing(j)) {
+		if (!is.null(x@QC)) {
+			QC <- x@QC
+			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
+			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
+			x@QC <- QC
+		}
+		if (!is.null(attr(x, 'vstParameter'))) {
+			vstParameter <- attr(x, 'vstParameter')
+			if (!is.null(nrow(vstParameter))) {
+				if (nrow(vstParameter) == ddim[2]) {
+					attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,,drop=FALSE]
+					attr(x, 'transformFun') <- attr(x, 'transformFun')[j]
+				}
+			}
+		}
+
+		## controlData information
+		if (nrow(x@controlData) > 0) {
+			if (is.numeric(j))  j <- sampleName[j]
+			x@controlData <- x@controlData[,j, drop=FALSE]
+		}
+
+	}
+
+    # history tracking
+    history.finished <- as.character(Sys.time())
+	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
+	lumiVersion <- packageDescription('lumi')$Version
+	x@history<- rbind(x@history, data.frame(submitted=history.submitted, finished=history.finished, 
+			command=history.command, lumiVersion=lumiVersion))
+
+	return(x)
+})
+
+
 setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y) 
 {
 	if (class(x) != class(y))
@@ -118,7 +175,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	}
 
 	history.submitted <- as.character(Sys.time())
-
+	dimm.x <- dim(x); dimm.y <- dim(y)
 	assayData(x) <- combine(assayData(x), assayData(y))
 	experimentData(x) <- combine(experimentData(x),experimentData(y))
 
@@ -181,8 +238,14 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y)
 	
 	## VST transformation parameters
 	if (!is.null(attr(x, 'vstParameter')) & !is.null(attr(x, 'vstParameter'))) {
-		attr(x, 'vstParameter') <- rbind(attr(x, 'vstParameter'), attr(y, 'vstParameter'))
-		attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
+		vstParameter.x <- attr(x, 'vstParameter')
+		vstParameter.y <- attr(y, 'vstParameter')
+		if (nrow(vstParameter.x) != dimm.x[2] || nrow(vstParameter.y) != dimm.y[2]) {
+			attr(x, 'vstParameter') <- attr(x, 'transformFun') <- NULL
+		} else{
+			attr(x, 'vstParameter') <- rbind(attr(x, 'vstParameter'), attr(y, 'vstParameter'))
+			attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
+		}
 	}
 	
 	## controlData information
@@ -439,58 +502,6 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 		}
 		mva.pairs(expr[ind, ], log.it=FALSE, ...)
 	}
-})
-
-
-setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE) 
-{
-	if (missing(drop)) drop <- FALSE
-   	history.submitted <- as.character(Sys.time())
-	
-	sampleName <- sampleNames(x)
-	## do default processing of 'ExpressionSet'
-	x <- callNextMethod()
-
-	ddim <- dim(x)
-	if (!missing(i) & !missing(j)) {
-		history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
-	} else if (!missing(i)) {
-		history.command <- paste('Subsetting', ddim[1], 'features.')
-	} else if (!missing(j)) {
-		history.command <- paste('Subsetting', ddim[2], 'samples.')
-	} else {
-		return(x)
-	}
-
-	## subsetting the QC information
-	if (!missing(j)) {
-		if (!is.null(x@QC)) {
-			QC <- x@QC
-			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
-			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
-			x@QC <- QC
-		}
-		if (!is.null(attr(x, 'vstParameter'))) {
-			attr(x, 'vstParameter') <- attr(x, 'vstParameter')[j,,drop=FALSE]
-			attr(x, 'transformFun') <- attr(x, 'transformFun')[j]
-		}
-
-		## controlData information
-		if (nrow(x@controlData) > 0) {
-			if (is.numeric(j))  j <- sampleName[j]
-			x@controlData <- x@controlData[,j, drop=FALSE]
-		}
-
-	}
-
-    # history tracking
-    history.finished <- as.character(Sys.time())
-	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
-	lumiVersion <- packageDescription('lumi')$Version
-	x@history<- rbind(x@history, data.frame(submitted=history.submitted, finished=history.finished, 
-			command=history.command, lumiVersion=lumiVersion))
-
-	return(x)
 })
 
 

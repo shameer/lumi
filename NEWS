@@ -1,4 +1,13 @@
 -----------------------------------------------------
+version 1.3.18-1.3.26
+release data: 08/25/2007
+1. Updated the vst function in version 1.3.25. (estimate the c3 based on the background probes).
+2. Updated the inverseVST and other related functions to allow the recover to the raw scale of the preprocessed data.
+3. Added the evaluation of VST vignette
+3. Updated the lumi vignette
+
+
+-----------------------------------------------------
 version 1.3.16-1.3.17
 release data: 07/11/2007
 1. Add the correction of the STDEV column values of the BeadStudio output file (transfer the standard error of the mean as the standard deviation).

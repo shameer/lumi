@@ -34,6 +34,8 @@ function(x.lumi, method=c('rsn', 'loess', 'quantile', 'vsn'), ...) {
 	} else if (!is.null(attr(norm.matrix, 'vstParameter'))) {
 		attr(x.lumi, 'vstParameter') <- attr(norm.matrix, 'vstParameter')
 		attr(x.lumi, 'transformFun') <- attr(norm.matrix, 'transformFun')
+		if (!is.null(attr(norm.matrix, 'targetArray')))
+			attr(x.lumi, 'targetArray') <- attr(norm.matrix, 'targetArray')
 	}
 
 	if (is(x.lumi, 'ExpressionSet')) {

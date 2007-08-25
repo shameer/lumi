@@ -110,10 +110,15 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			if (!is.null(attr(x.lumi, 'vstParameter'))) {
 				attr(x.lumi, 'vstParameter') <- attr(x.lumi, 'vstParameter')[targetArray,]
 				attr(x.lumi, 'transformFun') <- attr(x.lumi, 'transformFun')[targetArray]
+				attr(x.lumi, 'targetArray') <- sampleNames(x.lumi)[targetArray]
 			}
-		} else if (!is.null(attr(targetArray, 'vstParameter'))) {
-			attr(x.lumi, 'vstParameter') <- attr(targetArray, 'vstParameter')
-			attr(x.lumi, 'transformFun') <- attr(targetArray, 'transformFun')
+		} else {
+			if (!is.null(attr(targetArray, 'vstParameter'))) {
+				attr(x.lumi, 'vstParameter') <- attr(targetArray, 'vstParameter')
+				attr(x.lumi, 'transformFun') <- attr(targetArray, 'transformFun')
+			}
+			if (is(targetArray, 'ExpressionSet'))
+				attr(x.lumi, 'targetArray') <- sampleNames(targetArray)
 		}
 	} else {
 		x.lumi <- normalized
