@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{lumi}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, affy, Biobase}
+%\VignetteDepends{lumi, affy, Biobase, lumiHumanV1}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}
@@ -509,6 +509,9 @@ is.nuID('adfqeqe')
 Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  Annotation packages indexed by nuID for different Illumina expression chips can be downloaded from Bioconductor. 
 
 The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} with small modification. As a result, the format of the package is the same as Affymetrix annotation package, lots of packages designed for Affymetrix can also be used for Illumina annotation package. The mappings between TargetID to nuID and ProbeID to nuID are also included in the Illumina annotation packages. Thus, we can easily mapping between the nuID and TargetID or ProbeID.
+
+Need to mention, currently there are two sets of Illumina annotation packages in Bioconductor. The Illumina annotation packages mentioned here are named as "lumixxxx", e.g. "lumiHumanV2" and are maintained by us. There are another set of packages, named as "illuminaxxxx". These packages are indexed based on Illumina TargetID. They can also be used together with \Rpackage{lumi} package if the BeadStudio output file is also indexed with TargetID (file name includes \verb+"gene_profile"+). They have no relation with nuID and cannot be used when the BeadStudio output files are indexed with Illumina ProbeID (file name includes \verb+"probe_profile"+).
+
 
 Here is some examples:
 \begin{Sinput}

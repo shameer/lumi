@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{lumi}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, affy, Biobase}
+%\VignetteDepends{lumi, lumiBarnes, affy, limma, Biobase, vsn, genefilter, RColorBrewer}
 %\VignettePackage{lumi}
 
 %% 
@@ -47,7 +47,7 @@ Variance stabilization is critical for the subsequent statistical inference to i
 The evaluation requires the users to install packages: \Rpackage{lumi}, \Rpackage{vsn}, \Rpackage{genefilter}, \Rpackage{limma} and \Rpackage{lumiBarnes} (Experiment Data package). First, we need to load these packages:
 
 <<libraries,echo=TRUE,results=hide>>=
-# library("lumi")
+library("lumi")
 library("vsn")
 library("genefilter")
 library("geneplotter")
