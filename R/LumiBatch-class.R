@@ -41,7 +41,7 @@ if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(objec
 
 if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
-if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
+if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y) standardGeneric("combine"))
 if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
 
 setMethod("se.exprs", signature(object="LumiBatch"),
