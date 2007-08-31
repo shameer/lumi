@@ -41,7 +41,7 @@ if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(objec
 
 if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
-if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y) standardGeneric("combine"))
+if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
 if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
 
 setMethod("se.exprs", signature(object="LumiBatch"),
@@ -158,8 +158,11 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 })
 
 
-setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y) 
+setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...) 
 {
+	if (missing(y)) return(x)
+	if (length(list(...)) > 0) 
+	        combine(x, combine(y, ...))
 	if (class(x) != class(y))
 		stop(paste("objects must be the same class, but are ",
                  class(x), ", ", class(y), sep=""))

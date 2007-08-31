@@ -20,7 +20,7 @@
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}
 \alias{show,LumiBatch-method}
-\alias{combine,LumiBatch,LumiBatch-method}
+\alias{combine,LumiBatch,missing-method}
 \alias{[,LumiBatch-method}
 \alias{getHistory,LumiBatch-method}
 \alias{getHistory}
@@ -87,7 +87,7 @@
    \bold{Derived from \code{\link[Biobase]{ExpressionSet}}} (For the directly inherited methods, 
 	 please see \code{\link[Biobase]{ExpressionSet}} and \code{\link[Biobase]{eSet}}):
    \describe{
-     \item{\code{combine(LumiBatch,LumiBatch)}:}{Combine two LumiBatch objects, including \code{history} slot. See \code{\link[Biobase]{eSet}}}
+     \item{\code{combine(LumiBatch,missing)}:}{Combine two LumiBatch objects, including \code{history} slot. See \code{\link[Biobase]{eSet}}}
 	 \item{\code{exprs(LumiBatch)}, \code{exprs(LumiBatch,matrix)<-}:}{Access and
 	    set elements named \code{exprs} in the \code{AssayData-class} slot.}
 	 \item{\code{object[(i,j)}:}{Conduct subsetting of the data in a LumiBatch object }
