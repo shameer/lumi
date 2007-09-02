@@ -1,7 +1,7 @@
 `lumiT` <-
 function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutput = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
-	if (is(x.lumi, 'ExpressionSet') | is(x.lumi, 'exprSet')) {
+	if (is(x.lumi, 'ExpressionSet') || is(x.lumi, 'exprSet')) {
 		if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
 		if (!all(dim(se.exprs(x.lumi)) == dim(exprs(x.lumi))))
 			stop('Dimensions of slots exprs and se.exprs do not match!')

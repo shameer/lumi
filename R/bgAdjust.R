@@ -6,7 +6,7 @@ bgAdjust <- function(lumiBatch, probs=0.5, ...) {
 		return(lumiBatch)
 	}
 	control <- lumiBatch@controlData
-	if (is.null(control) | nrow(control) == 0) {
+	if (is.null(control) || nrow(control) == 0) {
 		print('There is no control probe information in the LumiBatch object!\n No background adjustment will be performed.')
 		return(lumiBatch)
 	}

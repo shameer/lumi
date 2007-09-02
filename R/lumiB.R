@@ -1,6 +1,6 @@
 lumiB <- function(lumiBatch, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...) 
 {
-	if (!(is.function(method)) & !(method %in% c('bgAdjust', 'none', 'forcePositive', 'bgAdjust.affy'))) {
+	if (!(is.function(method)) && !(method %in% c('bgAdjust', 'none', 'forcePositive', 'bgAdjust.affy'))) {
 		print('This method is not supported!')
 		return(lumiBatch)
 	} else if (method == 'none') {

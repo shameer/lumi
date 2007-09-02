@@ -111,7 +111,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	x <- callNextMethod()
 
 	ddim <- dim(x)
-	if (!missing(i) & !missing(j)) {
+	if (!missing(i) && !missing(j)) {
 		history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
 	} else if (!missing(i)) {
 		history.command <- paste('Subsetting', ddim[1], 'features.')
@@ -184,7 +184,7 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 
 	## combine pheno data
 	phenoData(x) <- combine(phenoData(x),phenoData(y))
-	# if (!is.null(phenoData(x)) | !is.null(phenoData(y))) {
+	# if (!is.null(phenoData(x)) || !is.null(phenoData(y))) {
 	# 	phenoData.x <- phenoData(x)
 	# 	phenoData.y <- phenoData(y)
     # 
@@ -197,7 +197,7 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 	
 	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
 	## combine feature data
-	if (!is.null(featureData(x)) | !is.null(featureData(y))) {
+	if (!is.null(featureData(x)) || !is.null(featureData(y))) {
 		feature.x <- featureData(x)
 		feature.y <- featureData(y)
     
@@ -214,14 +214,14 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 	}
 
 	## combining the QC information
-	if (length(x@QC) > 0 | length(y@QC) > 0) {
-		if (!is.null(x@QC$BeadStudioSummary) & !is.null(y@QC$BeadStudioSummary)) {
+	if (length(x@QC) > 0 || length(y@QC) > 0) {
+		if (!is.null(x@QC$BeadStudioSummary) && !is.null(y@QC$BeadStudioSummary)) {
 			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary))
 			BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
 		} else {
 			BeadStudioSummary <- x@QC$BeadStudioSummary
 		}
-		if (!is.null(x@QC$sampleSummary) & !is.null(y@QC$sampleSummary)) {
+		if (!is.null(x@QC$sampleSummary) && !is.null(y@QC$sampleSummary)) {
 			if (nrow(x@QC$sampleSummary) == nrow(y@QC$sampleSummary))
 			sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
 		} else {
@@ -240,7 +240,7 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 	}
 	
 	## VST transformation parameters
-	if (!is.null(attr(x, 'vstParameter')) & !is.null(attr(x, 'vstParameter'))) {
+	if (!is.null(attr(x, 'vstParameter')) && !is.null(attr(x, 'vstParameter'))) {
 		vstParameter.x <- attr(x, 'vstParameter')
 		vstParameter.y <- attr(y, 'vstParameter')
 		if (nrow(vstParameter.x) != dimm.x[2] || nrow(vstParameter.y) != dimm.y[2]) {
@@ -289,7 +289,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 	} else {
 		index <- 1:nrow(expr)
 	}
-  	if (logMode & max(exprs(x), na.rm=TRUE) > 50) {
+  	if (logMode && max(exprs(x), na.rm=TRUE) > 50) {
 		## force the expression value as positive in the logMode
 		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 		expr <- log2(expr)
@@ -343,7 +343,7 @@ setMethod('density', signature(x='ExpressionSet'),
 	}
 	expr <- expr[ind,,drop=FALSE]
 
-    if (logMode & (max(expr, na.rm=TRUE) > 50)) {
+    if (logMode && (max(expr, na.rm=TRUE) > 50)) {
 		## force the expression value as positive in the logMode
 		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 
@@ -355,7 +355,7 @@ setMethod('density', signature(x='ExpressionSet'),
 
 	if (!is.null(symmetry)) {
 		x.range <- range(expr)
-		if (symmetry > x.range[1] & symmetry < x.range[2]) {
+		if (symmetry > x.range[1] && symmetry < x.range[2]) {
 			warning('symmetry point should not be within the range of x!')
 			symmetry <- NULL
 		} else {
@@ -368,7 +368,7 @@ setMethod('density', signature(x='ExpressionSet'),
 
 	if (!is.null(symmetry)) {
 		nr <- nrow(all.x)
-		if (all.x[1,1] >= x.range[1] & all.x[1,1] <= x.range[2]) {
+		if (all.x[1,1] >= x.range[1] && all.x[1,1] <= x.range[2]) {
 			all.x <- all.x[1:round(nr/2),]
 			all.y <- all.y[1:round(nr/2),]
 		} else {
@@ -379,7 +379,7 @@ setMethod('density', signature(x='ExpressionSet'),
     matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=1:ncol(all.x), 
         lty=1:ncol(all.x), ...)
 	if (!is.null(index.highlight)) {
-		if (index.highlight > ncol(all.x) | index.highlight < 1) {
+		if (index.highlight > ncol(all.x) || index.highlight < 1) {
 			warning('Highlight index out of range!')
 			index.highlight <- 1
 		}

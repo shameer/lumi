@@ -50,12 +50,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		dataLine2 <- info[nMetaDataLines + 3]
 		sepNum1 <- gregexpr('\t', dataLine1)[[1]]
 		sepNum2 <- gregexpr('\t', dataLine2)[[1]]
-		if (sepNum1[1] > 0 & length(sepNum1) == length(sepNum2)) {
+		if (sepNum1[1] > 0 && length(sepNum1) == length(sepNum2)) {
 			sep <- '\t'
 		} else if (dec != ',') {
 			sepNum1 <- gregexpr(',', dataLine1)[[1]]
 			sepNum2 <- gregexpr(',', dataLine2)[[1]]
-			if (sepNum1[1] > 0 & length(sepNum1) == length(sepNum2)) {
+			if (sepNum1[1] > 0 && length(sepNum1) == length(sepNum2)) {
 				sep <- ','
 			} else {
 				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!')
@@ -337,7 +337,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		sampleIDInfo <- strsplit(sampleID, split="_")
 		label <- NULL
 		temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
-		if (length(unique(label)) != length(label) | length(label) == 0 | any(is.na(label)))
+		if (length(unique(label)) != length(label) || length(label) == 0 || any(is.na(label)))
 			label <- sampleID
 	} else {
 		sampleIDInfo <- NULL

@@ -9,7 +9,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 		exprs <- exprs[!naInd,]
 	}
 
-	if (logMode & (max(exprs, na.rm=TRUE) > 50)) {
+	if (logMode && (max(exprs, na.rm=TRUE) > 50)) {
 		if (min(exprs) < 0) {
 			# warning('Negative values found in the expression values!')
 			print('Negative values found in the expression values and were force to be positive by adding an overall offset.')

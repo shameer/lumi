@@ -53,7 +53,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			return(ww)
 		}
 
-		if (ind != targetArray[1] | length(targetArray) > 1) {
+		if (ind != targetArray[1] || length(targetArray) > 1) {
 			## calculate the weights based on the fold change 
 			if (!is.null(exprs0)) {
 				fd <- exprs0[,ind] - exprs0[, targetArray]
