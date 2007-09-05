@@ -8,8 +8,9 @@
 \description{ Creating density plot of sample intensities in a ExpressionSet object. It is equivalent to \link{hist-methods}. }
 
 \usage{
-\S4method{density}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l",
- 	index.highlight = NULL, color.highlight = 2, symmetry = NULL, addLegend = TRUE, subset = 5000, ...)
+\S4method{density}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", 
+	col=1:dim(x)[2], lty=1:dim(x)[2], lwd=1, index.highlight = NULL, color.highlight = 2, 
+	symmetry = NULL, addLegend = TRUE, subset = 5000, ...)
 }
 
 \arguments{
@@ -18,6 +19,9 @@
 	\item{xlab}{ xlab of the density plot }
 	\item{ylab}{ ylab of the density plot }
 	\item{type}{ parameter of plot function }
+	\item{col}{ line colors of the density plot }
+	\item{lty}{ line types of the density plot }
+	\item{lwd}{ line width of plot function }
 	\item{index.highlight}{ the column index of the highlighted density curve }
 	\item{color.highlight}{ color of highlighted density curve }
 	\item{symmetry}{ the boundary position suppose to be symmetric distributed  }

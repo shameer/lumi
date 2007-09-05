@@ -320,8 +320,8 @@ setMethod('hist', signature(x='ExpressionSet'),
 
 
 setMethod('density', signature(x='ExpressionSet'), 
-	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", index.highlight=NULL, 
-	color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
+	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", col=1:dim(x)[2], lty=1:dim(x)[2], 
+	lwd=1, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
 {
 	if (is(x, 'ExpressionSet')) {
 	    expr <- exprs(x)
@@ -376,8 +376,7 @@ setMethod('density', signature(x='ExpressionSet'),
 			all.y <- all.y[round(nr/2):nr,]
 		}
 	}
-    matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=1:ncol(all.x), 
-        lty=1:ncol(all.x), ...)
+    matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, lty=lty, lwd=lwd, ...)
 	if (!is.null(index.highlight)) {
 		if (index.highlight > ncol(all.x) || index.highlight < 1) {
 			warning('Highlight index out of range!')
@@ -390,9 +389,9 @@ setMethod('density', signature(x='ExpressionSet'),
 		labels <- colnames(expr)
 		if (is.null(labels)) labels <- as.character(1:ncol(expr))
 
-		col <- 1:ncol(all.x)
-		lwd <- rep(1, ncol(all.x))
-		lty <- col
+		col <- col
+		lwd <- lwd
+		lty <- lty
 		if (!is.null(index.highlight)) {
 			col[index.highlight] <- color.highlight
 			lwd[index.highlight] <- 2
