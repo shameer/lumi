@@ -144,7 +144,6 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 			if (is.numeric(j))  j <- sampleName[j]
 			x@controlData <- x@controlData[,j, drop=FALSE]
 		}
-
 	}
 
     # history tracking
@@ -158,7 +157,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 })
 
 
-setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...) 
+setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, ...) 
 {
 	if (missing(y)) return(x)
 	if (length(list(...)) > 0) 
@@ -175,6 +174,8 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 		warning('Two data sets have some duplicated sample names!\n "_1" and "_2" were attached to the sample names!')
 		sampleName.x <- paste(sampleNames(x), '_1', sep='')
 		sampleName.y <- paste(sampleNames(y), '_2', sep='')
+		sampleNames(x) <- sampleName.x
+		sampleNames(y) <- sampleName.y
 	}
 
 	history.submitted <- as.character(Sys.time())
@@ -214,29 +215,38 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 	}
 
 	## combining the QC information
-	if (length(x@QC) > 0 || length(y@QC) > 0) {
+	if (length(x@QC) > 0 && length(y@QC) > 0) {
 		if (!is.null(x@QC$BeadStudioSummary) && !is.null(y@QC$BeadStudioSummary)) {
-			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary))
-			BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
+			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary)) {
+				BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
+				x@QC$BeadStudioSummary <- BeadStudioSummary
+			} else {
+				x@QC <- NULL
+			}
 		} else {
-			BeadStudioSummary <- x@QC$BeadStudioSummary
+			x@QC <- NULL
 		}
 		if (!is.null(x@QC$sampleSummary) && !is.null(y@QC$sampleSummary)) {
-			if (nrow(x@QC$sampleSummary) == nrow(y@QC$sampleSummary))
-			sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
+			if (nrow(x@QC$sampleSummary) == nrow(y@QC$sampleSummary)) {
+				sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
+				x@QC$sampleSummary <- sampleSummary
+			} else {
+				x@QC <- NULL
+			}
 		} else {
-			sampleSummary <- x@QC$sampleSummary
+			x@QC <- NULL
 		}
-		
-		x@QC$BeadStudioSummary <- BeadStudioSummary
-		x@QC$sampleSummary <- sampleSummary
-		history.x <- x@QC$history
-		if (is.null(history.x)) history.x <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
-		if (is.null(history.x$lumiVersion)) history.x$lumiVersion <- rep(NA, nrow(history.x))
-		history.y <- y@QC$history
-		if (is.null(history.y)) history.y <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
-		if (is.null(history.y$lumiVersion)) history.y$lumiVersion <- rep(NA, nrow(history.y))
-		x@QC$history <- rbind(history.x, history.y)
+		if (!is.null(x@QC)) {
+			history.x <- x@QC$history
+			if (is.null(history.x)) history.x <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
+			if (is.null(history.x$lumiVersion)) history.x$lumiVersion <- rep(NA, nrow(history.x))
+			history.y <- y@QC$history
+			if (is.null(history.y)) history.y <- data.frame(submitted=NA, finished=NA, command=NA, lumiVersion=NA)
+			if (is.null(history.y$lumiVersion)) history.y$lumiVersion <- rep(NA, nrow(history.y))
+			x@QC$history <- rbind(history.x, history.y)
+		} 
+	} else {
+		x@QC <- NULL
 	}
 	
 	## VST transformation parameters
@@ -256,7 +266,6 @@ setMethod("combine", signature=c("LumiBatch", 'missing'), function(x, y, ...)
 		controlData <- cbind(x@controlData, y@controlData)
 		x@controlData <- as.data.frame(controlData)
 	}
-	sampleNames(x) <- c(sampleName.x, sampleName.y)
 
 	# history tracking
 	history.finished <- as.character(Sys.time())
