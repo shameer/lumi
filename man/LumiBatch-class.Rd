@@ -20,7 +20,7 @@
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}
 \alias{show,LumiBatch-method}
-\alias{combine,LumiBatch,missing-method}
+\alias{combine,LumiBatch,LumiBatch-method}
 \alias{[,LumiBatch-method}
 \alias{getHistory,LumiBatch-method}
 \alias{getHistory}
