@@ -10,28 +10,29 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('i
 	ord <- order(u); u.bak <- u
 	u <- u[ord]; std <- std[ord]
 	
-	## check for the negative values, which is not allowed in the vst function
-	if (any(u < 0)) {
-		stop('Negative expression value is not allowed!')
-	}
 	if (any(std < 0)) {
 		stop('Negative expression standard deviation is not allowed!')
 	}
 	
- 	## downsampling to speed up
-	downSampledU <- 2^seq(from=min(log2(u), na.rm=TRUE), to=max(log2(u), na.rm=TRUE), length=nSupport)
-	
+	## downsampling to speed up 
+	if (min(u) < 1) {
+		offset <- 1 - min(u)
+	} else {
+		offset <- 0
+	}
+	offset <- 1 - min(u)
+	downSampledU <- 2^seq(from=log2(min(u + offset)), to=log2(max(u + offset)), length=nSupport) - offset
+
 	if (method == 'quadratic') {
 		dd <- data.frame(y=std, x2=u^2, x1=u)
-		##dd = data.frame(y=std^2, x2=u^2, x1=u)
 		lm2 <- lm(y ~ x2 + x1, dd)
 		smoothStd <- predict(lm2, data.frame(x2=downSampledU^2, x1=downSampledU))
 	} else {
-		minU <- max(log2(100), log(min(u)))
+		minU <- log2(max(100 + offset, min(u)))
 		maxU <- log2(max(u))
 		# uCutoff <- 2^((maxU + minU)/2)
 		uCutoffLow <- 2^(minU + (maxU - minU)/3)
-		uCutoffHigh <- 2^(minU + (maxU - minU) * 3/4)
+		uCutoffHigh <- 2^(minU + (maxU - minU) * 4/5)
 		selInd <- (u > uCutoffLow & u < uCutoffHigh)
 		selLowInd <- (u < uCutoffLow)
 		if (c3 != 0) {
@@ -72,6 +73,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('i
 		len <- length(u)
 		ind <- sample(1:len, min(5000, len))
 		plot(u[ind], std[ind], pch='.', log='xy', xlab="mean", ylab="standard deviation")
+		# points(u[selInd], std[selInd], col=2)
 		lines(downSampledU, smoothStd, col=2, lwd=1.5)
 	}
 	
