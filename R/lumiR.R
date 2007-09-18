@@ -298,7 +298,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		## remove duplicated
 		exprs <- exprs[-rmInd,,drop=FALSE]
 		if (!is.null(se.exprs)) se.exprs <- se.exprs[-rmInd,,drop=FALSE]
-		id <- id[-rmInd]
+		id <- id[-rmInd]; targetID <- targetID[-rmInd]
 		if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
 		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
 	}

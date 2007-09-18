@@ -146,7 +146,8 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 		## controlData information
 		if (nrow(x@controlData) > 0) {
 			if (is.numeric(j))  j <- sampleName[j]
-			x@controlData <- x@controlData[,j, drop=FALSE]
+			if (all(j %in% colnames(x@controlData)))
+				x@controlData <- x@controlData[,j, drop=FALSE]
 		}
 	}
 
@@ -175,8 +176,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	sampleName.x <- sampleNames(x)
 	sampleName.y <- sampleNames(y)
 	if (any(sampleName.x %in% sampleName.y)) {
-		warning('Two data sets have some duplicated sample names!\n "_1" and "_2" were attached to the sample names!')
-		sampleName.x <- paste(sampleNames(x), '_1', sep='')
+		warning('Two data sets have some duplicated sample names!\n "_2" were attached to the duplicated sample names!')
+		sampleName.x <- sampleNames(x)   # paste(sampleNames(x), '_1', sep='')
 		sampleName.y <- paste(sampleNames(y), '_2', sep='')
 		sampleNames(x) <- sampleName.x
 		sampleNames(y) <- sampleName.y
@@ -189,16 +190,6 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 	## combine pheno data
 	phenoData(x) <- combine(phenoData(x),phenoData(y))
-	# if (!is.null(phenoData(x)) || !is.null(phenoData(y))) {
-	# 	phenoData.x <- phenoData(x)
-	# 	phenoData.y <- phenoData(y)
-    # 
-	# 	pData(phenoData.x) <- rbind(pData(phenoData.x), pData(phenoData.y))
-	# 	metaInfo <- rbind(varMetadata(phenoData.x), varMetadata(phenoData.y))
-	# 	varMetadata(phenoData.x) <- metaInfo[!duplicated(c(rownames(varMetadata(phenoData.x)),
-	# 	 		rownames(varMetadata(phenoData.y)))), ,drop=FALSE]
-	# 	phenoData(x) <- phenoData.x
-	# }	
 	
 	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
 	## combine feature data
@@ -267,8 +258,10 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	
 	## controlData information
 	if (nrow(x@controlData) > 0) {
-		controlData <- cbind(x@controlData, y@controlData)
-		x@controlData <- as.data.frame(controlData)
+		if (nrow(x@controlData) == nrow(y@controlData)) {
+			controlData <- cbind(x@controlData, y@controlData)
+			x@controlData <- as.data.frame(controlData)
+		}
 	}
 
 	# history tracking

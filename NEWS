@@ -1,9 +1,10 @@
 -----------------------------------------------------
-version 1.3.27-1.3.33
-release data: 09/17/2007
+version 1.3.27-1.3.34
+release data: 09/18/2007
 1. update the code to make vst accept negative values.
-2. fixed bug of combine function
-3. other small updates of help and vignette
+2. fixed bug of combine and subset functions dealing with controlData slot
+3. add bg.Adjust background adjustment function to deal with the control probe information
+4. other small updates of help and vignette
 
 
 -----------------------------------------------------

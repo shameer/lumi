@@ -11,6 +11,8 @@ bgAdjust <- function(lumiBatch, probs=0.5, ...) {
 		return(lumiBatch)
 	}
 	control <- control[, sampleNames(lumiBatch)]
+	probeType <- rownames(control)
+	if ('negative' %in% probeType) control <- control[probeType == 'negative',]
 	quantile.ctrl <- apply(control, 2, quantile, probs=probs, ...)
 	exprs(lumiBatch) <- exprs(lumiBatch) - matrix(rep(1, nrow(lumiBatch)), ncol=1) %*% quantile.ctrl
 	return(lumiBatch)

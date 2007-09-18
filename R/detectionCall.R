@@ -16,8 +16,11 @@ function(x.lumi, Th = 0.01, type=c('probe', 'sample', 'matrix')) {
 
 	## check the detection is p-values or not
 	expr <- exprs(x.lumi)
-	low <- mean(expr[detect[,1] > 0.9,1])
-	high <- mean(expr[detect[,1] < 0.1,1])
+	# low <- mean(expr[detect[,1] > 0.9,1])
+	# high <- mean(expr[detect[,1] < 0.1,1])
+	low <- expr[which.max(detect[,1]), 1]
+	high <- expr[which.min(detect[,1]), 1]
+	
 	if (low > high) detect <- 1 - detect
 	if (!is.null(detect)) {
 		if (type == 'sample') AP <- colSums(detect<= Th)
