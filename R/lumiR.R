@@ -36,7 +36,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (!file.exists(fileName)) stop('The file is not exist! Please check your file path!')
 	## ---------------------------------------
 	## identify the Metadata lines 
-	info <- readLines(file(fileName), n=20)    # take the first 20 lines to have a taste
+	info <- readLines(fileName, n=20)    # take the first 20 lines to have a taste
 
 	## Use "AVG_SIGNAL" as an indicator of Where the metaData stops
 	##   intelligently find nMetaDataLines  
@@ -88,7 +88,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	## ---------------------------------------
 	# get meta data info
 	if (nMetaDataLines > 0) {
-		info <- readLines(file(fileName), n=nMetaDataLines)
+		info <- readLines(fileName, n=nMetaDataLines)
 		## check the version of the beadStudio output
 		markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
 		if (length(markerInd) > 0) {

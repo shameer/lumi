@@ -1,4 +1,12 @@
 -----------------------------------------------------
+version 1.3.27-1.3.33
+release data: 09/17/2007
+1. update the code to make vst accept negative values.
+2. fixed bug of combine function
+3. other small updates of help and vignette
+
+
+-----------------------------------------------------
 version 1.3.18-1.3.26
 release data: 08/25/2007
 1. Updated the vst function in version 1.3.25. (estimate the c3 based on the background probes).
