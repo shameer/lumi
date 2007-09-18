@@ -125,8 +125,12 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	if (!missing(j)) {
 		if (!is.null(x@QC)) {
 			QC <- x@QC
-			if (!is.null(QC$sampleSummary)) QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
-			if (!is.null(QC$BeadStudioSummary)) QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
+			if (!is.null(QC$sampleSummary))
+				if (ncol(QC$sampleSummary) == ddim[2])
+					QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
+			if (!is.null(QC$BeadStudioSummary))
+				if (nrow(QC$BeadStudioSummary) == ddim[2])
+					QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
 			x@QC <- QC
 		}
 		if (!is.null(attr(x, 'vstParameter'))) {
