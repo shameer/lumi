@@ -79,6 +79,8 @@ We strongly suggest outputting the header information when using BeadStudio, as 
 
 If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the {\bf featureData} of the {\bf LumiBatch} object.
  
+For convenience, another function \Rfunction{lumiR.batch} is designed to input files in batch. Basically it combines the output of each file. See the help of \Rfunction{lumiR.batch} for details.
+ 
 \begin{figure}
 \includegraphics{dataFileSample}
 \caption{An example of the input data format}
@@ -802,6 +804,12 @@ if (require(GOstats) & require(lumiHumanV1) & require(xtable)) {
 \label{ta:GOggterms}
 \end{center}
 \end{table}
+
+
+\section{Session Info}
+<<sessionInfo, results=tex, print=TRUE>>=
+toLatex(sessionInfo())
+@ 
 
 
 \section{Reference}
