@@ -319,7 +319,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (!is.null(detection)) rownames(detection) <- id
     
 	if (stdCorrection) {
-		se.exprs <- se.exprs * sqrt(beadNum)
+		if (is.null(beadNum)) {
+			print('No Standard Deviation correction was applied becasue of missing bead number information.')
+		} else {
+			se.exprs <- se.exprs * sqrt(beadNum)
+		}
 	} 
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
