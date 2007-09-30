@@ -33,22 +33,19 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 		transFun <- NULL
 		for (i in 1:nArray) {
 			cat(as.character(Sys.time()), ", processing array ", i, "\n")
-			if (method == 'vst') {
-				if (!is.null(detectCall)) {
-					backgroundIndex <- which(detectCall[,i] == 'A')
-				} else {
-					backgroundIndex <- NULL
-				}
-		        x <- vst(u=exprs[,i], std=se.exprs[,i], method='iterate', backgroundInd=backgroundIndex, ifPlot=ifPlot, ...)
+			if (!is.null(detectCall)) {
+				backgroundIndex <- which(detectCall[,i] == 'A')
 			} else {
-				x <- vst(u=exprs[,i], std=se.exprs[,i], method='quadratic', ifPlot=ifPlot, ...)
+				backgroundIndex <- NULL
 			}
+		    x <- vst(u=exprs[,i], std=se.exprs[,i], backgroundInd=backgroundIndex, ifPlot=ifPlot, ...)
 			transExpr <- cbind(transExpr, x)
+			
 			transPara <- rbind(transPara, attr(x, 'parameter'))
 			transFun <- c(transFun, attr(x, 'transformFun'))
 		}
-		rownames(transPara) <- colnames(exprs(x.lumi))
-		names(transFun) <- colnames(exprs(x.lumi))
+		if (!is.null(transPara))	rownames(transPara) <- colnames(exprs(x.lumi))
+		if (!is.null(transFun))	names(transFun) <- colnames(exprs(x.lumi))
 		exprs(new.lumi) <- transExpr
 	}
 	colnames(exprs(new.lumi)) <- colnames(exprs(x.lumi))

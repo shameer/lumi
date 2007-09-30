@@ -6,7 +6,7 @@
   Stabilizing the expression variance based on the bead level expression variance and mean relations
 }
 \usage{
-vst(u, std, nSupport = min(length(u), 500), backgroundIndex=NULL, method = c('iterate', 'quadratic'), ifPlot = FALSE)
+vst(u, std, nSupport = min(length(u), 500), backgroundIndex=NULL, fitMethod = c('linear', 'quadratic'), ifPlot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,11 +14,13 @@ vst(u, std, nSupport = min(length(u), 500), backgroundIndex=NULL, method = c('it
   \item{std}{ expression standard deviation of the beads with same sequence }
   \item{nSupport}{ the number of down-sampling to speed processing }
   \item{backgroundIndex}{ the index of background probes, which are determined based on the detection p-values.}
-  \item{method}{ methods of fitting the relations between expression variance and mean relations }
+  \item{fitMethod}{ methods of fitting the relations between expression variance and mean relations }
   \item{ifPlot}{ plot intermediate results or not }
 }
 \details{
  The variance-stabilizing transformation (VST) takes the advantage of larger number of technical replicates available on the Illumina microarray. It models the mean-variance relationship of the within-array technical replicates at the bead level of Illumina microarray. An arcsinh transform is then applied to stabilize the variance. See reference for more details.
+
+For the methods of fitting the relations between expression variance and mean relations, the 'linear' method is more robust and provides detailed parameters for inverseVST. 
 }
 \value{
 Return the transformed (variance stabilized) expression values.

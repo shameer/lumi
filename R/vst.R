@@ -1,9 +1,9 @@
 `vst` <-
-function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('iterate', 'quadratic'), ifPlot=FALSE) {
+function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c('linear', 'quadratic'), ifPlot=FALSE) {
 	# u is the mean of probe beads
 	# std is the standard deviation of the probe beads
-	
-	method <- match.arg(method)
+	# 
+	fitMethod <- match.arg(fitMethod)
 	## Estimate the background variance c3
 	c3 <- ifelse (is.null(backgroundIndex), 0, mean(std[backgroundIndex]))
 	
@@ -14,20 +14,22 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('i
 		stop('Negative expression standard deviation is not allowed!')
 	}
 	
-	## downsampling to speed up 
-	if (min(u) < 1) {
-		offset <- 1 - min(u)
-	} else {
-		offset <- 0
-	}
-	offset <- 1 - min(u)
-	downSampledU <- 2^seq(from=log2(min(u + offset)), to=log2(max(u + offset)), length=nSupport) - offset
 
-	if (method == 'quadratic') {
+	if (fitMethod == 'quadratic') {
+		downSampledU <- u; offset=0
 		dd <- data.frame(y=std, x2=u^2, x1=u)
 		lm2 <- lm(y ~ x2 + x1, dd)
 		smoothStd <- predict(lm2, data.frame(x2=downSampledU^2, x1=downSampledU))
 	} else {
+		## downsampling to speed up 
+		if (min(u) < 1) {
+			offset <- 1 - min(u)
+		} else {
+			offset <- 0
+		}
+		offset <- 1 - min(u)
+		downSampledU <- 2^seq(from=log2(min(u + offset)), to=log2(max(u + offset)), length=nSupport) - offset
+
 		minU <- log2(max(100 + offset, min(u)))
 		maxU <- log2(max(u))
 		# uCutoff <- 2^((maxU + minU)/2)
@@ -70,15 +72,16 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('i
 
 	if (ifPlot) {
 		par(mfrow=c(1,2))
-		len <- length(u)
+		x <- u[u > 0]
+		y <- std[u > 0]
+		len <- length(x)
 		ind <- sample(1:len, min(5000, len))
-		plot(u[ind], std[ind], pch='.', log='xy', xlab="mean", ylab="standard deviation")
-		# points(u[selInd], std[selInd], col=2)
-		lines(downSampledU, smoothStd, col=2, lwd=1.5)
+		plot(x[ind], y[ind], pch='.', log='xy', xlab="Mean", ylab="Standard Deviation", main='(A) Relations of probe Mean and SD')
+		lines(downSampledU, smoothStd, col=3, lwd=1.5)
 	}
 	
 	## calculate the integration (h function is the integral)
-	if (method == 'iterate') {
+	if (fitMethod == 'linear') {
 		if (c3 == 0) {
 			## Transform function h(x) = g * log(a + b * x)
 			g <- 1/c1
@@ -114,35 +117,40 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, method=c('i
 		transform.parameter <- NULL
 	}	
 
-    if (ifPlot) {
-        plot(downSampledU, hy, col=2, xlab="original value", ylab="variance stabilization transformed value")
-        ii <- order(u.bak)
-        lines(u.bak[ii], transformedU[ii], col=3, type='l')
-		par(mfrow=c(1,1))
-    }
-
 	## rescale to the similar range with log2
-	if (method == 'iterate') {
-		cutInd <- which.min(abs(u.bak - uCutoffLow))
-		maxInd <- which.max(u.bak)
-		y <- c(u.bak[cutInd], u.bak[maxInd])
-		x <- c(transformedU[cutInd], transformedU[maxInd])
-		m <- lm(log2(y) ~ x)
+	if (fitMethod == 'quadratic') {
+		minU <- log2(max(100 + offset, min(u)))
+		maxU <- log2(max(u))
+		uCutoffLow <- 2^(minU + (maxU - minU)/3)
+		uCutoffHigh <- 2^(minU + (maxU - minU) * 4/5)		
+	}
+	cutInd <- which.min(abs(u.bak - uCutoffLow))
+	maxInd <- which.max(u.bak)
+	y <- c(u.bak[cutInd], u.bak[maxInd])
+	x <- c(transformedU[cutInd], transformedU[maxInd])
+	m <- lm(log2(y) ~ x)
+	if (fitMethod == 'linear') {
 		transform.parameter <- c(a, b, g * m$coef[2], m$coef[1])
 		names(transform.parameter) <- c('a', 'b', 'g', 'Intercept')
 		## The transform parameter is in the transFun below
 		## transFun <- g * asinh(a + b * x) * m$coef[2] + m$coef[1]
-		transformedU <- predict(m, data.frame(x=transformedU))
 	} else {
-		minRequire <- length(which(u.bak < 1)) / length(u.bak)
-		low <- ifelse(minRequire < 0.05, 0.05, minRequire)
-		y <- c(quantile(u.bak, low), quantile(u.bak, 0.95))
-		x <- c(quantile(transformedU, low), quantile(transformedU, 0.95))
-		m <- lm(log2(y) ~ x)
-		transformedU <- predict(m, data.frame(x=transformedU))
+		transform.parameter <- NULL
+		transFun <- NULL
 	}
+	transformedU <- predict(m, data.frame(x=transformedU))
 	attr(transformedU, 'parameter') <- transform.parameter
 	attr(transformedU, 'transformFun') <- transFun
+
+    if (ifPlot) {
+		x <- log2(u.bak[u.bak > 0])
+		y <- transformedU[u.bak > 0]
+        ii <- order(x)
+        plot(x[ii], y[ii], lwd=1.5, type='l', xlab="Log2 transformed value", ylab="VST transformed value", main='(B) Log2 vs. VST')
+		abline(a=0, b=1, col=3, lwd=1.5, lty=2)
+		par(mfrow=c(1,1))
+    }
+	
 	return(transformedU)
 }
 
