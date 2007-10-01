@@ -1,5 +1,5 @@
 `lumiT` <-
-function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutput = TRUE, ...) {
+function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	if (is(x.lumi, 'ExpressionSet') || is(x.lumi, 'exprSet')) {
 		if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
@@ -26,6 +26,14 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 		exprs(new.lumi) <- sign(exprs) * (abs(exprs))^1/3
 	} else {
 		se.exprs <- se.exprs(x.lumi)
+		if (stdCorrection) {
+			bn <- beadNum(x.lumi)
+			if (is.null(bn)) {
+				print('No Standard Deviation correction was applied becasue of missing bead number information.')
+			} else {
+				se.exprs <- se.exprs * sqrt(bn)
+			}
+		}
 		nArray <- ncol(exprs)
 		detectCall <- detectionCall(x.lumi, Th=0.01, type='matrix')
 		transExpr <- NULL

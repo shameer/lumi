@@ -6,7 +6,7 @@
   Read in Illumina expression data. We assume the data was saved in a comma or tab separated text file.  
 }
 \usage{
-lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', stdCorrection=TRUE, parseColumnName=TRUE, 
+lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=TRUE, 
 columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -17,14 +17,11 @@ columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection=
   \item{na.rm}{ determine whether to remove NA }
   \item{lib}{ the annotation library used by \code{\link{addNuId2lumi}}  }
   \item{dec}{ the character used in the file for decimal points.}
-  \item{stdCorrection}{ determine transfer the standard error of the mean as the standard deviation }
   \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (assume the naming of the column names are meaningful.) }
   \item{columnNameGrepPattern}{ the string grep patterns used to determine the slot corresponding columns.}
 }
 \details{
 The function can automatically determine the separation character if it is Tab or comma. Otherwise, the user should specify the separator manually. If the annotation library is provided, the Illumina Id will be replaced with nuID, which is used as the index Id for the lumi annotation packages.
-
-The adding of the parameter "stdCorrection" is for the value correction of the STDEV (or STDERR) columns. The STDEV (or STDERR) columns of the BeadStudio output file is the standard error of the mean of the bead intensities corresponding to the same probe. (Thanks Gordon Smyth kindly provided this information.). As the variance stabilization (see \code{\link{vst}} function) requires the information of the standard deviation instead of the standard error of the mean, the value correction is required. The corrected value will be x * sqrt(N), where x is the old value (standard error of the mean), N is the number of beads corresponding to the probe.
 
 The parameter "columnNameGrepPattern" is designed for some advanced users. It defines the string grep patterns used to determine the slot corresponding columns. For example, for the "exprs" slot in LumiBatch object, it is composed of the columns whose name includes "AVG\_SIGNAL". In some cases, the user may not want to read the "detection" and "beadNum" related columns to save memory. The user can set the "detection" and "beadNum" as NA in "columnNameGrepPattern". If the 'se.exprs' is set as NA or the corresponding columns are not available, then lumiR will create a ExpressionSet object instead of LumiBatch object.
 
