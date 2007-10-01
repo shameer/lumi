@@ -61,9 +61,9 @@
    \describe{
       \item{\code{assayData}}{ contains equal dimensional matrices:
  		\code{\bf exprs} (contains gene expression level, which is the mean of its bead replicates.),
- 		\code{\bf se.exprs} (contains gene expression standard deviation, which is the standard deviation of its bead replicates.), 
+ 		\code{\bf se.exprs} (contains gene expression standard error, which is the standard error of its bead replicates.), 
  		\code{\bf beadNum} (records the number of beads for the gene.),
- 		\code{\bf detection} (records the detectability of the gene. The number is from [0,1]. Usually > 0.99 inidicates good detection.). 
+ 		\code{\bf detection} (records the detectability of the gene. The number is from [0,1]. Usually > 0.99 indicates good detection.). 
 		For more details of \code{assayData}, please see \code{\link[Biobase]{ExpressionSet}} } 
       \item{\code{phenoData}:}{See \code{\link[Biobase]{eSet}}}
       \item{\code{experimentData}:}{See \code{\link[Biobase]{eSet}}}
