@@ -14,16 +14,13 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		warning('exprs slot is required and default pattern will be used!')
 	}
 	if (is.na(columnNameGrepPattern$se.exprs)) {
-		# stdCorrection <- FALSE
 		columnNameGrepPattern$beadNum <- columnNameGrepPattern$detection <- NA
 		warning('se.exprs slot is required for the VST transformation!\n We strongly suggest to include BEAD_STD columns!')
 		# columnNameGrepPattern$se.exprs <- 'BEAD_STD'
 		# warning('se.exprs slot is required and default pattern will be used!')
 	}
 	if (is.na(columnNameGrepPattern$beadNum)) {
-		# stdCorrection <- FALSE
 		# columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
-		# warning('beadNum is required if "stdCorrection=TRUE". The default pattern will be used!')
 	}
 
 	# columnNameGrepPattern <- c(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')
@@ -318,13 +315,6 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (!is.null(beadNum)) rownames(beadNum) <- id
 	if (!is.null(detection)) rownames(detection) <- id
     
-	# if (stdCorrection) {
-	# 	if (is.null(beadNum)) {
-	# 		print('No Standard Deviation correction was applied becasue of missing bead number information.')
-	# 	} else {
-	# 		se.exprs <- se.exprs * sqrt(beadNum)
-	# 	}
-	# } 
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
