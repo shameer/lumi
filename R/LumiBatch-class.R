@@ -285,6 +285,16 @@ setMethod("boxplot",signature(x="ExpressionSet"),
      	main <- tmp@title
 
 	expr <- exprs(x)
+  	if (logMode && max(exprs(x), na.rm=TRUE) > 50) {
+		## force the expression value as positive in the logMode
+		# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+		# remove the negative values
+		if (min(expr) < 0) {
+			rMin <- rowMin(expr)
+			expr <- expr[rMin > 0, ]
+		}
+		expr <- log2(expr)
+	} 
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
@@ -295,11 +305,6 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 	} else {
 		index <- 1:nrow(expr)
 	}
-  	if (logMode && max(exprs(x), na.rm=TRUE) > 50) {
-		## force the expression value as positive in the logMode
-		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
-		expr <- log2(expr)
-	} 
 
 	dataMatrix <- expr[index,]
 	labels <- colnames(dataMatrix)
@@ -337,6 +342,20 @@ setMethod('density', signature(x='ExpressionSet'),
 		stop('Un-supported class of x!')
 	}
 		
+    if (logMode && (max(expr, na.rm=TRUE) > 50)) {
+		## force the expression value as positive in the logMode
+		# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+		# remove the negative values
+		if (min(expr) < 0) {
+			rMin <- rowMin(expr)
+			expr <- expr[rMin > 0, ]
+		}
+		expr <- log2(expr)
+		if (is.null(xlab)) 
+			xlab <- "log2 intensity"
+    } else if (is.null(xlab)) 
+        xlab <- "intensity"
+
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
@@ -348,16 +367,6 @@ setMethod('density', signature(x='ExpressionSet'),
 		ind <- 1:nrow(expr)
 	}
 	expr <- expr[ind,,drop=FALSE]
-
-    if (logMode && (max(expr, na.rm=TRUE) > 50)) {
-		## force the expression value as positive in the logMode
-		if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
-
-		expr <- log2(expr)
-		if (is.null(xlab)) 
-			xlab <- "log2 intensity"
-    } else if (is.null(xlab)) 
-        xlab <- "intensity"
 
 	if (!is.null(symmetry)) {
 		x.range <- range(expr)
@@ -453,6 +462,23 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	}
 
 	expr <- exprs(x)
+	if(logMode) {
+		if (max(expr, na.rm=TRUE) > 50) {
+			## force the expression value as positive in the logMode
+			# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+			# remove the negative values
+			if (min(expr) < 0) {
+				rMin <- rowMin(expr)
+				expr <- expr[rMin > 0, ]
+			}
+			expr <- log2(expr)
+		}
+	} else {
+		if (max(expr, na.rm=TRUE) < 50) {
+			expr <- 2^expr
+		}
+	}
+
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
@@ -462,17 +488,6 @@ setMethod("pairs", signature(x="ExpressionSet"),
 		subset <- 1:nrow(expr)
 	}
 	
-	if(logMode) {
-		if (max(expr, na.rm=TRUE) > 50) {
-			## force the expression value as positive in the logMode
-			if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
-			expr <- log2(expr)
-		}
-	} else {
-		if (max(expr, na.rm=TRUE) < 50) {
-			expr <- 2^expr
-		}
-	}
 	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
 			lower.panel=lowerPanel, ...)
 })
@@ -487,6 +502,22 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	function(object, ..., logMode=TRUE, subset=5000) 
 {
 	expr <- exprs(object)
+	if(logMode) {
+		if (max(expr, na.rm=TRUE) > 50) {
+			## force the expression value as positive in the logMode
+			# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+			# remove the negative values
+			if (min(expr) < 0) {
+				rMin <- rowMin(expr)
+				expr <- expr[rMin > 0, ]
+			}
+			expr <- log2(expr)
+		} 
+	} else {
+		if (max(expr, na.rm=TRUE) < 50) {
+			expr <- 2^expr
+		}
+	}
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
@@ -497,19 +528,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	} else {
 		ind <- 1:nrow(expr)
 	}
-	if(logMode) {
-		if (max(expr, na.rm=TRUE) > 50) {
-			## force the expression value as positive in the logMode
-			if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
-			expr <- log2(expr)
-		} 
-		mva.pairs(expr[ind, ], log.it=FALSE, ...)
-	} else {
-		if (max(expr, na.rm=TRUE) < 50) {
-			expr <- 2^expr
-		}
-		mva.pairs(expr[ind, ], log.it=FALSE, ...)
-	}
+	mva.pairs(expr[ind, ], log.it=FALSE, ...)
 })
 
 

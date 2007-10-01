@@ -3,24 +3,25 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	history.submitted <- as.character(Sys.time())
 
-	exprs <- exprs(x.lumi)
-	if (any(is.na(exprs))) {
-		naInd <- apply(exprs, 1, function(x) any(is.na(x)))
-		exprs <- exprs[!naInd,]
+	expr <- exprs(x.lumi)
+	if (any(is.na(expr))) {
+		naInd <- apply(expr, 1, function(x) any(is.na(x)))
+		expr <- expr[!naInd,]
 	}
 
-	if (logMode && (max(exprs, na.rm=TRUE) > 50)) {
-		if (min(exprs) < 0) {
-			rMin <- rowMin(exprs)
-			exprs <- exprs[rMin > 0, ]
+	if (logMode && (max(expr, na.rm=TRUE) > 50)) {
+		# remove the negative values
+		if (min(expr) < 0) {
+			rMin <- rowMin(expr)
+			expr <- expr[rMin > 0, ]
 		}
-		exprs <- log2(exprs)
+		expr <- log2(expr)
 	} 
-	sampleName <- colnames(exprs)
+	sampleName <- colnames(expr)
 
 	## mean, variance, 'cv', 'AP', 'density', 'correlation', 'sample relation'
-	mm <- colMeans(exprs)
-	std <- apply(exprs, 2, sd)
+	mm <- colMeans(expr)
+	std <- apply(expr, 2, sd)
 	
 	## AP calls
 	if (!is.null(x.lumi@QC$sampleSummary)) {
@@ -36,9 +37,9 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01) {
 	}
 
 	## detect outlier
-	center <- rowMeans(exprs)
-	profile <- cbind(center, exprs)
-	colnames(profile) <- c('Center', colnames(exprs))
+	center <- rowMeans(expr)
+	profile <- cbind(center, expr)
+	colnames(profile) <- c('Center', colnames(expr))
 	distCenter <- as.matrix(dist(t(profile), method="euclidean"))
 
 	sampleSummary <- rbind(mm, std, detectionRate, distCenter[2:nrow(distCenter),1])
