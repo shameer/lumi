@@ -291,7 +291,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 		# remove the negative values
 		if (min(expr) < 0) {
 			rMin <- rowMin(expr)
-			expr <- expr[rMin > 0, ]
+			expr <- expr[rMin > 0, , drop=FALSE]
 		}
 		expr <- log2(expr)
 	} 
@@ -301,6 +301,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
 			index <- subset
+			index <- index[index > 0 & index <= nrow(expr)]
 		}
 	} else {
 		index <- 1:nrow(expr)
@@ -348,7 +349,7 @@ setMethod('density', signature(x='ExpressionSet'),
 		# remove the negative values
 		if (min(expr) < 0) {
 			rMin <- rowMin(expr)
-			expr <- expr[rMin > 0, ]
+			expr <- expr[rMin > 0, , drop=FALSE]
 		}
 		expr <- log2(expr)
 		if (is.null(xlab)) 
@@ -359,14 +360,15 @@ setMethod('density', signature(x='ExpressionSet'),
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
-			ind <- sample(1:nrow(expr), min(subset, nrow(expr)))
+			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
-			ind <- subset
+			index <- subset
+			index <- index[index > 0 & index <= nrow(expr)]
 		}
 	} else {
-		ind <- 1:nrow(expr)
+		index <- 1:nrow(expr)
 	}
-	expr <- expr[ind,,drop=FALSE]
+	expr <- expr[index,,drop=FALSE]
 
 	if (!is.null(symmetry)) {
 		x.range <- range(expr)
@@ -469,7 +471,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 			# remove the negative values
 			if (min(expr) < 0) {
 				rMin <- rowMin(expr)
-				expr <- expr[rMin > 0, ]
+				expr <- expr[rMin > 0, , drop=FALSE]
 			}
 			expr <- log2(expr)
 		}
@@ -483,7 +485,9 @@ setMethod("pairs", signature(x="ExpressionSet"),
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
 			subset <- sample(1:nrow(expr), min(subset, nrow(expr)))
-		} 
+		} else {
+			subset <- subset[subset > 0 & subset <= nrow(expr)]
+		}
 	} else {
 		subset <- 1:nrow(expr)
 	}
@@ -509,7 +513,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 			# remove the negative values
 			if (min(expr) < 0) {
 				rMin <- rowMin(expr)
-				expr <- expr[rMin > 0, ]
+				expr <- expr[rMin > 0, ,drop=FALSE]
 			}
 			expr <- log2(expr)
 		} 
@@ -521,14 +525,15 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric!')
 		if (length(subset) == 1) {
-			ind <- sample(1:nrow(expr), min(subset, nrow(expr)))
+			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
-			ind <- subset
+			index <- subset
+			index <- index[index > 0 & index <= nrow(expr)]
 		}
 	} else {
-		ind <- 1:nrow(expr)
+		index <- 1:nrow(expr)
 	}
-	mva.pairs(expr[ind, ], log.it=FALSE, ...)
+	mva.pairs(expr[index, ], log.it=FALSE, ...)
 })
 
 
