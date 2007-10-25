@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=TRUE,
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE,
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS')) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
