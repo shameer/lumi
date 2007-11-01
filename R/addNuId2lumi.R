@@ -133,12 +133,20 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	if (any(duplicated(newId)))  {
 		warning('Duplicated IDs found and were merged!')
 		dupId <- unique(newId[duplicated(newId)])
+		## determine whether the detection p-value close to 0 or 1 is significant
+		detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]
+		detect.high <- exprs[which.min(detection(x.lumi)[,1]), 1]
+		
 		rmIndex <- NULL
 		for (dupId.i in dupId) {
 			dupIndex <- which(newId == dupId.i)
 			ave.exp <- colMeans(exprs(x.lumi)[dupIndex, ])
 			totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
-			maxDetection <- apply(detection(x.lumi), 2, max)
+			if (detect.low < detect.high) {
+				maxDetection <- apply(detection(x.lumi), 2, min)
+			} else {
+				maxDetection <- apply(detection(x.lumi), 2, max)
+			}
 
 			temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum(x.lumi)[dupIndex,] - 1))
 			temp <- temp / (totalBeadNum - length(dupIndex))
@@ -148,7 +156,6 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			beadNum(x.lumi)[dupIndex[1],] <- totalBeadNum
 			rmIndex <- c(rmIndex, dupIndex[-1])
 		}
-
 		## remove duplicated
 		x.lumi <- x.lumi[-rmIndex, ]
 		newId <- newId[-rmIndex]
