@@ -248,9 +248,15 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	if (!is.null(attr(x, 'vstParameter')) && !is.null(attr(x, 'vstParameter'))) {
 		vstParameter.x <- attr(x, 'vstParameter')
 		vstParameter.y <- attr(y, 'vstParameter')
+		if (is.null(nrow(vstParameter.x))) {
+			vstParameter.x <- matrix(vstParameter.x, nrow=1)
+		}
+		if (is.null(nrow(vstParameter.y))) {
+			vstParameter.y <- matrix(vstParameter.y, nrow=1)
+		}
 		if (nrow(vstParameter.x) != dimm.x[2] || nrow(vstParameter.y) != dimm.y[2]) {
 			attr(x, 'vstParameter') <- attr(x, 'transformFun') <- NULL
-		} else{
+		} else {
 			attr(x, 'vstParameter') <- rbind(attr(x, 'vstParameter'), attr(y, 'vstParameter'))
 			attr(x, 'transformFun') <- c(attr(x, 'transformFun'), attr(y, 'transformFun'))
 		}

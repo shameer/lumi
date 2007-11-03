@@ -1,13 +1,14 @@
 `lumiT` <-
 function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
-	if (is(x.lumi, 'ExpressionSet') || is(x.lumi, 'exprSet')) {
+	if (is(x.lumi, 'eSet')) {
 		if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
 		if (!all(dim(se.exprs(x.lumi)) == dim(exprs(x.lumi))))
 			stop('Dimensions of slots exprs and se.exprs do not match!')
 	} else {
-		stop('The object should be class "LumiBatch"!')
+		stop('The object should be class "eSet" inherited!')
 	}
+	if (!is(x.lumi, 'LumiBatch')) stdCorrection <- FALSE
 
 	method <- match.arg(method)
 	## check the negative values
@@ -35,7 +36,11 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 			}
 		}
 		nArray <- ncol(exprs)
-		detectCall <- detectionCall(x.lumi, Th=0.01, type='matrix')
+		if (is(x.lumi, 'LumiBatch')) {
+			detectCall <- detectionCall(x.lumi, Th=0.01, type='matrix')			
+		} else {
+			detectCall <- NULL
+		}
 		transExpr <- NULL
 		transPara <- NULL
 		transFun <- NULL
@@ -74,7 +79,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 			}
 		}
 		if (is(x.lumi, 'AffyBatch')) {
-			x.lumi@se.exprs <- new('matrix')
+			se.exprs(x.lumi) <- new('matrix')
 		}
 	}
 
