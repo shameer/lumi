@@ -622,6 +622,9 @@ We use the Barnes data set [3] as an example, which has be created as a Biocondu
 > ## summary of quality control information after preprocessing
 > summary(lumi.N.Q, 'QC')
 
+> ## Output the data as Tab separated text file
+> write.exprs(lumi.N.Q, file='processedExampleData.txt')
+
 \end{Sinput}
 
 \subsection{Identify differentially expressed genes}

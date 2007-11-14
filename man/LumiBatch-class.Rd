@@ -54,7 +54,8 @@
    Slot specific to \code{LumiBatch}:
    \describe{
    		\item{\code{history}:}{ a data.frame recording the operation history of the LumiBatch object.}
-   		\item{\code{summary}:}{ a summary of the LumiBatch object.}
+   		\item{\code{controlData}:}{ a control data information (as a data.frame) output by BeadStudio.}
+   		\item{\code{QC}:}{ a the quality control information of the LumiBatch object, returned by lumiQ function.}
    }
 
    Slots inherited from \code{ExpressionSet}:

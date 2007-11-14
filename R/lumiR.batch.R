@@ -17,6 +17,7 @@ lumiR.batch <- function(fileList, lib=NULL, sampleInfoFile=NULL, ...) {
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
 		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, ...)
+		# x.lumi.i <- lumiR(file.i, parseColumnName=FALSE)
 		if (i == 1) {
 			x.lumi <- x.lumi.i
 		} else {

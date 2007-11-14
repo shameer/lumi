@@ -98,6 +98,12 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 	print(getHistory(object)) 
 	cat('\nObject Information:\n')
 	callNextMethod()
+	if (!is.null(object@controlData)) {
+		cat('Control Data: Available\n')
+	} else {
+		cat('Control Data: N/A\n')
+	}
+	cat("QC information: Please run summary(x, 'QC') for details!\n")
 })
 
 
@@ -245,7 +251,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	}
 	
 	## VST transformation parameters
-	if (!is.null(attr(x, 'vstParameter')) && !is.null(attr(x, 'vstParameter'))) {
+	if (!is.null(attr(x, 'vstParameter')) && !is.null(attr(y, 'vstParameter'))) {
 		vstParameter.x <- attr(x, 'vstParameter')
 		vstParameter.y <- attr(y, 'vstParameter')
 		if (is.null(nrow(vstParameter.x))) {

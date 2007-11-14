@@ -11,7 +11,7 @@ bgAdjust(lumiBatch, probs = 0.5, ...)
 \arguments{
   \item{lumiBatch}{ A LumiBatch object with controlData slot include control probe information }
   \item{probs}{ The quantile used to estimate the background }
-  \item{\dots}{ other parameters used by \code{\link[affy]{bg.adjust}} }
+  \item{\dots}{ other parameters used by \code{\link{quantile}} method }
 }
 \details{
 The method adjusts the data by subtracting an offset, which is estimated based on the quantile of the control probes. The control probe information is kept in the controlData slot of the LumiBatch object. If no control data information, the method will do nothing.

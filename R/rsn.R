@@ -21,6 +21,20 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 			targetArray <- 1
 			externalTarget <- TRUE
 		}
+		if (is.numeric(targetArray)) {
+			if (targetArray < 1 || targetArray > nrow(exprs)) {
+				warning('The provided targetArray is invalid and will be set as NULL!')
+				targetArray <- NULL
+			}
+		} else if (is.character(targetArray)) {
+			if (!(targetArray %in% colnames(exprs))) {
+				warning('The provided targetArray is invalid and will be set as NULL!')
+				targetArray <- NULL
+			}
+		} else {
+			warning('The provided targetArray is invalid and will be set as NULL!')
+			targetArray <- NULL
+		}
 	}
 
 	## check whether the data was variance stabilized.
@@ -95,10 +109,10 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	nArray <- ncol(exprs)
 	normalized <- lapply(1:nArray, FUN=pairwiseN, exprs=exprs,
 					exprs0=exprs0, targetArray=targetArray, ifPlot=ifPlot)
-	normalized <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)
+	normalized <- matrix(unlist(normalized), ncol=nArray, byrow=FALSE)	
 	colnames(normalized) <- colnames(exprs)
 	rownames(normalized) <- rownames(exprs)
-	
+
 	## if the targetArray is an external vector, it will be removed from the normalized data.
 	if (externalTarget) normalized <- normalized[,-1]
 	## transformed as original scale in not log2transformed
