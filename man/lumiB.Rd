@@ -6,11 +6,11 @@
   Background correction of Illumina data
 }
 \usage{
-lumiB(lumiBatch, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...)
+lumiB(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{lumiBatch}{ a LumiBatch Object, which can be the return of \code{\link{lumiR}} }
+  \item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes. For 'bgAdjust' method, it should be a LumiBatch Object }
   \item{method}{ the background correction method, it can be any function with a LumiBatch Object as the first argument and return a LumiBatch Object }
   \item{\dots}{ other parameters used by the user provided background correction method  }
 }
@@ -20,7 +20,7 @@ lumiB(lumiBatch, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'
 Thanks Kevin Coombes (M.D. Anderson Cancer Center) suggested adding this function.
 }
 \value{
- return a LumiBatch Object with background corrected.
+ Return an object with background corrected. The class of the return object is the same as the input object x.lumi.
 }
 
 \author{ Pan Du, Kevin Coombes }

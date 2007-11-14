@@ -1,5 +1,5 @@
 `ssn` <-
-function(x.lumi, targetArray=NULL, scaling=TRUE, ...) {
+function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', 'median'), fgMethod=c('mean', 'density', 'median'), ...) {
 	if (is(x.lumi, 'ExpressionSet')) {
 		# x.lumi is a lumi object
 		expr  <- exprs(x.lumi)
@@ -8,7 +8,9 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, ...) {
 	} else {
 		stop('The object should be a matrix or class "ExpressionSet" inherited!')
 	}
-
+	bgMethod <- match.arg(bgMethod)
+	fgMethod <- match.arg(fgMethod)
+	if (bgMethod != 'density' && bgMethod == fgMethod) scaling <- FALSE
 	externalTarget <- FALSE
 	if (!is.null(targetArray)) {
 		## check the format of the targetArray
@@ -50,11 +52,17 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, ...) {
 		hh <- hist(xx, 1000, plot=FALSE)
 		Th <- hh$breaks[which.max(hh$counts) + 1] * 2
 		dd <- density(xx[xx < Th], ...)
-		bg <- dd$x[which.max(dd$y)]
+		# bg <- dd$x[which.max(dd$y)]
+		bg <- switch(bgMethod,
+			density = dd$x[which.max(dd$y)],
+			mean = mean(xx),
+			median = median(xx))
 		bgNum <- 2 * length(which(xx <= bg))
 		# estimate the foreground level by removing the background probes
-		fg <- (sum(xx) - bgNum * bg) / (length(xx) - bgNum)
-		# fg <- mean(xx)
+		fg <- switch(fgMethod,
+			density = (sum(xx) - bgNum * bg) / (length(xx) - bgNum),
+			mean = mean(xx),
+			median = median(xx))
 		twoPoint <- c(bg, fg)
 		return(twoPoint)
 	})
@@ -70,7 +78,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, ...) {
 	nArray <- ncol(expr)
 	for (i in 1:nArray) {
 		if (scaling) {
-			ff <- (target2P[2] - target2P[1]) / (twoPoint[2,i] - twoPoint[1,i]) 
+			ff <- abs((target2P[2] - target2P[1]) / (twoPoint[2,i] - twoPoint[1,i]))
 		} else {
 			ff <- 1
 		}
@@ -81,7 +89,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, ...) {
 	if (externalTarget) normalized <- normalized[,-1]
 	## transformed as original scale in not log2transformed
 	if (log2Trans) {
-		if (min(exprs(normalized)) < 0) {
+		if (min(normalized) < 0) {
 			normalized <- lumiB(normalized, method='forcePositive')
 		}
 		normalized <- log2(normalized)	
