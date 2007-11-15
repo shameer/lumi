@@ -1,7 +1,6 @@
 `ssn` <-
 function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', 'median'), fgMethod=c('mean', 'density', 'median'), ...) {
 	if (is(x.lumi, 'ExpressionSet')) {
-		# x.lumi is a lumi object
 		expr  <- exprs(x.lumi)
 	} else if (is.numeric(x.lumi)) {
 		expr <- as.matrix(x.lumi)
@@ -51,7 +50,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', '
 	twoPoint <- apply(expr, 2, function(xx) {
 		hh <- hist(xx, 1000, plot=FALSE)
 		Th <- hh$breaks[which.max(hh$counts) + 1] * 2
-		dd <- density(xx[xx < Th], ...)
+		dd <- density(xx[xx < Th], na.rm=TRUE, ...)
 		# bg <- dd$x[which.max(dd$y)]
 		bg <- switch(bgMethod,
 			density = dd$x[which.max(dd$y)],
@@ -89,7 +88,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', '
 	if (externalTarget) normalized <- normalized[,-1]
 	## transformed as original scale in not log2transformed
 	if (log2Trans) {
-		if (min(normalized) < 0) {
+		if (min(normalized) <= 0) {
 			normalized <- lumiB(normalized, method='forcePositive')
 		}
 		normalized <- log2(normalized)	

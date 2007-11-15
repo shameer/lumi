@@ -13,7 +13,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 	method <- match.arg(method)
 	## check the negative values
 	if (method == 'log2') {
-		if (min(exprs(x.lumi)) < 0) {
+		if (min(exprs(x.lumi)) <= 0) {
 			x.lumi <- lumiB(x.lumi, method='forcePositive')
 		}
 	}

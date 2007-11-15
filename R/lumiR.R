@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, 
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE,
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'), ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -271,33 +271,35 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	}
     
 	## check for possible duplicated ids
-	dupId <- unique(id[duplicated(id)])
-	if (length(dupId) > 0) {
-		warning('Duplicated IDs found and were merged!')
-		rmInd <- NULL
-		for (dupId.i in dupId) {
-			selInd.i <- which(id == dupId.i)
-			exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,])
-			if (is.null(beadNum)) {
-				se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,])
-			} else {
-				totalBead.i <- colSums(beadNum[selInd.i,])
-				beadNum[selInd.i[1],] <- totalBead.i				
-				temp <- colSums(se.exprs[selInd.i,]^2 * (beadNum[selInd.i,] - 1))
-				temp <- temp / (totalBead.i - length(selInd.i))
-				se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
+	if (checkDupId) {
+		dupId <- unique(id[duplicated(id)])
+		if (length(dupId) > 0) {
+			warning('Duplicated IDs found and were merged!')
+			rmInd <- NULL
+			for (dupId.i in dupId) {
+				selInd.i <- which(id == dupId.i)
+				exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,])
+				if (is.null(beadNum)) {
+					se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,])
+				} else {
+					totalBead.i <- colSums(beadNum[selInd.i,])
+					beadNum[selInd.i[1],] <- totalBead.i				
+					temp <- colSums(se.exprs[selInd.i,]^2 * (beadNum[selInd.i,] - 1))
+					temp <- temp / (totalBead.i - length(selInd.i))
+					se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
+				}
+				if (!is.null(detection)) {
+					detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)
+				}
+				rmInd <- c(rmInd, selInd.i[-1])
 			}
-			if (!is.null(detection)) {
-				detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)
-			}
-			rmInd <- c(rmInd, selInd.i[-1])
+			## remove duplicated
+			exprs <- exprs[-rmInd,,drop=FALSE]
+			if (!is.null(se.exprs)) se.exprs <- se.exprs[-rmInd,,drop=FALSE]
+			id <- id[-rmInd]; targetID <- targetID[-rmInd]
+			if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
+			if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
 		}
-		## remove duplicated
-		exprs <- exprs[-rmInd,,drop=FALSE]
-		if (!is.null(se.exprs)) se.exprs <- se.exprs[-rmInd,,drop=FALSE]
-		id <- id[-rmInd]; targetID <- targetID[-rmInd]
-		if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
-		if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
 	}
     
 	if (na.rm) {
