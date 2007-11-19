@@ -21,7 +21,7 @@ Please refer to reference for more details.
 a string of nucleotide sequence
 }
 \references{
-Du, P., Kibbe, W.A. and Link, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", submitted.
+Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 }
 \author{ Pan Du }
 \seealso{\code{\link{seq2id}}}

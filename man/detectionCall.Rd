@@ -1,8 +1,10 @@
 \name{detectionCall}
 \alias{detectionCall}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Estimate the detectable probe ratio in each sample }
-\description{  }
+\title{ Estimate the detectable probe ratio }
+\description{ 
+Estimate the detectable probe ratio of each probe, sample or just return an AP matrix
+ }
 
 \usage{
 detectionCall(x.lumi, Th = 0.01, type = c('probe', 'sample', 'matrix'))

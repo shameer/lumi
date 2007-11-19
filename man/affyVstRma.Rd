@@ -3,6 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Preprocess Affymetrix data by integrating VST with RMA method }
 \description{
+Preprocess Affymetrix data by integrating VST with RMA method (under evaluation)
 }
 \usage{
 affyVstRma(afbatch, bgcorrect.method = "none", bgcorrect.param = list(), VST.param = list(), verbose = TRUE, ...)

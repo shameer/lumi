@@ -2,7 +2,9 @@
 \alias{detectOutlier}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Detect the outlier sample (or gene)}
-\description{  }
+\description{ 
+Detect the outlier sample (or gene) based on distance to the cluster center
+}
 
 \usage{
 detectOutlier(x, metric = "euclidean", standardize = TRUE, Th = 2, ifPlot = FALSE)

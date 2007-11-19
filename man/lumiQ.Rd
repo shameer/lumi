@@ -1,8 +1,10 @@
 \name{lumiQ}
 \alias{lumiQ}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Quality control estimation of the LumiBatch object }
-\description{  }
+\title{ Quality control evaluation of the LumiBatch object }
+\description{
+Quality control evaluation of the LumiBatch object and returns a summary of the data
+}
 
 \usage{
 lumiQ(x.lumi, logMode = TRUE, detectionTh = 0.01)

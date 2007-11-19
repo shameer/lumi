@@ -3,6 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Mapping nuID into Illumina TargetID }
 \description{
+Mapping nuID into Illumina TargetID
 }
 \usage{
 nuID2targetID(nuID, lib = "lumiHumanV1")
@@ -16,6 +17,9 @@ nuID2targetID(nuID, lib = "lumiHumanV1")
 }
 \value{
 return a list with the same length as the input nuID vector.
+}
+\references{
+Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 }
 \author{ Pan Du }
 \seealso{ \code{\link{targetID2nuID}} }

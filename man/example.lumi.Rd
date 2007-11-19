@@ -1,9 +1,9 @@
 \name{example.lumi}
 \alias{example.lumi}
 \docType{data}
-\title{Example lumiBatch object includes example data}
+\title{Example LumiBatch object includes example data}
 \description{
-  
+  Example data as a LumiBatch object which is a subset of Barnes data (Barnes, 2005)
 }
 \usage{data(example.lumi)}
 \format{

@@ -3,6 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Preprocess Affymetrix data by integrating VST with expresso method }
 \description{
+Preprocess Affymetrix data by integrating VST with expresso method (under developing)
 }
 \usage{
 affyExpresso(afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.param = list(), variance.stabilize = TRUE, varianceStabilize.param = list(), normalize = TRUE, normalize.method = NULL, normalize.param = list(), pmcorrect.method = NULL, pmcorrect.param = list(), summary.method = NULL, summary.param = list(), summary.subset = NULL, verbose = TRUE)

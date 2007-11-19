@@ -3,6 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ plot the VST (Variance Stabilizing Transform) function }
 \description{
+plot the VST (Variance Stabilizing Transform) function of VST transformed LumiBatch object or parameters of VST function.
 }
 \usage{
 plotVST(x, transFun = NULL, plotRange = NULL, addLegend = TRUE, ...)

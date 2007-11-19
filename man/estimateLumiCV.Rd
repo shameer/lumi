@@ -2,7 +2,9 @@
 \alias{estimateLumiCV}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Estimate the coefficient of variance matrix of LumiBatch object }
-\description{  }
+\description{ 
+Estimate the coefficient of variance matrix of LumiBatch object for each measurement or probe.
+}
 
 \usage{
 estimateLumiCV(x.lumi, type = c("measurement", "probe"), ifPlot = FALSE, ...)

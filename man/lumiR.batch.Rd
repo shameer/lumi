@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Read BeadStudio output files in batch}
 \description{
-  
+  Read BeadStudio output files in batch and combine them as a single LumiBatch object
 }
 \usage{
 lumiR.batch(fileList, lib = NULL, sampleInfoFile = NULL, ...)

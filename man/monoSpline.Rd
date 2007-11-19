@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Fitting a curve with monotonic spline }
 \description{
-
+Fitting a curve with monotonic spline
 }
 \usage{
 monoSpline(x, y, newX=NULL, nKnots = 6, ifPlot = FALSE)
