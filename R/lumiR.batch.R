@@ -1,7 +1,8 @@
-lumiR.batch <- function(fileList, lib=NULL, sampleInfoFile=NULL, ...) {
+lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
 
 	oldDir <- getwd()
 	dirMode <- FALSE
+	transform <- match.arg(transform)
 	if (file.exists(fileList[1])) {
 		if (file.info(fileList[1])[1,'isdir']) {
 			dirMode <- TRUE
@@ -18,6 +19,9 @@ lumiR.batch <- function(fileList, lib=NULL, sampleInfoFile=NULL, ...) {
 		file.i <- fileList[i]
 		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, ...)
 		# x.lumi.i <- lumiR(file.i, parseColumnName=FALSE)
+		if (transform != 'none') {
+			x.lumi.i <- lumiT(x.lumi.i, method=transform, simpleOutput=TRUE)
+		}
 		if (i == 1) {
 			x.lumi <- x.lumi.i
 		} else {

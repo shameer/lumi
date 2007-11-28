@@ -34,7 +34,7 @@
 \section{Overview of lumi} 
 Illumina microarray is becoming a popular microarray platform. The BeadArray technology from Illumina makes its preprocessing and quality control different from other microarray technologies. Unfortunately, until now, most analyses have not taken advantage of the unique properties of the BeadArray system. The \Rpackage{lumi} Bioconductor package especially designed to process the Illumina microarray data. The \Rpackage{lumi} package provides an integrated solution for the bead-level Illumina microarray data analysis. The package covers data input, quality control, variance stabilization, normalization and gene annotation. 
 
-The \Rpackage{lumi} package includes a new variance-stabilizing transformation (VST) algorithm that takes advantage of the technical replicates available on every Illumina microarray. A new robust spline normalization (RSN) algorithm, which combines the features of the quantile and loess normalization, is also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
+The \Rpackage{lumi} package provides unique functions for microarray processing. It includes a variance-stabilizing transformation (VST) algorithm [1] that takes advantage of the technical replicates available on every Illumina microarray. A robust spline normalization (RSN), which combines the features of the quantile and loess normalization, and simple scaling normalization (SSN) algorithms are also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) [2] was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
 
 
 % \section{Citation}
@@ -284,9 +284,15 @@ abline(a=0, b=1, col=2)
 
 
 \subsection{Data normalization}
-We proposed a robust spline normalization (RSN) algorithm, which combines the features of quanitle and loess nor-malization. The advantages of quantile normalization include computational efficiency and preserving the rank order of genes. However, the intensity transformation of a quantile normalization is discontinuous because the normalization forces the intensity values for different samples (microarrrays) having exactly the same distribution. This can cause small differences among intensity values to be lost. In contrast, the loess or spline normalization provides a continuous transformation. However, these methods cannot ensure that the rank of the probes remain unchanged across samples. Moreover, the loess normalization assumes the majority of the genes measured by the probes are non-differentially expressed and their distribution is approximately symmetric, which may not be a good assumption. To address some of these concerns, we developed a Robust Spline Normalization (RSN) method, which combines features from loess and quantile normalization methods. We use a monotonic spline to calibrate one microarray to the reference microarray. To increase the robustness of the spline method, we down-weight the contributions of probes of putatively differentially expressed genes. The probe intensities that are from potentially differentially expressed genes are heuristically determined as follows: First, we run a quantile normalization. Next, we estimate the fold-change of a gene measured by a probe based on the quantile-normalized data. The weighting factor for a probe is calculated based on a Gaussian window function. More details will be shown in a separate manuscript.
 
-By default, function \Rfunction{lumiN} performs robust spline normalization (RSN) algorithm. \Rfunction{lumiN} also provides options to do \verb+"quantile", "loess", "vsn"+ normalization. See help of \Rfunction{lumiN} for details.
+\Rpackage{lumi} package provides several normalization method options, which include SSN (Simple Scaling Normalization), RSN (Robust Spline Normalization), quantile and loess normalization.
+	
+	Comparing with other normalization methods, like quantile and curve-fitting methods, SSN is a more conservative method. The only assumption is that each sample has the same background level and the same scale (if do scaling). There are three methods ('density', 'mean' and 'median') for background estimation. If bgMethod is 'none', then the background level will be set as 0, i.e., no background adjustment. For the 'density' bgMethod, it estimates the background based on the mode of probe intensities based on the assumption that the background level intensity is the most frequent value across all the probes in the chip. For the foreground level estimation, it also provides three methods ('mean', 'density', 'median'). For the 'density' fgMethod, it assumes the background probe levels are symmetrically distributed. The foreground levels were estimated by taking the intensity mean of all other probes except from the background probes. For the 'mean' and 'median' methods (for both bgMethod and fgMethod), it basically estimates the level based on the mean or median of all probes of the sample. If the fgMethod is the same as bgMethod (except 'density' method), no scaling will be performed.   
+
+
+Another normalization method which is unique in the \Rpackage{lumi} package is the Robust Spline Normalization (RSN) algorithm. RSN combines the features of quanitle and loess nor-malization. The advantages of quantile normalization include computational efficiency and preserving the rank order of genes. However, the intensity transformation of a quantile normalization is discontinuous because the normalization forces the intensity values for different samples (microarrrays) having exactly the same distribution. This can cause small differences among intensity values to be lost. In contrast, the loess or spline normalization provides a continuous transformation. However, these methods cannot ensure that the rank of the probes remain unchanged across samples. Moreover, the loess normalization assumes the majority of the genes measured by the probes are non-differentially expressed and their distribution is approximately symmetric, which may not be a good assumption. To address some of these concerns, we developed a Robust Spline Normalization (RSN) method, which combines features from loess and quantile normalization methods. We use a monotonic spline to calibrate one microarray to the reference microarray. To increase the robustness of the spline method, we down-weight the contributions of probes of putatively differentially expressed genes. The probe intensities that are from potentially differentially expressed genes are heuristically determined as follows: First, we run a quantile normalization. Next, we estimate the fold-change of a gene measured by a probe based on the quantile-normalized data. The weighting factor for a probe is calculated based on a Gaussian window function. More details will be shown in a separate manuscript.
+
+By default, function \Rfunction{lumiN} performs robust spline normalization (RSN) algorithm. \Rfunction{lumiN} also provides other options to do \verb+"quantile", "loess", "vsn"+ normalization. See help of \Rfunction{lumiN} for details.
 
 Do default RSN between microarray normaliazation
 <<>>=
@@ -414,7 +420,7 @@ lumi.N.raw <- inverseVST(lumi.N)
 
 \section{Handling large data sets}
 Several users asked about processing large data set, e.g., over 100 samples. Directly handling such big data set usually will cause "out of memory" error in most computers. 
-In this case, when read the BeadStudio output file, we can ignore the "beadNum"  (related columns. The function \Rfunction{lumiR} provides a parameter called "columnNameGrepPattern". we can set the string grep pattern of "detection" and "beadNum"  as NA. You can also ignore "detection" columns. However, the "detection" information is useful for the estimation of present count of each probe and used in the VST parameter estimation.
+In this case, when read the BeadStudio output file, we can ignore the "beadNum"  (related columns. The function \Rfunction{lumiR} provides a parameter called "columnNameGrepPattern". we can set the string grep pattern of "detection" and "beadNum"  as NA. You can also ignore "detection" columns. However, the "detection" information is useful for the estimation of present count of each probe and used in the VST parameter estimation. 
 
 Here is some example code:
 \begin{Sinput}
@@ -422,18 +428,27 @@ Here is some example code:
 >  x.lumi <- lumiR("fileName.txt", columnNameGrepPattern=list(beadNum=NA))
 \end{Sinput}
 
-Another good news is that the \Rfunction{vst} and \Rfunction{rsn} functions in the \Rpackage{lumi} package can sequentially process the data and handle such large data set.  
+Usually, the large data set is composed of many small data files. In this case, the transformations, like log2 and \Rfunction{vst}, can be performed right after the input of each data file and some information can be removed in the object after transformation. \Rpackage{lumi} provides the \Rfunction{lumiR.batch} function for this purpose.
+
+Here is some example code:
+\begin{Sinput}
+## load the list of data files (a vector of file names) 
+##        and do VST transformation for each file and combine the results.
+>  x.lumi <- lumiR.batch(fileList, transform='vst')
+\end{Sinput}
+
+Another good news is that the normalization, like \Rfunction{rsn} and \Rfunction{ssn} in the \Rpackage{lumi} package, can sequentially process the data and handle such large data set.  
 
 The solution can be like this:
 
-1. Read the data file by smaller batches (e.g. 10 or just one by one), and then do the variance stabilization, i.e., \Rfunction{lumiT} function, for each data batch. 
+1. Read the data file by smaller batches (e.g. 10 or just one by one), and then do the variance stabilization for each data batch using \Rfunction{lumiR.batch} or \Rfunction{lumiR} function.
 
-2. Pick one sample as the target array for normalization and then using "RSN" normalization method to normalize all batches of data using the same target array. 
+2. Pick one sample as the target array for normalization and then using "RSN" or "SSN" normalization method to normalize all batches of data using the same target array. 
 
 3. Combine the normalized data. (In order to save memory, the user can first remove those probes not expressed in all samples.)
 
 
-In the \Rfunction{rsn} function, there is a parameter called "targetArray", which is the model for other chips to normalize. It can be a column index, a vector or a LumiBatch object with one sample. In our case, we need to use one LumiBatch object with one sample as the "targetArray". The selection of the target array is flexible. We suggest to choose the one most similar to the mean of all samples. For convenience, we can also just select the first sample as "targetArray" (suppose it has no quality problem).  The selected target array will also be used for all other data batches. Since different data batches use the same target array as model, the results are comparable and can be combined!
+In the \Rfunction{rsn} and \Rfunction{ssn} functions, there is a parameter called "targetArray", which is the model for other chips to normalize. It can be a column index, a vector or a LumiBatch object with one sample. In our case, we need to use one LumiBatch object with one sample as the "targetArray". The selection of the target array is flexible. We suggest to choose the one most similar to the mean of all samples. For convenience, we can also just select the first sample as "targetArray" (suppose it has no quality problem).  The selected target array will also be used for all other data batches. Since different data batches use the same target array as model, the results are comparable and can be combined!
 
 Here is the example code:
 \begin{Sinput}
@@ -449,7 +464,7 @@ Here is the example code:
 > x.lumiN.i <- lumiN(x.lumiT.i, targetArray=targetArray)
 \end{Sinput}
 
-The normalized data batches can be combined by using function Rfunction{combine(x, y)}. 
+The normalized data batches can be combined by using function \Rfunction{combine(x, y)}. 
 
 
 \section{Performance comparison}

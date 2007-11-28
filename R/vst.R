@@ -1,11 +1,11 @@
 `vst` <-
-function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c('linear', 'quadratic'), ifPlot=FALSE) {
+function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('linear', 'quadratic'), lowCutoff=1/3, ifPlot=FALSE) {
 	# u is the mean of probe beads
 	# std is the standard deviation of the probe beads
 	# 
 	fitMethod <- match.arg(fitMethod)
 	## Estimate the background variance c3
-	c3 <- ifelse (is.null(backgroundIndex), 0, mean(std[backgroundIndex]))
+	c3 <- ifelse (is.null(backgroundStd), 0, backgroundStd)
 	
 	ord <- order(u); u.bak <- u
 	u <- u[ord]; std <- std[ord]
@@ -33,7 +33,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c
 		minU <- log2(max(100 + offset, min(u)))
 		maxU <- log2(max(u))
 		# uCutoff <- 2^((maxU + minU)/2)
-		uCutoffLow <- 2^(minU + (maxU - minU)/3)
+		uCutoffLow <- 2^(minU + (maxU - minU) * lowCutoff)
 		uCutoffHigh <- 2^(minU + (maxU - minU) * 4/5)
 		selInd <- (u > uCutoffLow & u < uCutoffHigh)
 		selLowInd <- (u < uCutoffLow)
@@ -47,7 +47,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c
 		} else {
 			iterNum <- 0
 			c3.i <- 0
-			while(iterNum < 3) {
+			while(iterNum <= 20) {
 				selInd.i <- selInd & (std^2 > c3.i)
 				dd <- data.frame(y=sqrt(std[selInd.i]^2 - c3.i), x1=u[selInd.i])
 				if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
@@ -57,10 +57,12 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c
 				y <- std[selLowInd]
 				x <- u[selLowInd]
 				cc <- y^2 - (c1.i * x + c2.i)^2
-				c3.i <- mean(cc, trim=0.05)
-				if (c3.i < 0) {
-					c3.i <- 0
+				c3.i.new <- mean(cc, trim=0.05)
+				if (c3.i.new < 0) {
 					break
+				} else {
+					if (abs(c3.i.new - c3.i) < 1e-5) break
+					c3.i <- c3.i.new
 				}
 				iterNum <- iterNum + 1
 			}
@@ -88,7 +90,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c
 			a <- c2
 			b <- c1
 			tmp <- a + b * u.bak
-			if (any(tmp) < 0) {
+			if (any(tmp < 0)) {
 				transformedU <- log(u.bak)
 				g <- 1; a <- 0; b <- 1
 			} else {
@@ -121,7 +123,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundIndex=NULL, fitMethod=c
 	if (fitMethod == 'quadratic') {
 		minU <- log2(max(100 + offset, min(u)))
 		maxU <- log2(max(u))
-		uCutoffLow <- 2^(minU + (maxU - minU)/3)
+		uCutoffLow <- 2^(minU + (maxU - minU) * lowCutoff)
 		uCutoffHigh <- 2^(minU + (maxU - minU) * 4/5)		
 	}
 	cutInd <- which.min(abs(u.bak - uCutoffLow))

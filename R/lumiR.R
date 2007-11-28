@@ -312,10 +312,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		id <- id[keepInd]
 		targetID <- targetID[keepInd]
 	}
-	rownames(exprs) <- id
-	if (!is.null(se.exprs)) rownames(se.exprs) <- id
-	if (!is.null(beadNum)) rownames(beadNum) <- id
-	if (!is.null(detection)) rownames(detection) <- id
+	if (checkDupId) {
+		rownames(exprs) <- id
+		if (!is.null(se.exprs)) rownames(se.exprs) <- id
+		if (!is.null(beadNum)) rownames(beadNum) <- id
+		if (!is.null(detection)) rownames(detection) <- id
+	}
     
 	# get sample information
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
@@ -352,7 +354,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		varMetadata <- rbind(varMetadata, data.frame(labelDescription='The Illumina TargetID'))
 		rownames(varMetadata)[nrow(varMetadata)] <- 'TargetID'
 	}
-	rownames(reporterInfo) <- id
+	if (checkDupId)	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
 	## check the dimensions of the input data

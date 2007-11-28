@@ -1,9 +1,10 @@
-affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.param = list(),
-    variance.stabilize = TRUE, varianceStabilize.param = list(), normalize = TRUE, normalize.method = NULL, 
+affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.param = list(), variance.stabilize = TRUE,
+    varianceStabilize.method = c("vst", "log2", "cubicRoot"), varianceStabilize.param = list(), normalize = TRUE, normalize.method = NULL, 
     normalize.param = list(), pmcorrect.method = NULL, pmcorrect.param = list(), 
     summary.method = NULL, summary.param = list(), summary.subset = NULL, verbose = TRUE) 
 {
-    setCorrections <- function() {
+    varianceStabilize.method <- match.arg(varianceStabilize.method)
+	setCorrections <- function() {
         bioc.opt <- getOption("BioC")
         if (bg.correct) {
             if (is.null(bgcorrect.method)) {
@@ -54,6 +55,7 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
             stop("Aborted by user")
         }
     }
+
     nchips <- length(afbatch)
     if (verbose) {
         if (bg.correct) {
@@ -69,18 +71,48 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
         cat("PM/MM correction :", pmcorrect.method, "\n")
         cat("expression values:", summary.method, "\n")
     }
-    if (bg.correct) {
-        if (verbose) 
-            cat("background correcting...")
-        afbatch <- do.call("bg.correct", c(alist(afbatch, method = bgcorrect.method), 
-            bgcorrect.param))
-        if (verbose) 
-            cat("done.\n")
-    }
-	if (variance.stabilize) {
-		if (verbose) cat("Variance stabilizing ...\n")
-		afbatch <- do.call("lumiT", c(alist(afbatch), varianceStabilize.param))
-		if (verbose) cat("done.\n")
+
+	if (is.character(afbatch)) {
+		if (!all(file.exists(afbatch))) stop('The input is not a valid file list or an AffyBatch object!')
+		fileList <- afbatch
+		afbatch <- NULL
+		for (i in 1:length(fileList)) {
+			file.i <- fileList[i]
+			cat(paste('Processing', file.i, '...\n'))
+			afbatch.i <- ReadAffy(filenames=file.i, sd=TRUE)
+
+		    if (bg.correct) {
+		        if (verbose) 
+		            cat("background correcting...")
+					afbatch.i <- do.call("bg.correct", c(alist(afbatch.i, method = bgcorrect.method), bgcorrect.param))
+		        if (verbose) 
+		            cat("done.\n")
+		    }
+			if (variance.stabilize) {
+				if (verbose) cat("Variance stabilizing ...\n")
+				afbatch.i <- do.call("lumiT", c(alist(afbatch.i, method = varianceStabilize.method), varianceStabilize.param))
+				if (verbose) cat("done.\n")
+			}
+			if (i == 1) {
+				afbatch <- afbatch.i
+			} else {
+				afbatch <- merge.AffyBatch(afbatch, afbatch.i)
+			}
+		}
+	} else {
+	    if (bg.correct) {
+	        if (verbose) 
+	            cat("background correcting...")
+	        afbatch <- do.call("bg.correct", c(alist(afbatch, method = bgcorrect.method), 
+	            bgcorrect.param))
+	        if (verbose) 
+	            cat("done.\n")
+	    }
+		if (variance.stabilize) {
+			if (verbose) cat("Variance stabilizing ...\n")
+			afbatch <- do.call("lumiT", c(alist(afbatch), varianceStabilize.param))
+			if (verbose) cat("done.\n")
+		}
 	}
 
     if (normalize) {
@@ -91,6 +123,8 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
         if (verbose) 
             cat("done.\n")
     }
+	## To avoid double transformation in the rma function
+	if (summary.method == 'medianpolish' && variance.stabilize)  exprs(afbatch) <- 2^exprs(afbatch)
     eset <- computeExprSet(afbatch, summary.method = summary.method, 
         pmcorrect.method = pmcorrect.method, ids = summary.subset, 
         summary.param = summary.param, pmcorrect.param = pmcorrect.param)

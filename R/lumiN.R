@@ -1,5 +1,5 @@
 `lumiN` <-
-function(x.lumi, method=c('rsn', 'ssn', 'loess', 'quantile', 'vsn'), ...) {
+function(x.lumi, method=c('rsn', 'ssn', 'quantile', 'loess', 'vsn'), ...) {
 
 	if (is(x.lumi, 'ExpressionSet')) {
 	    # x.lumi is a lumi object

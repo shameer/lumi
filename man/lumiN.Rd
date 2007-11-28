@@ -3,15 +3,15 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Between chip normalization of a LumiBatch object }
 \description{
-  A main function of between chip normalization of a LumiBatch object. Currently, four methods ("rsn", "ssn", "loess", "quantile", "vsn") are supported.
+  A main function of between chip normalization of a LumiBatch object. Currently, four methods ("rsn", "ssn", "quantile", "loess", "vsn") are supported.
 }
 \usage{
-lumiN(x.lumi, method = c("rsn", "ssn", "loess", "quantile", "vsn"), ...)
+lumiN(x.lumi, method = c("rsn", "ssn", "quantile", "loess", "vsn"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 	\item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes}
-  	\item{method}{ four different between chips normalization methods ("rsn", "ssn", "loess", "quantile", "vsn") are supported }
+  	\item{method}{ four different between chips normalization methods ("rsn", "ssn", "quantile", "loess", "vsn") are supported }
   	\item{\dots}{ other parameters used by corresponding method }
 }
 \details{

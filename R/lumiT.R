@@ -27,7 +27,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 		exprs(new.lumi) <- sign(exprs) * (abs(exprs))^1/3
 	} else {
 		se.exprs <- se.exprs(x.lumi)
-		if (stdCorrection) {
+		if (stdCorrection & is(x.lumi, 'LumiBatch')) {
 			bn <- beadNum(x.lumi)
 			if (is.null(bn)) {
 				print('No Standard Deviation correction was applied becasue of missing bead number information.')
@@ -46,12 +46,27 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 		transFun <- NULL
 		for (i in 1:nArray) {
 			cat(as.character(Sys.time()), ", processing array ", i, "\n")
+			u <- exprs[,i]; std <- se.exprs[,i]
+			lowCutoff <- 1/3
+			backgroundStd <- NULL
 			if (!is.null(detectCall)) {
-				backgroundIndex <- which(detectCall[,i] == 'A')
-			} else {
-				backgroundIndex <- NULL
+				backgroundStd <- mean(se.exprs[detectCall[,i] == 'A',i])
+			} else if (is(x.lumi, 'AffyBatch')) {
+				lowCutoff <- 1/4
+				# afbatch.i <- x.lumi[,i]
+				# pmInd <- unlist(indexProbes(afbatch.i, 'pm'))
+				# mmInd <- unlist(indexProbes(afbatch.i, 'mm'))
+				# pm <- exprs(afbatch.i)[pmInd]
+				# mm <- exprs(afbatch.i)[mmInd]
+				# bgInd <- pmInd[mm > pm]
+				# bgStd <- se.exprs[bgInd,i]
+				# hh <- hist(bgStd, 1000, plot=FALSE)
+				# Th <- hh$breaks[which.max(hh$counts) + 1] * 2
+				# dd <- density(bgStd[bgStd < Th], na.rm=TRUE)
+				# backgroundStd <- dd$x[which.max(dd$y)]
+				# backgroundStd <- mean(bgStd)
 			}
-		    x <- vst(u=exprs[,i], std=se.exprs[,i], backgroundInd=backgroundIndex, ifPlot=ifPlot, ...)
+		    x <- vst(u=u, std=std, backgroundStd=backgroundStd, lowCutoff=lowCutoff, ifPlot=ifPlot, ...)
 			transExpr <- cbind(transExpr, x)
 			
 			transPara <- rbind(transPara, attr(x, 'parameter'))
@@ -69,12 +84,14 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 			storage.mode <- storageMode(new.lumi)
 			if ("lockedEnvironment" == storage.mode) {
 				aData <- copyEnv(assayData(new.lumi))
-				rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+				# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+				rm(list=c('se.exprs', 'beadNum'), envir=aData)
 				lockEnvironment(aData, bindings = TRUE)
 				assayData(new.lumi) <- aData
 			} else {
 				aData <- assayData(new.lumi)
-				rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+				# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+				rm(list=c('se.exprs', 'beadNum'), envir=aData)
 				assayData(new.lumi) <- aData
 			}
 		}

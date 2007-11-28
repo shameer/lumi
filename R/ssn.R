@@ -1,5 +1,5 @@
 `ssn` <-
-function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', 'median'), fgMethod=c('mean', 'density', 'median'), ...) {
+function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', 'median', 'none'), fgMethod=c('mean', 'density', 'median'), ...) {
 	if (is(x.lumi, 'ExpressionSet')) {
 		expr  <- exprs(x.lumi)
 	} else if (is.numeric(x.lumi)) {
@@ -10,6 +10,10 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', '
 	bgMethod <- match.arg(bgMethod)
 	fgMethod <- match.arg(fgMethod)
 	if (bgMethod != 'density' && bgMethod == fgMethod) scaling <- FALSE
+	if (bgMethod != 'density' && fgMethod == 'density') {
+		warning('fgMethod "density" can only be used together with the bgMethod "density"!\n bgMethod is set as "density".')
+		bgMethod <- 'density'
+	}
 	externalTarget <- FALSE
 	if (!is.null(targetArray)) {
 		## check the format of the targetArray
@@ -53,6 +57,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', '
 		dd <- density(xx[xx < Th], na.rm=TRUE, ...)
 		# bg <- dd$x[which.max(dd$y)]
 		bg <- switch(bgMethod,
+			none = 0,
 			density = dd$x[which.max(dd$y)],
 			mean = mean(xx),
 			median = median(xx))

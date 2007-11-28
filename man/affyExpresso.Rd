@@ -3,19 +3,20 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Preprocess Affymetrix data by integrating VST with expresso method }
 \description{
-Preprocess Affymetrix data by integrating VST with expresso method (under developing)
+Preprocess Affymetrix data by integrating VST with expresso method
 }
 \usage{
-affyExpresso(afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.param = list(), variance.stabilize = TRUE, varianceStabilize.param = list(), normalize = TRUE, normalize.method = NULL, normalize.param = list(), pmcorrect.method = NULL, pmcorrect.param = list(), summary.method = NULL, summary.param = list(), summary.subset = NULL, verbose = TRUE)
+affyExpresso(afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.param = list(), variance.stabilize = TRUE, varianceStabilize.method = c("vst", "log2", "cubicRoot"), varianceStabilize.param = list(), normalize = TRUE, normalize.method = NULL, normalize.param = list(), pmcorrect.method = NULL, pmcorrect.param = list(), summary.method = NULL, summary.param = list(), summary.subset = NULL, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{afbatch}{ an AffyBatch object, see \code{\link[affy]{AffyBatch-class}}  }
+  \item{afbatch}{ a vector of CEL file names or an AffyBatch object, see \code{\link[affy]{AffyBatch-class}}  }
   \item{bg.correct}{ a boolean to express whether background correction is wanted or not }
   \item{bgcorrect.method}{ the name of the background adjustment method }
   \item{bgcorrect.param}{ a list of parameters for bgcorrect.method (if needed/wanted) }
   \item{variance.stabilize}{ a boolean to express whether variance stabilization is wanted or not }
-  \item{varianceStabilize.param}{ a list of parameters for \code{\link{vst}} method  }
+  \item{varianceStabilize.method}{ the name of the variance stabilizing transform, same as \code{\link{lumiT}} function }
+  \item{varianceStabilize.param}{ a list of parameters for transformation method  }
   \item{normalize}{ normalization step wished or not }
   \item{normalize.method}{ the normalization method to use }
   \item{normalize.param}{ a list of parameters to be passed to the normalization method (if wanted) }
@@ -27,7 +28,7 @@ affyExpresso(afbatch, bg.correct = TRUE, bgcorrect.method = NULL, bgcorrect.para
   \item{verbose}{ logical value. If TRUE it writes out some messages }
 }
 \details{
- 
+ This function basically integrates the VST (variance stabilizing transformation) transformation into the expresso function in the affy package. The variance stabilization is based on the mean and variance relations of pixel intensities of each probe.
 }
 \value{
 Return an object of class ExpressionSet. 

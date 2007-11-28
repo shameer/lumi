@@ -27,7 +27,7 @@ Return an object with expression values normalized. The class of the return obje
 If it is a LumiBatch object, it also includes the VST transform function and its parameters as attributes: "transformFun", "parameter". See \code{\link{inverseVST}} for details.
 }
 \references{ 
-Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", submitted
+
 }
 \author{Pan Du, Simon Lin}
 \note{ 

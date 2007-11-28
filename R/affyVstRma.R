@@ -16,7 +16,9 @@ affyVstRma <- function (afbatch, bgcorrect.method = 'none', bgcorrect.param = li
 				if (verbose)  cat("done.\n")
 			}
 			if (verbose) cat("Variance stabilizing ...\n")
+	# browser()
 			afbatch.i <- do.call("lumiT", c(alist(afbatch.i), VST.param))
+
 			if (verbose) cat("done.\n")
 			if (i == 1) {
 				afbatch <- afbatch.i
@@ -35,6 +37,7 @@ affyVstRma <- function (afbatch, bgcorrect.method = 'none', bgcorrect.param = li
 		afbatch <- do.call("lumiT", c(alist(afbatch), VST.param))
 		if (verbose) cat("done.\n")
 	}
+	## To avoid double transformation in the rma function
 	exprs(afbatch) <- 2^exprs(afbatch)
 
 	if (verbose) cat("RMA normalization ...\n")
