@@ -1,4 +1,13 @@
 -----------------------------------------------------
+version 1.5.1-1.5.9
+release data: 12/05/2007
+1. Add functions dealing with the control probe data outputted by BeadStudio.
+2. Extended VST algorithm for processing the Affymetrix data.
+3. Add SSN (simple scaling normalization) algorithm for conservative normalization.
+4. other updates of help and vignette
+
+
+-----------------------------------------------------
 version 1.3.27-1.3.37
 release data: 09/30/2007
 1. update the code to make vst accept negative values.

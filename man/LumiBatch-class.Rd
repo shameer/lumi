@@ -54,7 +54,7 @@
    Slot specific to \code{LumiBatch}:
    \describe{
    		\item{\code{history}:}{ a data.frame recording the operation history of the LumiBatch object.}
-   		\item{\code{controlData}:}{ a control data information (as a data.frame) output by BeadStudio.}
+   		\item{\code{controlData}:}{ a data.frame with first two columns as "controlType" and "ProbeID". The rest columns are the control probe expression amplitudes for individual samples.}
    		\item{\code{QC}:}{ a the quality control information of the LumiBatch object, returned by lumiQ function.}
    }
 
@@ -63,8 +63,8 @@
       \item{\code{assayData}}{ contains equal dimensional matrices:
  		\code{\bf exprs} (contains gene expression level, which is the mean of its bead replicates.),
  		\code{\bf se.exprs} (contains gene expression standard error, which is the standard error of its bead replicates.), 
- 		\code{\bf beadNum} (records the number of beads for the gene.),
- 		\code{\bf detection} (records the detectability of the gene. The number is from [0,1]. Usually > 0.99 indicates good detection.). 
+ 		\code{\bf beadNum} (records the number of beads for the probe.),
+ 		\code{\bf detection} (records the detection p-value of the probe. The number is from [0,1]. By default, < 0.01 indicates good detection.). 
 		For more details of \code{assayData}, please see \code{\link[Biobase]{ExpressionSet}} } 
       \item{\code{phenoData}:}{See \code{\link[Biobase]{eSet}}}
       \item{\code{experimentData}:}{See \code{\link[Biobase]{eSet}}}

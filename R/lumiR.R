@@ -334,11 +334,15 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (parseColumnName) {
 		sampleIDInfo <- strsplit(sampleID, split="_")
 		label <- NULL
-		temp <- lapply(sampleIDInfo, function(x) label <<- c(label, x[length(x)]))
+		newID <- NULL
+		temp <- lapply(sampleIDInfo, function(x) {
+			label <<- c(label, x[length(x)])
+			newID <<- c(newID, paste(x[1:2], collapse="_"))
+			})
+		if (!any(duplicated(newID))) sampleID <- newID
 		if (length(unique(label)) != length(label) || length(label) == 0 || any(is.na(label)))
 			label <- sampleID
 	} else {
-		sampleIDInfo <- NULL
 		label <- sampleID
 	}
     
@@ -400,16 +404,22 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	}
 	
 	## produce the phenoData object
-	if (parseColumnName) {
+	if (!all(sampleID == label)) {
 		pData <- data.frame(sampleID=sampleID, label=label)
 		rownames(pData) <- label
 		#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
 			'The label of the sample'))
 		rownames(varMetadata) <- c('sampleID', 'label')
-		pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
-		cmd <- paste(cmd, ', phenoData=pdata')
-	} 
+	}  else {
+		pData <- data.frame(sampleID=sampleID)
+		rownames(pData) <- sampleID
+		#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
+		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id'))
+		rownames(varMetadata) <- c('sampleID')
+	}
+	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
+	cmd <- paste(cmd, ', phenoData=pdata')
 	cmd <- paste(cmd, ')')
 	eval(parse(text=cmd))
 
