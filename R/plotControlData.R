@@ -4,6 +4,7 @@ function(controlData, type=NULL, slideIndex=NULL, logMode=FALSE, new=TRUE, ...)
 	if (is(controlData, 'LumiBatch')) {
 		sampleID <- pData(phenoData(controlData))$sampleID
 		controlData <- controlData@controlData
+		if (nrow(controlData) == 0) stop('Slot controlData is empty!')
 	} else {
 		sampleID <- NULL
 	}
@@ -11,6 +12,8 @@ function(controlData, type=NULL, slideIndex=NULL, logMode=FALSE, new=TRUE, ...)
 	uniControlType <- getControlType(controlData)
 	controlData <- controlData[, -c(1,2)]
 	if (!is.null(type)) {
+		type <- toupper(type)
+		allControlType <- toupper(allControlType)
 		if (!all(type %in% uniControlType)) {
 			warning('"type" does not match "controlType". Please use getControlType function to view the available type!')
 			type <- ''
@@ -48,12 +51,18 @@ function(controlData, type=NULL, slideIndex=NULL, logMode=FALSE, new=TRUE, ...)
 	if (length(type) > 1) oldPar <- par(mfrow=c(ceiling(length(type)/2), 2))
 	for (type.i in type) {
 		if (type.i != '') {
-			selControlData <- controlData[allControlType == type.i, ]
+			selControlData <- controlData[allControlType == type.i, , drop=FALSE]
 		} else {
 			selControlData <- controlData
 		}
-		mm <- apply(selControlData, 2, mean)
-		std <- apply(selControlData, 2, sd)
+		
+		if (nrow(selControlData) > 1) {
+			mm <- apply(selControlData, 2, mean)
+			std <- apply(selControlData, 2, sd)
+		} else {
+			mm <- selControlData
+			std <- rep(0, length(mm))
+		}
 
 		labels <- colnames(selControlData)
 		if (is.null(labels)) labels <- as.character(1:ncol(selControlData))
@@ -72,7 +81,9 @@ function(controlData, type=NULL, slideIndex=NULL, logMode=FALSE, new=TRUE, ...)
 		} else {
 			points(1:ind, mm, pch = 19, cex=1.8, type='o', col=col, ...)
 		}
-		arrows(1:ind, mm - std, 1:ind, mm + std, code = 3, col=col, angle = 90, length = .1)
+		if (nrow(selControlData) > 1) {
+			arrows(1:ind, mm - std, 1:ind, mm + std, code = 3, col=col, angle = 90, length = .1)
+		}
 		# plot the vertical lines
 		if (chipNum > 1) {
 			abline(v=0.5 + which(diff(col) != 0), lty=2)

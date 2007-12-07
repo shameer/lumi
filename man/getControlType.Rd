@@ -23,6 +23,10 @@ getControlType(controlData)
 
 \seealso{  \code{\link{addControlData2lumi}} }
 \examples{
+	controlFile <- system.file('doc', 'Control Probe Profile.txt', package='lumi')
+	## return a data.frame
+	controlData <- getControlData(controlFile)
+	getControlType(controlData)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

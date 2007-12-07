@@ -11,7 +11,7 @@ plotControlData(controlData, type = NULL, slideIndex = NULL, logMode = FALSE, ne
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{controlData}{ a LumiBatch object including control data or a control data data.frame}
-  \item{type}{ the control probe type, which can be get by running getControlType(controlData) }
+  \item{type}{ the control probe type (case insensitive), which can be get by running getControlType(controlData) }
   \item{slideIndex}{ the slide index or ID corresponding to each sample }
   \item{logMode}{ whether show the data in log2 scale }
   \item{new}{ whether refresh the new plot or add it on the old one  }
@@ -27,7 +27,10 @@ plotControlData(controlData, type = NULL, slideIndex = NULL, logMode = FALSE, ne
 \author{ Pan Du }
 \seealso{ \code{\link{addControlData2lumi}} }
 \examples{
-
+	controlFile <- system.file('doc', 'Control Probe Profile.txt', package='lumi')
+	controlData <- getControlData(controlFile)
+	getControlType(controlData)
+	plotControlData(controlData, type='NEGATIVE')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

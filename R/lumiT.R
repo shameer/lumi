@@ -50,7 +50,14 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 			lowCutoff <- 1/3
 			backgroundStd <- NULL
 			if (!is.null(detectCall)) {
-				backgroundStd <- mean(se.exprs[detectCall[,i] == 'A',i])
+				ind <- which(detectCall[,i] == 'A')
+				if (nrow(se.exprs) - length(ind) < 3000) {
+					warning('Too few probes are detectable based on detection p-values!\n 
+						Iteration method will be used for VST.')
+					lowCutoff <- 1/4
+				} else {
+					backgroundStd <- mean(se.exprs[ind,i])
+				}
 			} else if (is(x.lumi, 'AffyBatch')) {
 				lowCutoff <- 1/4
 				# afbatch.i <- x.lumi[,i]

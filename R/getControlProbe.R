@@ -9,6 +9,8 @@ function(controlData, type=NULL)
 	allProbeID <- controlData$ProbeID
 	selProbeID <- allProbeID
 	if (!is.null(type)) {
+		type <- toupper(type)
+		allControlType <- toupper(allControlType)
 		if (type %in% uniControlType) {
 			selProbeID <- allProbeID[allControlType == type[1]]
 		} 

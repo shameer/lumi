@@ -24,8 +24,9 @@ Return the LumiBatch object with controlData slot filled.
 
 \seealso{  \code{\link{getControlData}}, \code{\link{plotControlData}} }
 \examples{
-
-
+	## Not runnable
+	# controlFile <- 'Control Probe Profile.txt'
+	# x.lumi <- addControlData2lumi(controlFile, x.lumi)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

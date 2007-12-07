@@ -345,7 +345,7 @@ setMethod('hist', signature(x='ExpressionSet'),
 
 setMethod('density', signature(x='ExpressionSet'), 
 	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", col=1:dim(x)[2], lty=1:dim(x)[2], 
-	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, ...) 
+	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, main='',...) 
 {
 	if (is(x, 'ExpressionSet')) {
 	    expr <- exprs(x)
@@ -406,7 +406,7 @@ setMethod('density', signature(x='ExpressionSet'),
 		}
 	}
 	# matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, lty=lty, lwd=lwd, ...)
-	matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, lty=lty, lwd=lwd, xlim=xlim)
+	matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, lty=lty, lwd=lwd, xlim=xlim, main=main)
 	if (!is.null(index.highlight)) {
 		if (index.highlight > ncol(all.x) || index.highlight < 1) {
 			warning('Highlight index out of range!')

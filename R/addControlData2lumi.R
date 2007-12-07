@@ -6,14 +6,14 @@ function(controlData, x.lumi)
 		controlFile <- controlData
 		allControlInfo <- lumiR.batch(controlFile, lib=NULL, checkDupId=FALSE)
 		controlData <- as.data.frame(exprs(allControlInfo))
-		controlType <- pData(featureData(allControlInfo))$TargetID
-		ProbeID <- pData(featureData(allControlInfo))$ProbeID
+		controlType <- as.character(pData(featureData(allControlInfo))$TargetID)
+		ProbeID <- as.character(pData(featureData(allControlInfo))$ProbeID)
 		controlData <- data.frame(controlType=controlType, ProbeID=ProbeID, controlData)
 	}
 	if (is.matrix(controlData)) controlData <- as.data.frame(controlData)
 	if (is(controlData, 'data.frame')) {
 		## match the column names of controlData and LumiBatch object
-		sampleID <- pData(phenoData(x.lumi))$sampleID
+		sampleID <- as.character(pData(phenoData(x.lumi))$sampleID)
 		if (is.null(sampleID)) sampleID <- sampleNames(x.lumi)
 		controlSampleID <- names(controlData)
 		if ('TargetID' %in% controlSampleID) {

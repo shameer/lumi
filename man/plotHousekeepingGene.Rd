@@ -28,7 +28,9 @@ plotHousekeepingGene(controlData, lib = NULL, slideIndex = NULL, addLegend = TRU
 \seealso{ \code{\link{addControlData2lumi}}, \code{\link{plotControlData}} }
 
 \examples{
-
+	controlFile <- system.file('doc', 'Control Probe Profile.txt', package='lumi')
+	controlData <- getControlData(controlFile)
+	plotHousekeepingGene(controlData)
 
 }
 \keyword{methods}
