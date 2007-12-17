@@ -40,7 +40,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 		if (c3 != 0) {
 			selInd <- selInd & (std^2 > c3)
 			dd <- data.frame(y=sqrt(std[selInd]^2 - c3), x1=u[selInd])
-			if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
+ 			# if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
 			lmm <- lm(y ~ x1, dd)
 			c1 <- lmm$coef[2]
 			c2 <- lmm$coef[1]
@@ -50,7 +50,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 			while(iterNum <= 20) {
 				selInd.i <- selInd & (std^2 > c3.i)
 				dd <- data.frame(y=sqrt(std[selInd.i]^2 - c3.i), x1=u[selInd.i])
-				if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
+				# if (nrow(dd) > 5000) dd <- dd[sample(1:nrow(dd), 5000),]
 				lm.i <- lm(y ~ x1, dd)
 				c1.i <- lm.i$coef[2]
 				c2.i <- lm.i$coef[1]

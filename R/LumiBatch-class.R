@@ -172,7 +172,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 {
 	if (missing(y)) return(x)
 	if (length(list(...)) > 0) 
-	        combine(x, combine(y, ...))
+	        return(combine(x, combine(y, ...)))
 	if (class(x) != class(y))
 		stop(paste("objects must be the same class, but are ",
                  class(x), ", ", class(y), sep=""))

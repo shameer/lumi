@@ -49,21 +49,25 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 
 		ID <- sampleInfo$ID
 		if (is.null(ID)) {
-			warning('The ID column in sampleInfoFile is required!')
-			setwd(oldDir)
-			return(x.lumi)
+			ID <- sampleInfo[,1]
+			if (any(duplicated(ID))) {
+				warning('In sampleInfoFile, the ID column is required or the first column should be unique!')
+				setwd(oldDir)
+				return(x.lumi)
+			}
 		} 
 		rownames(sampleInfo) <- ID
 
 		sampleName <- sampleNames(x.lumi)
-		if (!all(sampleName %in% ID)) {
-			warning('Some sample informatin is not provided!')
+		ID <- ID[ID %in% sampleName]
+		if (length(sampleInfo$ID) != length(ID)) {
+			warning('Some IDs provided in the sampleInfoFile do not exist the data file!')
+			if (length(ID) == 0) {
+				stop('The IDs provided in the sampleInfoFile do not match the data file!')
+			} 
+			
 		} 
-		ID <- intersect(ID, sampleName)
-		sampleNames(x.lumi) <- sampleInfo[sampleName, 'Label']
-		ind <- 1:ncol(x.lumi)
-		names(ind) <- sampleName
-		x.lumi <- x.lumi[, ind[ID]]
+		x.lumi <- x.lumi[, ID]
 
 		pData <- sampleInfo[ID,]
 		label <- sampleInfo[ID, 'Label']
