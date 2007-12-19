@@ -301,7 +301,7 @@ lumi.N <- lumiN(lumi.T)
 @ 
 
 Users can also easily select other normalization method. For example, the following command will run quantile between microarray normaliazation.
-<<eval=FALSE>>=
+<<eval=T>>=
 ## Do quantile between microarray normaliazation
 lumi.N <- lumiN(lumi.T, method='quantile')	## Not Run
 @ 
@@ -489,15 +489,8 @@ In order to get unique mapping between microarray measurements and probes, using
 
 
 \subsection{Examples of nuID}
-\begin{Sinput}
-> ## provide an arbitrary nucleotide sequence as an example 
-> seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
-> ## create a nuID for it
-> id <- seq2id(seq)
-> print(id)
-\end{Sinput}
 
-<<echo=F>>=
+<<echo=T>>=
 ## provide an arbitrary nucleotide sequence as an example 
 seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
 ## create a nuID for it
@@ -532,18 +525,8 @@ Need to mention, currently there are two sets of Illumina annotation packages in
 
 
 Here is some examples:
-\begin{Sinput}
-> ## load lumi annotation package
-> lib <- 'lumiHumanV1'		# Huamn lumi annotation package version one
-> if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
-+ 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
-+ 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
-+ 	# probes under 'GO:0004816'  category
-+ 	probe
-+ }
-\end{Sinput} 
 
-<<echo=F>>=
+<<echo=T>>=
 ## load lumi annotation package
 lib <- 'lumiHumanV1'		# Huamn lumi annotation package
 if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
@@ -555,17 +538,7 @@ if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
 @
 
 
-\begin{Sinput}
-> # specify a nuID
-> nuId <- 'WVUU7XyNw3ucXzwdEk'	
-> if (require(annotate) & require(lib, character.only=TRUE)) {
-+	# get the gene symbol of nuId
-+	getSYMBOL(nuId, lib)
-+ }
-\end{Sinput} 
-
-
-<<echo=F>>=
+<<echo=T>>=
 # specify a nuID
 nuId <- 'WVUU7XyNw3ucXzwdEk'	
 if (require(annotate) & require(lib, character.only=TRUE)) {
@@ -658,32 +631,7 @@ selProbe <- rownames(selDataMatrix)
 @
 
 
-\begin{Sinput}
-> ## Specify the sample type
-> sampleType <- c('100:0', '95:5', '100:0', '95:5')
-> if (require(limma)) {
-+ 	## compare '95:5' and '100:0'
-+ 	design <- model.matrix(~ factor(sampleType))
-+ 	colnames(design) <- c('100:0', '95:5-100:0')
-+ 	fit <- lmFit(selDataMatrix, design)
-+ 	fit <- eBayes(fit)
-+       ## Add gene symbols to gene properties
-+	if (require(lumiHumanV1) & require(annotate)) {
-+             geneSymbol <- getSYMBOL(fit$genes$ID, 'lumiHumanV1')
-+              fit$genes <- data.frame(fit$genes, geneSymbol=geneSymbol)
-+        }
-+ 	## print the top 10 genes
-+ 	topTable(fit, coef='95:5-100:0', adjust='fdr', number=10)
-+ 	
-+ 	## get significant gene list with FDR adjusted p.values less than 0.01
-+ 	p.adj <- p.adjust(fit$p.value[,2])		
-+ 	sigGene.adj <- selProbe[ p.adj < 0.01]
-+ 	## without FDR adjustment
-+ 	sigGene <- selProbe[ fit$p.value[,2] < 0.001]
-+ } 
-\end{Sinput}
-
-<<echo=F>>=
+<<echo=T>>=
 ## Specify the sample type
 sampleType <- c('100:0', '95:5', '100:0', '95:5')
 if (require(limma)) {

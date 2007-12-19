@@ -23,7 +23,7 @@ returns the corresponding probe Ids for the control type.
 \author{ Pan Du }
 \seealso{  \code{\link{addControlData2lumi}} }
 \examples{
-	controlFile <- system.file('doc', 'Control Probe Profile.txt', package='lumi')
+	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
 	## return a data.frame
 	controlData <- getControlData(controlFile)
 	getControlType(controlData)

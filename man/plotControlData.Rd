@@ -27,7 +27,7 @@ plotControlData(controlData, type = NULL, slideIndex = NULL, logMode = FALSE, ne
 \author{ Pan Du }
 \seealso{ \code{\link{addControlData2lumi}} }
 \examples{
-	controlFile <- system.file('doc', 'Control Probe Profile.txt', package='lumi')
+	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
 	controlData <- getControlData(controlFile)
 	getControlType(controlData)
 	plotControlData(controlData, type='NEGATIVE')
