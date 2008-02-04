@@ -41,9 +41,18 @@ The \Rpackage{lumi} package provides unique functions for microarray processing.
 
 
 \section{Installation of lumi package} 
-In order to install the lumi package, the user needs to first install R, some Bioconductor packages ( \Rpackage{Biobase}, \Rpackage{affy}, \Rpackage{annotate}) and R packages ( \Rpackage{mgcv},  \Rpackage{methods}). If the user is also interested in using vsn method, then the Bioconductor package \Rpackage{vsn} needs to be installed.
+In order to install the lumi package, the user needs to first install R, some related Bioconductor packages. You can easily install them by the following codes.
 
-For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website.
+\begin{Sinput}
+ source("http://bioconductor.org/biocLite.R")
+ biocLite("lumi")
+\end{Sinput}
+
+For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website. You can also directly install the source packages from the Bioconductor website by specify the developing version. For example, to install the latest lumi pakcage in the 2.2 Bioconductor developing version, you can use the following command:
+
+\begin{Sinput}
+install.packages("lumi",repos="http://www.bioconductor.org/packages/2.2/bioc",type="source")
+\end{Sinput}
 
 An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.
 
@@ -75,7 +84,7 @@ The BeadStudio can output the gene profile or the probe profile. As the probe pr
 
 We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
 
-The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, we do not recommend to input all of them. Also, some annotation information may be outdated. Therefore, we recommend using Bioconductor annotation packages to retrieve some annotation information.
+The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, by default, we only input: ACCESSION, SYMBOL, PROBE\_START, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION. As some annotation information may be outdated. We recommend using Bioconductor annotation packages to retrieve the annotation information.
 
 If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the {\bf featureData} of the {\bf LumiBatch} object.
  
@@ -422,12 +431,12 @@ lumi.N.raw <- inverseVST(lumi.N)
 
 \section{Handling large data sets}
 Several users asked about processing large data set, e.g., over 100 samples. Directly handling such big data set usually will cause "out of memory" error in most computers. 
-In this case, when read the BeadStudio output file, we can ignore the "beadNum"  (related columns. The function \Rfunction{lumiR} provides a parameter called "columnNameGrepPattern". we can set the string grep pattern of "detection" and "beadNum"  as NA. You can also ignore "detection" columns. However, the "detection" information is useful for the estimation of present count of each probe and used in the VST parameter estimation. 
+In this case, when read the BeadStudio output file, we can ignore the "beadNum"  (related columns. The function \Rfunction{lumiR} provides a parameter called "columnNameGrepPattern". we can set the string grep pattern of "detection" and "beadNum"  as NA. You can also ignore "detection" columns. However, the "detection" information is useful for the estimation of present count of each probe and used in the VST parameter estimation. To further save memory, you can suppress the input of annotation data by setting "inputAnnotation" as FALSE.
 
 Here is some example code:
 \begin{Sinput}
-## load the data with empty detection and beadNum slots
->  x.lumi <- lumiR("fileName.txt", columnNameGrepPattern=list(beadNum=NA))
+## load the data with empty detection and beadNum slots, and without annotation information
+>  x.lumi <- lumiR("fileName.txt", columnNameGrepPattern=list(beadNum=NA), inputAnnotation=FALSE)
 \end{Sinput}
 
 Usually, the large data set is composed of many small data files. In this case, the transformations, like log2 and \Rfunction{vst}, can be performed right after the input of each data file and some information can be removed in the object after transformation. \Rpackage{lumi} provides the \Rfunction{lumiR.batch} function for this purpose.

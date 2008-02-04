@@ -198,22 +198,23 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	phenoData(x) <- combine(phenoData(x),phenoData(y))
 	
 	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
-	## combine feature data
-	if (!is.null(featureData(x)) || !is.null(featureData(y))) {
-		feature.x <- featureData(x)
-		feature.y <- featureData(y)
-    
-		pData.x <- pData(feature.x)
-		pData.y <- pData(feature.y)
-		if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are incompatible!')
-		#repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
-		#pData(feature.x) <- repInfo
-		#
-		#metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
-		#rownames(metaInfo) <- names(repInfo)
-		#varMetadata(feature.x) <- metaInfo
-		#featureData(x) <- feature.x
-	}
+	## For the feature data, we assume all the data have the same information,
+	##    so only the first feature data will be used.
+	# if (!is.null(featureData(x)) || !is.null(featureData(y))) {
+	# 	feature.x <- featureData(x)
+	# 	feature.y <- featureData(y)
+    # 
+	# 	pData.x <- pData(feature.x)
+	# 	pData.y <- pData(feature.y)
+	# 	if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are incompatible!')
+	# 	#repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
+	# 	#pData(feature.x) <- repInfo
+	# 	#
+	# 	#metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
+	# 	#rownames(metaInfo) <- names(repInfo)
+	# 	#varMetadata(feature.x) <- metaInfo
+	# 	#featureData(x) <- feature.x
+	# }
 
 	## combining the QC information
 	if (length(x@QC) > 0 && length(y@QC) > 0) {

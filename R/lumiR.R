@@ -1,7 +1,7 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
-	inputAnnotation=FALSE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
+	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
 	## 'exprs' and 'se.exprs' related columns are required
@@ -276,7 +276,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (inputAnnotation) {
 		# It is based on annotationColumn
 		annotationColumn <- header[toupper(header) %in% toupper(annotationColumn)]
-		if (length(annotationColumn) == 0) {
+		if (length(annotationColumn) == 0 && "SPECIES" %in% toupper(header)) {
 			print('Some annotation columns not available in the data.')
 		} else {
 			annotationInfo <- allData[,annotationColumn]
