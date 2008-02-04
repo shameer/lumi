@@ -75,6 +75,8 @@ The BeadStudio can output the gene profile or the probe profile. As the probe pr
 
 We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
 
+The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, we do not recommend to input all of them. Also, some annotation information may be outdated. Therefore, we recommend using Bioconductor annotation packages to retrieve some annotation information.
+
 If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the {\bf featureData} of the {\bf LumiBatch} object.
  
 For convenience, another function \Rfunction{lumiR.batch} is designed to input files in batch. Basically it combines the output of each file. See the help of \Rfunction{lumiR.batch} for details.
@@ -785,7 +787,7 @@ We would like to thanks the users and researchers around the world contribute to
 
 \section{References}
 
-1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data", accepted by Nucleic Acid Research in Nov. 2007
+1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data",  Nucleic Acids Res. 2008 Jan 4
 
 2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 

@@ -1,6 +1,7 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE,
-	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'), ...) 
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
+	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
+	inputAnnotation=FALSE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
 	## 'exprs' and 'se.exprs' related columns are required
@@ -270,6 +271,18 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		colnames(beadNum) <- header[ind]
 	}
     
+	## identify the annotation columns
+	annotationInfo <- NULL
+	if (inputAnnotation) {
+		# It is based on annotationColumn
+		annotationColumn <- header[toupper(header) %in% toupper(annotationColumn)]
+		if (length(annotationColumn) == 0) {
+			print('Some annotation columns not available in the data.')
+		} else {
+			annotationInfo <- allData[,annotationColumn]
+		}
+	}
+
 	## check for possible duplicated ids
 	if (checkDupId) {
 		dupId <- unique(id[duplicated(id)])
@@ -299,6 +312,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 			id <- id[-rmInd]; targetID <- targetID[-rmInd]
 			if (!is.null(detection)) detection <- detection[-rmInd,,drop=FALSE]
 			if (!is.null(beadNum)) beadNum <- beadNum[-rmInd,,drop=FALSE]
+			if (!is.null(annotationInfo)) annotationInfo <- annotationInfo[-rmInd,,drop=FALSE]
 		}
 	}
     
@@ -309,6 +323,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		se.exprs <- se.exprs[keepInd,,drop=FALSE]
 		if (!is.null(beadNum))  beadNum <- beadNum[keepInd,,drop=FALSE]
 		if (!is.null(detection))  detection <- detection[keepInd,,drop=FALSE]
+		if (!is.null(annotationInfo)) annotationInfo <- annotationInfo[keepInd,,drop=FALSE]
 		id <- id[keepInd]
 		targetID <- targetID[keepInd]
 	}
@@ -350,14 +365,21 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	reporterInfo <- data.frame(id)
 	names(reporterInfo) <- idName
 	varMetadata <- data.frame(labelDescription='The Illumina microarray identifier')
-	rownames(varMetadata) <- idName
+	varName <- idName
 
 	## if ProbeID is used as id, then also keep the TargetID information in the featureData
 	if (idName != header[1]) {
 		reporterInfo <- data.frame(reporterInfo, TargetID=targetID)
-		varMetadata <- rbind(varMetadata, data.frame(labelDescription='The Illumina TargetID'))
-		rownames(varMetadata)[nrow(varMetadata)] <- 'TargetID'
+		varMetadata <- data.frame(labelDescription=c(varMetadata$labelDescription, 'The Illumina TargetID'))
+		varName <- c(varName, 'TargetID')
 	}
+	## add annotationInfo to the featureData
+	if (!is.null(annotationInfo)) {
+		reporterInfo <- data.frame(reporterInfo, annotationInfo)
+		varMetadata <- data.frame(labelDescription=c(varMetadata$labelDescription, names(annotationInfo)))
+		varName <- c(varName, names(annotationInfo))
+	}
+	rownames(varMetadata) <- varName
 	if (checkDupId)	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
@@ -393,7 +415,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 		}
 	}
 
-	## If no se.exprs imported, the it will create a ExpressionSet class, instead of LumiBatch class.
+	## If no se.exprs imported, it will create a ExpressionSet class, instead of LumiBatch class.
 	if (is.null(se.exprs)) {
 		cmd <- 'x.lumi <- new("ExpressionSet", exprs=exprs'
 	} else {
@@ -453,6 +475,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	x.lumi@history<- data.frame(submitted=history.submitted, 
 			finished=history.finished, command=history.command, lumiVersion=lumiVersion)
 
+	## Add the species information if exists
+	if (any(toupper(header) == 'SPECIES')) {
+		species <- as.character(allData[1,header[toupper(header) == 'SPECIES']])
+		annotation(x.lumi) <- species
+	}
+	
 	## initialize the QC slot in the LumiBatch object
 	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
 

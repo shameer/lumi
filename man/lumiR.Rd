@@ -7,7 +7,8 @@
 }
 \usage{
 lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec = '.', parseColumnName=FALSE, checkDupId=TRUE,
-columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'), ...)
+columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
+inputAnnotation=FALSE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +21,8 @@ columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection=
   \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (Assume the sample information is separated by "\_".) }
   \item{checkDupId}{ determine whether to check duplicated TargetIDs or ProbeIds. The duplicated ones will be averaged.}
   \item{columnNameGrepPattern}{ the string grep patterns used to determine the slot corresponding columns.}
+  \item{inputAnnotation}{ determine whether input the annotation information outputted by BeadStudio if exists.}
+  \item{annotationColumn}{ the column names of the annotation information outputted by BeadStudio}
   \item{\dots}{ other parameters used by \code{\link[utils]{read.table}} function }
 }
 \details{
@@ -30,6 +33,8 @@ The parameter "columnNameGrepPattern" is designed for some advanced users. It de
 The parameter "parseColumnName" is designed to parse the column names and retrieve the sample information. We assume the sample information is separated by "\_" and the last element after "\_" is the sample label (sample names of the LumiBatch object).  If the parsed sample labels are not unique, then the entire string will be used as the sample label. For example: "1881436055\_A\_STA 27aR" is included in one of the column names of BeadStudio output file. Here, the program will first treat "STA 27aR" as the sample label. If it is not unique across the samples, "1881436055\_A\_STA 27aR" will be the sample label. If it is still not unique, the program will report warning messages. All the parsed information is kept in the phenoData slot. By default, "parseColumnName" is FALSE. We suggest the users use it only when they know what they are doing.
 
 Current version of lumiR can adaptively read the output of BeadStudio Verson 1 and 3. The format Version 3 made quite a few changes comparing with previous versions. One change is the detection value. It was called detectable when the detection value is close to one for Version 1 format. However, the detection value became a p-value in the Version 3. As a result, the detectionTh is automatically changed based on the version. The detectionTh 0.01 for the Version 3 will be changed as the detectionTh 0.99 for Version 1. Another big change is that Version 3 separately output the control probe (gene) information and a "Samples Table". As a result, the controlData slot in LumiBatch class was added to keep the control probe (gene) information, and a QC slot to keep the quality control information, including the "Sample Table" output by BeadStudio version 3.
+
+The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, we do not recommend to input all of them. Also, some annotation information may be outdated. Therefore, we recommend using Bioconductor annotation packages to retrieve some annotation information.
 }
 \value{
 return a LumiBatch object

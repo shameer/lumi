@@ -1,4 +1,11 @@
 -----------------------------------------------------
+version 1.5.10-1.5.13
+release data: 02/03/2008
+1. lumiR can also input the annotation information outputted by BeadStuio
+2. Add plot functions dealing with the control probe data outputted by BeadStudio.
+
+
+-----------------------------------------------------
 version 1.5.1-1.5.9
 release data: 12/05/2007
 1. Add functions dealing with the control probe data outputted by BeadStudio.
