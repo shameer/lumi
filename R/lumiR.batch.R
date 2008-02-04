@@ -46,7 +46,8 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 		} else if (is.data.frame(sampleInfoFile)) {
 			sampleInfo <- sampleInfoFile
 		}
-
+		## force the names to be capitalized
+		names(sampleInfo) <- toupper(names(sampleInfo))
 		ID <- sampleInfo$ID
 		if (is.null(ID)) {
 			ID <- sampleInfo[,1]
@@ -60,7 +61,7 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 
 		sampleName <- sampleNames(x.lumi)
 		ID <- ID[ID %in% sampleName]
-		if (length(sampleInfo$ID) != length(ID)) {
+		if (nrow(sampleInfo) != length(ID)) {
 			warning('Some IDs provided in the sampleInfoFile do not exist the data file!')
 			if (length(ID) == 0) {
 				stop('The IDs provided in the sampleInfoFile do not match the data file!')
@@ -70,7 +71,7 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 		x.lumi <- x.lumi[, ID]
 
 		pData <- sampleInfo[ID,]
-		label <- sampleInfo[ID, 'Label']
+		label <- sampleInfo[ID, 'LABEL']
 		if (!is.null(label)) {
 			label <- ID
 			rownames(pData) <- label
