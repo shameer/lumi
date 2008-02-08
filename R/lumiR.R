@@ -203,9 +203,13 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	## Get Id. The ProbeID (by default it is the second column) is preferred if provided, 
 	# otherwise the TargetID (by default it is the first column) is used.
 	targetID <- as.character(as.vector(allData[,1]))
-	if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
-		id <- as.character(as.vector(allData[,2]))
-		idName <- header[2]
+	#if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
+	#	id <- as.character(as.vector(allData[,2]))
+	#	idName <- header[2]
+	probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
+	if (length(probeId.pos) > 0) {
+		id <- as.character(as.vector(allData[,probeId.pos]))
+		idName <- header[probeId.pos]
 	} else {
 		id <- targetID
 		idName <- header[1]
@@ -414,7 +418,6 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 			}
 		}
 	}
-
 	## If no se.exprs imported, it will create a ExpressionSet class, instead of LumiBatch class.
 	if (is.null(se.exprs)) {
 		cmd <- 'x.lumi <- new("ExpressionSet", exprs=exprs'
@@ -444,7 +447,6 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	cmd <- paste(cmd, ', phenoData=pdata')
 	cmd <- paste(cmd, ')')
 	eval(parse(text=cmd))
-
 	if (is.null(se.exprs)) {
 		## resume the old settings
 		options(stringsAsFactors = oldSetting)
