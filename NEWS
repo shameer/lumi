@@ -1,4 +1,11 @@
 -----------------------------------------------------
+version 1.5.15-1.5.16
+release data: 02/08/2008
+1. The default normalization method is changed as 'quantile' instead of 'rsn'.
+2. update lumiR for the changes of BeadStudio output.
+
+
+-----------------------------------------------------
 version 1.5.10-1.5.14
 release data: 02/03/2008
 1. lumiR can also input the annotation information outputted by BeadStuio
