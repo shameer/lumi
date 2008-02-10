@@ -9,7 +9,7 @@ function(x, type=c('data.frame', 'LumiBatch'))
 		}
 		x <- allControlInfo
 	} 
-	
+
 	if (is(x, 'LumiBatch')) {
 		if (type == 'LumiBatch') {
 			return(x)
@@ -19,7 +19,9 @@ function(x, type=c('data.frame', 'LumiBatch'))
 				controlType <- pData(featureData(allControlInfo))$TargetID
 				if (length(which(toupper(controlType) == 'NEGATIVE')) > 10) {
 					ProbeID <- pData(featureData(allControlInfo))$ProbeID
+					controlNames <- names(controlData)
 					controlData <- data.frame(controlType=as.character(controlType), ProbeID=as.character(ProbeID), controlData)
+					names(controlData) <- c('controlType', 'ProbeID', controlNames)
 				} else {
 					controlData <- data.frame()
 				}
