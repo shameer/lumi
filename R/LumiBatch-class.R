@@ -188,7 +188,19 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 		sampleNames(x) <- sampleName.x
 		sampleNames(y) <- sampleName.y
 	}
-
+	featureName.x <- featureNames(x)
+	featureName.y <- featureNames(y)
+	featureName.com <- featureName.x[featureName.x %in% featureName.y]
+	if (length(featureName.com) < length(featureName.x) || length(featureName.com) != length(featureName.y)) {
+		if (length(featureName.com) > 0) {
+			warning('Two data sets have different featureNames, only the common ones were used!')			
+		} else {
+			stop('Two data sets have totally different featureNames!')
+		}
+	}
+	## make sure two data sets have the sample order of features
+	x <- x[featureName.com,]
+	y <- y[featureName.com,]
 	history.submitted <- as.character(Sys.time())
 	dimm.x <- dim(x); dimm.y <- dim(y)
 	assayData(x) <- combine(assayData(x), assayData(y))
