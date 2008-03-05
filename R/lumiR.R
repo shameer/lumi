@@ -432,14 +432,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	if (!all(sampleID == label)) {
 		pData <- data.frame(sampleID=sampleID, label=label)
 		rownames(pData) <- label
-		#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
 			'The label of the sample'))
 		rownames(varMetadata) <- c('sampleID', 'label')
 	}  else {
 		pData <- data.frame(sampleID=sampleID)
 		rownames(pData) <- sampleID
-		#pdata <- new("phenoData", pData=pData, varLabels=list('sampleID', 'label'))
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id'))
 		rownames(varMetadata) <- c('sampleID')
 	}
