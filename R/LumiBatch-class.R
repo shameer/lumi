@@ -111,12 +111,12 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 {
 	if (missing(drop)) drop <- FALSE
    	history.submitted <- as.character(Sys.time())
+	ddim <- dim(x)
 	
 	sampleName <- sampleNames(x)
 	## do default processing of 'ExpressionSet'
 	x <- callNextMethod()
 
-	ddim <- dim(x)
 	if (!missing(i) && !missing(j)) {
 		history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
 	} else if (!missing(i)) {

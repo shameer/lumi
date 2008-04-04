@@ -141,19 +141,21 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 		for (dupId.i in dupId) {
 			dupIndex <- which(newId == dupId.i)
 			ave.exp <- colMeans(exprs(x.lumi)[dupIndex, ])
-			totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
-			if (detect.low < detect.high) {
-				maxDetection <- apply(detection(x.lumi), 2, min)
-			} else {
-				maxDetection <- apply(detection(x.lumi), 2, max)
-			}
-
-			temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum(x.lumi)[dupIndex,] - 1))
-			temp <- temp / (totalBeadNum - length(dupIndex))
-			se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum(x.lumi)[dupIndex,])))
 			exprs(x.lumi)[dupIndex[1],] <- ave.exp
-			detection(x.lumi)[dupIndex[1],] <- maxDetection
-			beadNum(x.lumi)[dupIndex[1],] <- totalBeadNum
+			if (is(x.lumi, 'LumiBatch')) {
+				totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
+				if (detect.low < detect.high) {
+					maxDetection <- apply(detection(x.lumi), 2, min)
+				} else {
+					maxDetection <- apply(detection(x.lumi), 2, max)
+				}
+
+				temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum(x.lumi)[dupIndex,] - 1))
+				temp <- temp / (totalBeadNum - length(dupIndex))
+				se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum(x.lumi)[dupIndex,])))
+				detection(x.lumi)[dupIndex[1],] <- maxDetection
+				beadNum(x.lumi)[dupIndex[1],] <- totalBeadNum
+			}
 			rmIndex <- c(rmIndex, dupIndex[-1])
 		}
 		## remove duplicated
@@ -171,12 +173,14 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	if (!is.null(lib)) annotation(x.lumi) <- lib
 
 	## Add history tracking
-	history.finished <- as.character(Sys.time())
-	history.command <- capture.output(print(match.call(addNuId2lumi)))
-	if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
-	lumiVersion <- packageDescription('lumi')$Version
-	x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
-			finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+	if (is(x.lumi, 'LumiBatch')) {
+		history.finished <- as.character(Sys.time())
+		history.command <- capture.output(print(match.call(addNuId2lumi)))
+		if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
+		lumiVersion <- packageDescription('lumi')$Version
+		x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
+				finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+	}
 
 	return(x.lumi)
 }
