@@ -558,7 +558,7 @@ Here is some examples:
 <<echo=T>>=
 ## load lumi annotation package
 lib <- 'lumiHumanV1'		# Huamn lumi annotation package
-if(require(GO) & require(annotate) & require(lib, character.only=TRUE)) {
+if(require(GO.db) & require(annotate) & require(lib, character.only=TRUE)) {
 	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
 	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
 	# probes under 'GO:0004816'  category
@@ -671,6 +671,7 @@ if (require(limma)) {
 	fit <- eBayes(fit)
 	## Add gene symbols to gene properties
 	if (require(lumiHumanV1) & require(annotate)) {
+	    if (nrow(fit$genes) == 0) fit$genes <- data.frame(ID=rownames(selDataMatrix), stringsAsFactors=FALSE)
               geneSymbol <- getSYMBOL(fit$genes$ID, 'lumiHumanV1')
               fit$genes <- data.frame(fit$genes, geneSymbol=geneSymbol)
           }
