@@ -6,11 +6,12 @@
   Read BeadStudio output files in batch and combine them as a single LumiBatch object
 }
 \usage{
-lumiR.batch(fileList, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...)
+lumiR.batch(fileList, convertNuID = TRUE, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fileList}{ a vector of file names or a directory keeping the data files in the format of .csv }
+  \item{convertNuID}{ determine whether convert the probe identifier as nuID }
   \item{lib}{ same as \code{\link{lumiR}} parameter lib (optional) }
   \item{transform}{ determine whether to do transform after input each file }
   \item{sampleInfoFile}{ a Tab-separated text file or a data.frame keeping the sample information (optional) }

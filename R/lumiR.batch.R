@@ -1,4 +1,4 @@
-lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
+lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
 
 	oldDir <- getwd()
 	dirMode <- FALSE
@@ -17,7 +17,7 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 	print('Inputting the data ...')
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
-		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, ...)
+		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, ...)
 		# x.lumi.i <- lumiR(file.i, parseColumnName=FALSE)
 		if (transform != 'none') {
 			x.lumi.i <- lumiT(x.lumi.i, method=transform, simpleOutput=TRUE)
@@ -28,7 +28,8 @@ lumiR.batch <- function(fileList, lib = NULL, transform = c('none', 'vst', 'log2
 			x.lumi <- combine(x.lumi, x.lumi.i)
 		}
 	}
-	if (!is.null(lib)) {
+	if (!convertNuID) lib <- NULL	
+	if (!is.null(lib) || convertNuID) {
 		print('Adding nuID to the data ...')
 		x.lumi <- addNuId2lumi(x.lumi, lib=lib)
 	}

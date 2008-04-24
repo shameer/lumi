@@ -3,7 +3,7 @@ function(x, type=c('data.frame', 'LumiBatch'))
 {
 	type <- match.arg(type)
 	if (is.character(x)) {
-		allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE)
+		allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE)
 		if (type == 'LumiBatch') {
 			return(allControlInfo)
 		}

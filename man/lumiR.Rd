@@ -6,9 +6,9 @@
   Read in Illumina expression data. We assume the data was saved in a comma or tab separated text file.  
 }
 \usage{
-lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec = '.', parseColumnName=FALSE, checkDupId=TRUE,
+lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec = '.', parseColumnName=FALSE, checkDupId=TRUE,
 columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
-inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...)
+inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,6 +16,7 @@ inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', '
   \item{sep}{ the separation character used in the text file.  }
   \item{detectionTh}{ the p-value threshold of determining detectability of the expression. The detection value less than the detectionTh is claimed as detectable. }
   \item{na.rm}{ determine whether to remove NA }
+  \item{convertNuID}{ determine whether convert the probe identifier as nuID }
   \item{lib}{ the annotation library used by \code{\link{addNuId2lumi}}  }
   \item{dec}{ the character used in the file for decimal points.}
   \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (Assume the sample information is separated by "\_".) }
@@ -26,7 +27,7 @@ inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', '
   \item{\dots}{ other parameters used by \code{\link[utils]{read.table}} function }
 }
 \details{
-The function can automatically determine the separation character if it is Tab or comma. Otherwise, the user should specify the separator manually. If the annotation library is provided, the Illumina Id will be replaced with nuID, which is used as the index Id for the lumi annotation packages.
+The function can automatically determine the separation character if it is Tab or comma. Otherwise, the user should specify the separator manually. If the annotation library is provided, the Illumina Id will be replaced with nuID, which is used as the index Id for the lumi annotation packages. If the annotation library is not provided, it will try to directly convert the probe sequence (if provided in the BeadStudio output file) as nuIDs.
 
 The parameter "columnNameGrepPattern" is designed for some advanced users. It defines the string grep patterns used to determine the slot corresponding columns. For example, for the "exprs" slot in LumiBatch object, it is composed of the columns whose name includes "AVG\_SIGNAL". In some cases, the user may not want to read the "detection" and "beadNum" related columns to save memory. The user can set the "detection" and "beadNum" as NA in "columnNameGrepPattern". If the 'se.exprs' is set as NA or the corresponding columns are not available, then lumiR will create a ExpressionSet object instead of LumiBatch object.
 

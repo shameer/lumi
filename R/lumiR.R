@@ -1,7 +1,7 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
 	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
-	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
+	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
 	## 'exprs' and 'se.exprs' related columns are required
@@ -203,16 +203,17 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	## Get Id. The ProbeID (by default it is the second column) is preferred if provided, 
 	# otherwise the TargetID (by default it is the first column) is used.
 	targetID <- as.character(as.vector(allData[,1]))
-	#if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
-	#	id <- as.character(as.vector(allData[,2]))
-	#	idName <- header[2]
-	probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
-	if (length(probeId.pos) > 0) {
-		id <- as.character(as.vector(allData[,probeId.pos]))
-		idName <- header[probeId.pos]
-	} else {
-		id <- targetID
-		idName <- header[1]
+	id <- targetID
+	idName <- header[1]
+	if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
+		id <- as.character(as.vector(allData[,2]))
+		idName <- header[2]
+	} else if (!is.null(lib)) {
+		probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
+		if (length(probeId.pos) > 0) {
+			id <- as.character(as.vector(allData[,probeId.pos]))
+			idName <- header[probeId.pos]
+		}
 	}
     
 	## identify where the signal column exists
@@ -485,7 +486,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = NULL, dec
 	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
 
 	## Add nuID if the annotation library is provided
-	if (!is.null(lib))  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
+	if (!convertNuID) lib <- NULL
+	if (!is.null(lib) || convertNuID)  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
 
 	## resume the old settings
 	options(stringsAsFactors = oldSetting)

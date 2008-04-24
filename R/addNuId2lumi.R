@@ -6,11 +6,18 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	## check whether the object is nuID annotated.
 	exprs <- exprs(x.lumi)
 	id <- rownames(exprs)
-	if(all(sapply(id[1:10], is.nuID))) {
+	if(all(sapply(id[1:20], is.nuID))) {
 		print('The lumiBatch object is already nuID annotated!')
 		return(x.lumi)
 	}
+	if (!is.null(lib)) {
+		if (length(grep('\\.db', lib)) > 0) {
+			warning(paste(lib, 'does not include nuID conversion information!'))
+			lib <- NULL
+		}
+	}
 
+	newId <- id
 	## ---------------------------------------
 	## identify the Metadata lines 
 	if (!is.null(annotationFile)) {
@@ -127,7 +134,25 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 			stop(paste('Annotation library', lib, 'is not installed!'))
 		}
 	} else {
-		stop('Please provide the annotation file or lumi annotation library!')
+		annotation <- pData(featureData(x.lumi))
+		names(annotation) <- toupper(names(annotation))
+		if (!is.null(annotation)) {
+			sequence <- annotation[, 'PROBE_SEQUENCE']
+			if (!is.null(sequence)) {
+				cat('Directly converting probe sequence to nuIDs ...')
+				newId <- sapply(sequence, seq2id)
+				names(newId) <- id				
+			} else {
+				warning('Please provide the annotation file or lumi annotation library!')
+			}
+		} else {
+			warning('Please provide the annotation file or lumi annotation library!')
+		}
+	}
+	if (all(newId == id)) {
+		conversion <- FALSE
+	} else {
+		conversion <- TRUE
 	}
 
 	if (any(duplicated(newId)))  {
@@ -164,22 +189,25 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	## update the feature names (probe ids)
-	names(newId) <- NULL
-	featureNames(x.lumi) <- newId
-	## update the feautre data
-	featureData <- featureData(x.lumi)
-	rownames(pData(featureData)) <- newId
-	featureData(x.lumi) <- featureData
-	if (!is.null(lib)) annotation(x.lumi) <- lib
+	if (conversion) {
+		names(newId) <- NULL
+		featureNames(x.lumi) <- newId
+		## update the feautre data
+		featureData <- featureData(x.lumi)
+		rownames(pData(featureData)) <- newId
+		if (!is.null(pData(featureData)[,'PROBE_SEQUENCE'])) pData(featureData)[,'PROBE_SEQUENCE'] <- NULL
+		featureData(x.lumi) <- featureData
+		if (!is.null(lib)) annotation(x.lumi) <- lib
 
-	## Add history tracking
-	if (is(x.lumi, 'LumiBatch')) {
-		history.finished <- as.character(Sys.time())
-		history.command <- capture.output(print(match.call(addNuId2lumi)))
-		if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
-		lumiVersion <- packageDescription('lumi')$Version
-		x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
-				finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+		## Add history tracking
+		if (is(x.lumi, 'LumiBatch')) {
+			history.finished <- as.character(Sys.time())
+			history.command <- capture.output(print(match.call(addNuId2lumi)))
+			if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
+			lumiVersion <- packageDescription('lumi')$Version
+			x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
+					finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+		}
 	}
 
 	return(x.lumi)
