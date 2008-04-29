@@ -133,7 +133,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		info <- NULL
 	}
     
-	allData <- read.table(file=fileName, header=TRUE, sep=sep, skip=nMetaDataLines, row.names=NULL, colClasses=colClasses,
+	allData <- read.table(file=fileName, header=TRUE, sep=sep, dec = dec, skip=nMetaDataLines, row.names=NULL, colClasses=colClasses,
 		quote=quote, as.is=TRUE, check.names=FALSE, strip.white=TRUE, comment.char="", fill=TRUE, ...)
 
 	## retrieve the possible section line index
