@@ -1,5 +1,12 @@
 nuID2probeID <- function(nuID, lib="lumiHumanV1") {
 	if (length(nuID) == 0) return(NULL)
+
+	if (!is.null(lib)) {
+		if (length(grep('\\.db', lib)) > 0) {
+			warning(paste(lib, 'does not include nuID conversion information!'))
+			return(nuID)
+		}
+	}
 	if (require(lib, character.only=TRUE)) {
 		env <- get(paste(lib, 'PROBEID2NUID', sep = ""), mode = "environment")
 		probe2nuID <- unlist(as.list(env))	
@@ -17,6 +24,12 @@ nuID2probeID <- function(nuID, lib="lumiHumanV1") {
 
 nuID2targetID <- function(nuID, lib="lumiHumanV1") {
 	if (length(nuID) == 0) return(NULL)
+	if (!is.null(lib)) {
+		if (length(grep('\\.db', lib)) > 0) {
+			warning(paste(lib, 'does not include nuID conversion information!'))
+			return(nuID)
+		}
+	}
 	if (require(lib, character.only=TRUE)) {
 		env <- get(paste(lib, 'TARGETID2NUID', sep = ""), mode = "environment")
 		target2nuID <- unlist(as.list(env))	
@@ -34,6 +47,12 @@ nuID2targetID <- function(nuID, lib="lumiHumanV1") {
 
 probeID2nuID <- function(probeID, lib="lumiHumanV1") {
 	if (length(probeID) == 0) return(NULL)
+	if (!is.null(lib)) {
+		if (length(grep('\\.db', lib)) > 0) {
+			warning(paste(lib, 'does not include nuID conversion information!'))
+			return(nuID)
+		}
+	}
 	if (!require(annotate)) print('Please install "annotate" library!')
 	if (require(lib, character.only=TRUE)) {
 		nuID <- unlist(lookUp(probeID, lib, 'PROBEID2NUID'))
@@ -45,6 +64,12 @@ probeID2nuID <- function(probeID, lib="lumiHumanV1") {
 
 targetID2nuID <- function(targetID, lib="lumiHumanV1") {
 	if (length(targetID) == 0) return(NULL)
+	if (!is.null(lib)) {
+		if (length(grep('\\.db', lib)) > 0) {
+			warning(paste(lib, 'does not include nuID conversion information!'))
+			return(nuID)
+		}
+	}
 	if (!require(annotate)) print('Please install "annotate" library!')
 	if (require(lib, character.only=TRUE)) {
 		nuID <- unlist(lookUp(targetID, lib, 'TARGETID2NUID'))

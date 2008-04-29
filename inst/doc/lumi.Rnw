@@ -66,10 +66,10 @@ In order to install the lumi package, the user needs to first install R, some re
  biocLite("lumi")
 \end{Sinput}
 
-For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website. You can also directly install the source packages from the Bioconductor website by specify the developing version. For example, to install the latest lumi pakcage in the 2.2 Bioconductor developing version, you can use the following command:
+For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website. You can also directly install the source packages from the Bioconductor website by specify the developing version number, which can be found at the Bioconductor website. Suppose the developing version is 2.3,  to install the latest lumi pakcage in the Bioconductor developing version, you can use the following command:
 
 \begin{Sinput}
-install.packages("lumi",repos="http://www.bioconductor.org/packages/2.2/bioc",type="source")
+install.packages("lumi",repos="http://www.bioconductor.org/packages/2.3/bioc",type="source")
 \end{Sinput}
 
 An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.
@@ -100,12 +100,10 @@ The  \Rfunction{lumiR} will automatically initialize the QC slot of the {\bf Lum
 
 The BeadStudio can output the gene profile or the probe profile. As the probe profile provides unique mapping from the probe Id to the expression profile, outputting probe profile is preferred. When the probe profile is outputted, as show in Figure \ref{fig:dataFileSample}(B), the ProbeId column will be used as the identifier of {\bf LumiBatch} object.
 
-We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. 
+We strongly suggest outputting the header information when using BeadStudio, as shown in Figure \ref{fig:dataFileSample}. Please refer to the separate document ("Resolve the Inconsistency of Illumina Identifiers through nuID Annotation") in the lumi package for more details of the changing of BeadStudio output formats.
 
 The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, by default, we only input: ACCESSION, SYMBOL, PROBE\_START, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION. As some annotation information may be outdated. We recommend using Bioconductor annotation packages to retrieve the annotation information.
 
-If a lumi annotation library is provided, the \Rfunction{lumiR} function will automatically mapping the ProbeId or TargetID as nuID (see annotation section for more details), and keep the mapping information in the {\bf featureData} of the {\bf LumiBatch} object.
- 
 For convenience, another function \Rfunction{lumiR.batch} is designed to input files in batch. Basically it combines the output of each file. See the help of \Rfunction{lumiR.batch} for details.
  
 \begin{figure}
@@ -119,7 +117,7 @@ For convenience, another function \Rfunction{lumiR.batch} is designed to input f
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  	# Not Run
 > ## load the data
-> # x.lumi <- lumiR(fileName, lib='lumiHuamnV1')		# Not Run
+> # x.lumi <- lumiR(fileName)		# Not Run
 \end{Sinput}
 
 Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor. The example data includes four samples "A01", "A02", "B01" and "B02". "A" and "B" represent different Illumina slides (8 microarrays on each slide), and "01" and "02" represent different samples.  That means "A01" and "B01" are technique replicates at different slides, the same for "A02" and "B02". 
@@ -512,98 +510,7 @@ Please see another vignette in the lumi package: \verb+"lumi_vST_evaluation.pdf"
 
 
 \section{Gene annotation}
-Illumina microarray provides the TargetID or the ProbeID to identify the measurements. The TargetID is used as a public identifier by Illumina and is supposed to be stable. The problem of the TargetID is that it can correspond to several different probes, which are supposed to match the same gene.  Due to the binding affinity difference or alternative splicing, the probes corresponding the the sample TargetID may have quite different expression levels and patterns. If we use TargetID to identify the measurements, then we cannot differentiate the difference between these probes. Another problem of using the TargetID is that the mapping between the TargetID and probes could be changed with our better understanding of the gene. Moreover, the TargetID used by Illumina microarray is not consistent among different versions of arrays. For instance, the same 50mer sequence has two different TargetIDs used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips. 
-
-In order to get unique mapping between microarray measurements and probes, using ProbeID is preferred. However, the ProbeID of Illumina is not stable. It is changing between different versions, even between different batches of Illumina microarrays. To solve these problems, we designed a nucleotide universal identifier (nuID), which encodes the 50mer oligonucleotide sequence and contains error checking and self-identification code. By using nuID, all the problems mentioned above can be easily solved. For details, please read [2]. 
-
-
-\subsection{Examples of nuID}
-
-<<echo=T>>=
-## provide an arbitrary nucleotide sequence as an example 
-seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
-## create a nuID for it
-id <- seq2id(seq)
-print(id)
-@
-
-
-The original nucleotide sequence can be easily recovered by \Rfunction{id2seq}
-<<>>=
-id2seq(id)
-@
-
-The nuID is self-identifiable. \Rfunction{is.nuID} can check the sequence is nuID or not. 
-A real nuID
-<<>>=
-is.nuID(id)
-@
-
-An random sequence
-<<>>=
-is.nuID('adfqeqe')
-@
-
-
-\subsection{Illumina microarray annotation packages}
-Because all the Illumina microarrays use 50-mers, by using the nuID universal identifier, we are able to build one annotation database for different versions of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  Annotation packages indexed by nuID for different Illumina expression chips can be downloaded from Bioconductor. 
-
-The Illumina annotation packages are produced by using \Rpackage{AnnBuilder} with small modification. As a result, the format of the package is the same as Affymetrix annotation package, lots of packages designed for Affymetrix can also be used for Illumina annotation package. The mappings between TargetID to nuID and ProbeID to nuID are also included in the Illumina annotation packages. Thus, we can easily mapping between the nuID and TargetID or ProbeID.
-
-Need to mention, currently there are two sets of Illumina annotation packages in Bioconductor. The Illumina annotation packages mentioned here are named as "lumixxxx", e.g. "lumiHumanV2" and are maintained by us. There are another set of packages, named as "illuminaxxxx". These packages are indexed based on Illumina TargetID. They can also be used together with \Rpackage{lumi} package if the BeadStudio output file is also indexed with TargetID (file name includes \verb+"gene_profile"+). They have no relation with nuID and cannot be used when the BeadStudio output files are indexed with Illumina ProbeID (file name includes \verb+"probe_profile"+).
-
-
-Here is some examples:
-
-<<echo=T>>=
-## load lumi annotation package
-lib <- 'lumiHumanV1'		# Huamn lumi annotation package
-if(require(GO.db) & require(annotate) & require(lib, character.only=TRUE)) {
-	GOId <- 'GO:0004816' 		 # asparagine-tRNA ligase activity
-	probe <- lookUp(GOId, lib, 'GO2ALLPROBES')
-	# probes under 'GO:0004816'  category
-	print(probe)
-}
-@
-
-
-<<echo=T>>=
-# specify a nuID
-nuId <- 'WVUU7XyNw3ucXzwdEk'	
-if (require(annotate) & require(lib, character.only=TRUE)) {
-	# get the gene symbol of nuId
-	print(getSYMBOL(nuId, lib))
-}
-@ 
-
-
-Mapping from nuID to TargetID
-<<echo=T>>=
-nuId <- "WVUU7XyNw3ucXzwdEk"
-if (require(lib, character.only=TRUE))
-	nuID2targetID(nuId, lib=lib)
-@ 
-
-Mapping from TargetID to nuID
-<<echo=T>>=
-targetID <- "GI_7262387-S"	
-if (require(lib, character.only=TRUE))
-	targetID2nuID(targetID, lib=lib)
-@ 
-
-\subsection{Transfer Illumina identifier annotated data into nuID annotated}
-As the annotation packages include the mappings between TargetID to nuID and ProbeID to nuID. We can easily map the targetID (or Probe Id) to nuID. The function can automatically check whether targetID or Probe Id  was used in the text data file, and convert them as nuID. Function \Rfunction{addNuId2lumi} can transfer a TargetID or Probe Id indexed  {\bf LumiBatch} object as an nuID indexed {\bf LumiBatch} object. And the mapping between the nuID and TargetID is kept in the featureData of the {\bf LumiBatch} object. If a {\bf LumiBatch} object has already been nuID indexed, the function will do nothing.
-<<quiet=T>>=
-if (require(lumiHumanV1)) {
-	lumi.N <- addNuId2lumi(lumi.N, lib='lumiHumanV1')
-}
-@
-
-The {\bf LumiBatch} object can also be directly transferred as nuID indexed at the very beginning of inputting data using \Rfunction{lumiR}. For example:
-\begin{Sinput}
-> ## load the data
-> # example.lumi <- lumiR(fileName, lib='lumiHumanV1')	    # Not run
-\end{Sinput} 
+One challenge of Illumina microarray is the inconsistency and changes of Illumina identifiers across versions, even across different releases. This makes the integration of the Illumina data difficult. In order to resolve these problems, we invented a nuID (nucleotide universal IDentifier) annotation system, released related annotation packages and a website to provide identifier mapping and the latest annotation. Please refer to the separate document ("Resolve the Inconsistency of Illumina Identifiers through nuID Annotation") in the lumi package for more details.
 
 
 \section{A use case: from raw data to functional analysis}
