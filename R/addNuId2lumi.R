@@ -1,5 +1,5 @@
 `addNuId2lumi` <-
-function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='ProbeId')) {
+function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='Probe_Id')) {
 
     history.submitted <- as.character(Sys.time())
 
@@ -21,7 +21,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	## ---------------------------------------
 	## identify the Metadata lines 
 	if (!is.null(annotationFile)) {
-		info <- readLines(file(annotationFile), n=10)    # take the first 10 lines to have a taste
+		info <- readLines(annotationFile, n=10)    # take the first 10 lines to have a taste
 
 		## Use annotationColName[1] as an indicator of Where the metaData stops
 		##   intelligently find nMetaDataLines  
