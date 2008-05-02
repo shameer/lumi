@@ -1,8 +1,8 @@
 Package: lumi
 Type: Package
 Title: BeadArray Specific Methods for Illumina Microarrays
-Version: 1.7.0
-Date: 2008-04-29
+Version: 1.7.1
+Date: 2008-05-02
 Depends: R (>= 2.4.0), affy, mgcv, methods
 Suggests: RCurl, Biobase (>= 1.12.0), annotate, beadarray, limma, vsn, lumiBarnes, lumiHumanV1, genefilter, geneplotter, RColorBrewer
 Author: Pan Du, Warren Kibbe, Simon Lin
