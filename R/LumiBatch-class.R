@@ -65,6 +65,46 @@ setReplaceMethod("detection", signature(object="LumiBatch",value="matrix"),
 setMethod("getHistory",signature(object="LumiBatch"), function(object) object@history)
 
 
+setReplaceMethod("sampleNames", signature(object="LumiBatch",value="ANY"),
+	function(object, value) {
+
+	 	object <- callNextMethod()
+		ddim <- dim(object)
+        
+	 	## subsetting the QC information
+	 	if (!is.null(object@QC)) {
+	 		QC <- object@QC
+	 		if (!is.null(QC$sampleSummary))
+	 			if (ncol(QC$sampleSummary) == ddim[2])
+	 				colnames(QC$sampleSummary) <- value
+	 		if (!is.null(QC$BeadStudioSummary))
+	 			if (nrow(QC$BeadStudioSummary) == ddim[2])
+	 				rownames(QC$BeadStudioSummary) <- value
+	 		object@QC <- QC
+	 	}
+	 	if (!is.null(attr(object, 'vstParameter'))) {
+	 		vstParameter <- attr(object, 'vstParameter')
+	 		if (!is.null(nrow(vstParameter))) {
+	 			if (nrow(vstParameter) == ddim[2]) {
+					rownames(vstParameter) <- value
+					transformFun <- attr(object, 'transformFun')
+					names(transformFun) <- value
+	 				attr(object, 'vstParameter') <- vstParameter
+	 				attr(object, 'transformFun') <- transformFun
+	 			}
+	 		}
+	 	}
+        
+	 	## controlData information
+	 	if (nrow(object@controlData) > 0) {
+			if (ncol(object@controlData) == ddim[2])
+				colnames(object@controlData) <- value
+	 	}
+	 	    
+	 	return(object)
+	})
+
+
 setMethod("summary",signature(object="LumiBatch"), function(object, type=c('data', 'QC')) 
 {
 	type <- match.arg(type)

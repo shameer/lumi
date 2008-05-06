@@ -34,7 +34,7 @@
 \section{Overview of lumi} 
 Illumina microarray is becoming a popular microarray platform. The BeadArray technology from Illumina makes its preprocessing and quality control different from other microarray technologies. Unfortunately, until now, most analyses have not taken advantage of the unique properties of the BeadArray system. The \Rpackage{lumi} Bioconductor package especially designed to process the Illumina microarray data. The \Rpackage{lumi} package provides an integrated solution for the bead-level Illumina microarray data analysis. The package covers data input, quality control, variance stabilization, normalization and gene annotation. 
 
-The \Rpackage{lumi} package provides unique functions for microarray processing. It includes a variance-stabilizing transformation (VST) algorithm [1] that takes advantage of the technical replicates available on every Illumina microarray. A robust spline normalization (RSN), which combines the features of the quantile and loess normalization, and simple scaling normalization (SSN) algorithms are also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots for expression and control probe data are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) [2] was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
+The \Rpackage{lumi} package provides unique functions for microarray processing. It includes a variance-stabilizing transformation (VST) algorithm [2] that takes advantage of the technical replicates available on every Illumina microarray. A robust spline normalization (RSN), which combines the features of the quantile and loess normalization, and simple scaling normalization (SSN) algorithms are also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots for expression and control probe data are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) [3] was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
 
 
 \section{Citation}
@@ -43,7 +43,7 @@ For the people using lumi package, please cite the following papers in your publ
 
 * For the package:
 
-Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", (under review). 
+Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", (Accepted by Bioinformatics). 
 
 
 * For the VST (variance stabilization transformation) algorithm, please cite:
@@ -268,7 +268,7 @@ The \Rpackage{lumi} package provides \Rfunction{lumiB} function for background c
 
 
 \subsection{Variance stabilizing transform}
-Variance stabilization is critical for subsequent statistical inference to identify differential genes from microarray data. We devised a variance-stabilizing transformation (VST) by taking advantages of larger number of technical replicates available on the Illumina microarray. Please see [1] for details of the algorithm.
+Variance stabilization is critical for subsequent statistical inference to identify differential genes from microarray data. We devised a variance-stabilizing transformation (VST) by taking advantages of larger number of technical replicates available on the Illumina microarray. Please see [2] for details of the algorithm.
 
 Because the STDEV (or STDERR) columns of the BeadStudio output file is the standard error of the mean of the bead intensities corresponding to the same probe. (Thanks Gordon Smyth kindly provided this information!). As the variance stabilization (see help of \Rfunction{vst} function) requires the information of the standard deviation instead of the standard error of the mean, the value correction is required. The corrected value will be x * sqrt(N), where x is the old value (standard error of the mean), N is the number of beads corresponding to the probe. The parameter 'stdCorrection' of \Rfunction{lumiT} determines whether to do this conversion and is effective only when the 'vst' method is selected. By default, the parameter 'stdCorrection' is TRUE.
 
@@ -495,9 +495,9 @@ The normalized data batches can be combined by using function \Rfunction{combine
 
 
 \section{Performance comparison}
-We have selected the Barnes data set [3], which is a series dilution of two tissues at five different dilutions, to compare different preprocessing methods. In order to better compare the algorithms, we selected the samples with the smallest dilution difference (the most challenging comparison), i.e., the samples with the dilution ratios of 100:0 and 95:5 (each condition has two technical replicates) for comparison. For the Barnes data set, because we do not know which of the signals are coming from 'true' differentially expressed genes, we cannot use an ROC curve to compare the performance of different algorithms. Instead, we evaluated the methods based on the concordance of normalized intensity profile and real dilution profile of the selected probes.  More detailed evaluations with other criteria and based on other data sets can by found in our paper [1]. 
+We have selected the Barnes data set [4], which is a series dilution of two tissues at five different dilutions, to compare different preprocessing methods. In order to better compare the algorithms, we selected the samples with the smallest dilution difference (the most challenging comparison), i.e., the samples with the dilution ratios of 100:0 and 95:5 (each condition has two technical replicates) for comparison. For the Barnes data set, because we do not know which of the signals are coming from 'true' differentially expressed genes, we cannot use an ROC curve to compare the performance of different algorithms. Instead, we evaluated the methods based on the concordance of normalized intensity profile and real dilution profile of the selected probes.  More detailed evaluations with other criteria and based on other data sets can by found in our paper [2]. 
 
-Following Barnes et al. (2005)[3], we defined a concordant gene (really a concordant probe) as a signal from a probe with a correlation coefficient larger than 0.8 between the normalized intensity profile and the real dilution profile (five dilution ratios with two replicates at each dilution ratio). If a selected differentially expressed probe is also a concordant one, it is more likely to be truly differentially expressed. Figure \ref{fig:corConcordanceComparison} shows the percentage of concordant probes among the selected probes, which were selected by ranking the probes' p-value (calculated based on \Rpackage{limma} package) from low to high. We can see the VST transformed data outperforms the Log2-transformed and VSN processed data. For the normalization methods, RSN and quantile normalization have similar performance for the VST transformed data, and RSN outperforms quantile for the Log transformed data. 
+Following Barnes et al. (2005)[4], we defined a concordant gene (really a concordant probe) as a signal from a probe with a correlation coefficient larger than 0.8 between the normalized intensity profile and the real dilution profile (five dilution ratios with two replicates at each dilution ratio). If a selected differentially expressed probe is also a concordant one, it is more likely to be truly differentially expressed. Figure \ref{fig:corConcordanceComparison} shows the percentage of concordant probes among the selected probes, which were selected by ranking the probes' p-value (calculated based on \Rpackage{limma} package) from low to high. We can see the VST transformed data outperforms the Log2-transformed and VSN processed data. For the normalization methods, RSN and quantile normalization have similar performance for the VST transformed data, and RSN outperforms quantile for the Log transformed data. 
 
 Please see another vignette in the lumi package: \verb+"lumi_vST_evaluation.pdf"+ for more details of the evaluation of VST (Variance Stabilizing Transformation).
 
@@ -516,7 +516,7 @@ One challenge of Illumina microarray is the inconsistency and changes of Illumin
 \section{A use case: from raw data to functional analysis}
 Figure \ref{useCase} shows the data processing flow chart of the use case. Since the classes in \Rpackage{lumi} package are inherited from class {\bf ExpressionSet}, packages and functions compatible with class {\bf ExpressionSet} or accepting matrix as input   all can be used for \Rpackage{lumi} results. Here we just give two examples: using \Rpackage{limma} to identify differentiated genes and using \Rpackage{GOstats} to annotate the significant genes.
 
-We use the Barnes data set [3] as an example, which has be created as a Bioconductor experiment data package \Rpackage{lumiBarnes}.  The Barnes data set measured a dilution series of two human tis-sues, blood and placenta.  It includes six samples with the titration ratio of blood and placenta as 100:0, 95:5, 75:25, 50:50, 25:75 and 0:100. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We select samples with titration ratio, 100:0 and 95:5 (each has two technique replicates) in  this data set to evaluate the detection of differential expressions.
+We use the Barnes data set [4] as an example, which has be created as a Bioconductor experiment data package \Rpackage{lumiBarnes}.  The Barnes data set measured a dilution series of two human tis-sues, blood and placenta.  It includes six samples with the titration ratio of blood and placenta as 100:0, 95:5, 75:25, 50:50, 25:75 and 0:100. The samples were hybridized on HumanRef-8 BeadChip (Illumina, Inc) in duplicate. We select samples with titration ratio, 100:0 and 95:5 (each has two technique replicates) in  this data set to evaluate the detection of differential expressions.
 
 
 \begin{figure}
@@ -722,11 +722,13 @@ We would like to thanks the users and researchers around the world contribute to
 
 \section{References}
 
-1. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data",  Nucleic Acids Res. 2008 Jan 4
+1. Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", (Accepted by Bioinformatics). 
 
-2. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
+2. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data",  Nucleic Acids Res. 2008 Jan 4
 
-3. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
+3. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
+
+4. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
 
 %\bibliographystyle{plainnat}
 %\bibliography{lumi}

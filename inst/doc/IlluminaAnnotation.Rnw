@@ -92,6 +92,14 @@ Need to mention, currently there are two sets of Illumina annotation packages in
 \subsection{Transfer Illumina identifier annotated data into nuID annotated}
 As the latest BeadStudio output files will include probe sequence information, by default, lumiR function will automatically convert them as nuID. As a result, the LumiBatch object will be nuID annotated if the BeadStudio output file includes probe sequence information. If the data file do not include the probe sequence information, we provide a online service to convert the Illumina IDs as nuIDs. We will describe more details of online service in the next section. For old versions of Illumina chips ( version 1 and 2 of Human chips, version 1 and 1.1 of Mouse chips and version 1 of Rat chip), you can use the previously released Illumina annotation packages (lumiHumanV1, lumiHumanV2, lumiMouseV1 and lumiRatV1) to convert between Illumina IDs and nuIDs (using functions TargetID2nuID, ProbeID2nuID). Function addNuId2lumi can add nuIDs to the LumiBatch object based on probe sequence information or user provided annotation file (or manifest file) for the chip. 
 
+If users have the Illumina manifest file of the chip, they can also use it for nuID conversion. The manifest file (.bgx) basically is  a zipped file by gzip. The first step is to unzip the manifest file. The unzipped file is a Tab-separated file, you can open it in Excel. Suppose \verb+'MouseWG-6_V1_1_R2_11234304_A'+ is the manifest file and x.lumi is a LumiBatch object indexed by Illumina Probe IDs, the user can use the following code for nuID conversion:
+
+
+\begin{Sinput}
+   x.lumi = addNuId2lumi(x.lumi, annotationFile='MouseWG-6_V1_1_R2_11234304_A')
+\end{Sinput}
+
+
 
 \section{Online service of nuID conversion and updated annotation information}
 This part is still under developing. Please check the developing version for the latest updates.

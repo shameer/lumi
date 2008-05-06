@@ -22,6 +22,7 @@
 \alias{show,LumiBatch-method}
 \alias{combine,LumiBatch,LumiBatch-method}
 \alias{[,LumiBatch-method}
+\alias{sampleNames<-,LumiBatch,ANY-method}
 \alias{getHistory,LumiBatch-method}
 \alias{getHistory}
 

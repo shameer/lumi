@@ -5,7 +5,7 @@
 \description{ Replace the Illumina Id (Target ID or Probe Id) as nuID (nucleotide universal identifier) for indexing genes in the LumiBatch object }
 
 \usage{
-addNuId2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib = NULL,  annotationColName = c(sequence = "Probe_Sequence", target = "Target", probe='ProbeId'))
+addNuId2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib = NULL,  annotationColName = c(sequence = "Probe_Sequence", target = "Target", probe='Probe_Id'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,10 +13,10 @@ addNuId2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib = NULL,  annotationCol
   \item{annotationFile}{ a annotation file, which includes the TargetID and probe sequence information}
   \item{sep}{ the separation used in the annotation file. Automatically detect the separator if it is "," or "\t". }
   \item{lib}{ a lumi annotation package }
-  \item{annotationColName}{ the annotation column name used for the probe sequence and TargetID and ProbeID }
+  \item{annotationColName}{ the annotation column name in the annotation file used for the probe sequence and TargetID and ProbeID }
 }
 \details{
-Since the default TargetID and ProbeId are not consistent between different arrays and batches, we invented a nuID, which is one-to-one matching with the probe sequence. This function is to replace the TargetID (or ProbeID) with the nuID. If the annotation library is provided, the function will automatically check whether the TargetID or ProbeID is provided for the microarray data. We recommend output the data using ProbeID when using Illumina BeadStudio software, because the TargetID are not unique. 
+Since the default TargetID and ProbeId are not consistent between different arrays and batches, we invented a nuID, which is one-to-one matching with the probe sequence. This function is to replace the TargetID (or ProbeID) with the nuID. If the annotation library (the unzipped manifest file (.bgx)) is provided, the function will automatically check whether the TargetID or ProbeID is provided for the microarray data. We recommend output the data using ProbeID when using Illumina BeadStudio software, because the TargetID are not unique. 
 }
 \value{
 a LumiBatch object with TargetID (or ProbeID) replaced by nuID. 
