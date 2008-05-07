@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{lumi}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, affy, Biobase, lumiHumanV1}
+%\VignetteDepends{lumi, affy, Biobase}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}
