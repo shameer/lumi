@@ -343,8 +343,9 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 ##some special handling of main is needed
 setMethod("boxplot",signature(x="ExpressionSet"),
-	function(x, range=0, main, logMode=TRUE, subset=5000, ...) 
+	function(x, range=0, main, logMode=TRUE, subset=5000, seed=123, ...) 
 {
+	set.seed(seed)
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
@@ -398,8 +399,9 @@ setMethod('hist', signature(x='ExpressionSet'),
 
 setMethod('density', signature(x='ExpressionSet'), 
 	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", col=1:dim(x)[2], lty=1:dim(x)[2], 
-	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, main='',...) 
+	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, seed=123, main='',...) 
 {
+	set.seed(seed)
 	if (is(x, 'ExpressionSet')) {
 	    expr <- exprs(x)
 	} else if (is.numeric(x)) {
@@ -490,7 +492,7 @@ setMethod('density', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x,..., logMode=TRUE, subset=5000) 
+	function(x,..., logMode=TRUE, subset=5000, seed=123) 
 {
 	upperPanel <- function(x, y, fold=2) {
 		points(x[subset], y[subset])
@@ -529,6 +531,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
 	}
 
+	set.seed(seed)
 	expr <- exprs(x)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
@@ -569,8 +572,9 @@ if(is.null(getGeneric("MAplot")))
   	
 
 setMethod("MAplot", signature(object="ExpressionSet"), 
-	function(object, ..., logMode=TRUE, subset=5000) 
+	function(object, ..., logMode=TRUE, subset=5000, seed=123) 
 {
+	set.seed(seed)
 	expr <- exprs(object)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {

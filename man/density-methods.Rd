@@ -10,7 +10,7 @@
 \usage{
 \S4method{density}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", 
 	col=1:dim(x)[2], lty=1:dim(x)[2], lwd=1, xlim = NULL, index.highlight = NULL, color.highlight = 2, 
-	symmetry = NULL, addLegend = TRUE, subset = 5000, ...)
+	symmetry = NULL, addLegend = TRUE, subset = 5000, seed = 123, ...)
 }
 
 \arguments{
@@ -28,6 +28,7 @@
 	\item{symmetry}{ the boundary position suppose to be symmetric distributed  }
 	\item{addLegend}{ whether add legend to the plot or not }
 	\item{subset}{ subset of rows used to plot. It can be an index vector, or the length of a random subset}
+	\item{seed}{ the random seed for random subset}
 	\item{\dots}{ additional parameters for \code{\link[stats]{density}} function }
 }
 

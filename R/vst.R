@@ -77,6 +77,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 		x <- u[u > 0]
 		y <- std[u > 0]
 		len <- length(x)
+		set.seed(123)
 		ind <- sample(1:len, min(5000, len))
 		plot(x[ind], y[ind], pch='.', log='xy', xlab="Mean", ylab="Standard Deviation", main='(A) Relations of probe Mean and SD')
 		lines(downSampledU, smoothStd, col=3, lwd=1.5)
