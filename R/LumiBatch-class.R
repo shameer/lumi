@@ -343,9 +343,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 ##some special handling of main is needed
 setMethod("boxplot",signature(x="ExpressionSet"),
-	function(x, range=0, main, logMode=TRUE, subset=5000, seed=123, ...) 
+	function(x, range=0, main, logMode=TRUE, subset=5000, ...) 
 {
-	set.seed(seed)
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
@@ -399,9 +398,8 @@ setMethod('hist', signature(x='ExpressionSet'),
 
 setMethod('density', signature(x='ExpressionSet'), 
 	function(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", col=1:dim(x)[2], lty=1:dim(x)[2], 
-	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, seed=123, main='',...) 
+	lwd=1, xlim=NULL, index.highlight=NULL, color.highlight=2, symmetry=NULL, addLegend=TRUE, subset=5000, main='',...) 
 {
-	set.seed(seed)
 	if (is(x, 'ExpressionSet')) {
 	    expr <- exprs(x)
 	} else if (is.numeric(x)) {
@@ -492,10 +490,16 @@ setMethod('density', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x,..., logMode=TRUE, subset=5000, seed=123) 
+	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, main=NULL) 
 {
 	upperPanel <- function(x, y, fold=2) {
-		points(x[subset], y[subset])
+		if (smoothScatter && require(geneplotter)) {
+			par(new=TRUE)
+			smoothScatter(x[subset], y[subset], main='')
+		} else {
+			points(x[subset], y[subset], pch='.', cex=3)
+		}
+		
 		abline(0, 1, col="red", lty=1)
 		if (logMode) {
 			abline(log2(fold), 1, col="green", lty=2)
@@ -528,10 +532,10 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	    h <- hist(x, plot = FALSE)
 	    breaks <- h$breaks; nB <- length(breaks)
 	    y <- h$counts; y <- y/max(y)
-	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
+	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan")
 	}
 
-	set.seed(seed)
+	if (smoothScatter && require(geneplotter)) subset <- NULL
 	expr <- exprs(x)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
@@ -560,9 +564,10 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	} else {
 		subset <- 1:nrow(expr)
 	}
-	
+	if (length(subset) < nrow(expr) && is.null(main)) 
+		main <- paste('Pair plot based on', length(subset), 'random sampling.')
 	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
-			lower.panel=lowerPanel, ...)
+			lower.panel=lowerPanel, main=main, ...)
 })
 
 
@@ -572,9 +577,9 @@ if(is.null(getGeneric("MAplot")))
   	
 
 setMethod("MAplot", signature(object="ExpressionSet"), 
-	function(object, ..., logMode=TRUE, subset=5000, seed=123) 
+	function(object, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, main=NULL) 
 {
-	set.seed(seed)
+	if (smoothScatter && require(geneplotter)) subset <- NULL
 	expr <- exprs(object)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
@@ -603,7 +608,14 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	} else {
 		index <- 1:nrow(expr)
 	}
-	mva.pairs(expr[index, ], log.it=FALSE, ...)
+	if (length(subset) < nrow(expr) && is.null(main)) 
+		main <- paste('Pair plot based on', length(subset), 'random sampling.')
+
+	if (smoothScatter && require(geneplotter)) {
+		mva.pairs(expr[index, ], log.it=FALSE, plot.method='smoothScatter', main=main, ...)
+	} else {
+		mva.pairs(expr[index, ], log.it=FALSE, plot.method='normal', main=main, ...)
+	}
 })
 
 

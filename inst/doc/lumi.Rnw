@@ -142,7 +142,7 @@ Summary of the quality control information of example.lumi data. If the QC slot 
 summary(example.lumi, 'QC')
 @
 
-The S4 method \Rfunction{plot} can produce the quality control plots of {\bf LumiBatch} object. The quality control plots includes: the density plot (Figure \ref{fig:density}), box plot (Figure \ref{fig:box}), pairwise correlation between microarrays (Figure \ref{fig:pairs}), pairwise MAplot between microarrays (Figure \ref{fig:MAplot}), density plot of coefficient of varience, (Figure \ref{fig:cv}), and the sample relations (Figure \ref{fig:sampleRelation1}). More details are in the help of \Rfunction{plot,LumiBatch-method} function. Most of these plots can also be plotted by the extended general functions: \Rfunction{density} (for density plot), \Rfunction{boxplot}, \Rfunction{MAplot}, \Rfunction{pairs} and \Rfunction{plotSampleRelation}.
+The S4 method \Rfunction{plot} can produce the quality control plots of {\bf LumiBatch} object. The quality control plots includes: the density plot (Figure \ref{fig:density}), box plot (Figure \ref{fig:box}), pairwise scatter plot between microarrays (Figure \ref{fig:pairs})  or pair scatter plot with smoothing (Figure \ref{fig:pairsSmooth}), pairwise MAplot between microarrays (Figure \ref{fig:MAplot}) or MAplot with smoothing (Figure \ref{fig:MAplotSmooth}), density plot of coefficient of varience, (Figure \ref{fig:cv}), and the sample relations (Figure \ref{fig:sampleRelation1}). More details are in the help of \Rfunction{plot,LumiBatch-method} function. Most of these plots can also be plotted by the extended general functions: \Rfunction{density} (for density plot), \Rfunction{boxplot}, \Rfunction{MAplot}, \Rfunction{pairs} and \Rfunction{plotSampleRelation}.
 
 
 % density plot
@@ -188,6 +188,8 @@ Figure \ref{fig:pairs} shows the pairwise sample correlation of the {\bf LumiBat
 > plot(example.lumi, what='pair')			
 > ## or
 > pairs(example.lumi)
+> ## pairwise scatter plot with smoothing
+> pairs(example.lumi, smoothScatter=T)
 \end{Sinput}
 
 \begin{figure}
@@ -199,6 +201,16 @@ plot(example.lumi, what='pair')		## pairwise plots
 \label{fig:pairs}
 \end{figure}            
 
+\begin{figure}
+\centering
+<<fig=true, width=8, height=8, quiet=T, echo=F>>=
+plot(example.lumi, what='pair', smoothScatter=T)
+@
+\caption{Pairwise plot with microarray correlation before normalization}
+\label{fig:pairsSmooth}
+\end{figure}            
+
+
 % MA plot
 Figure \ref{fig:MAplot} shows the MA plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{MAplot} functions.
 \begin{Sinput}
@@ -206,6 +218,8 @@ Figure \ref{fig:MAplot} shows the MA plot of the {\bf LumiBatch} object by using
 > plot(example.lumi, what='MAplot')			
 > ## or
 > MAplot(example.lumi)
+> ## with smoothing
+> MAplot(example.lumi, smoothScatter=TRUE)
 \end{Sinput}
 
 \begin{figure}
@@ -216,6 +230,17 @@ plot(example.lumi, what='MAplot')
 @
 \caption{Pairwise MAplot before normalization}
 \label{fig:MAplot}
+\end{figure}            
+
+
+\begin{figure}
+\centering
+<<fig=true, width=8, height=8, quiet=T, echo=F>>=
+## pairwise MAplot
+plot(example.lumi, what='MAplot', smoothScatter=T)	
+@
+\caption{Pairwise MAplot with smoothing before normalization}
+\label{fig:MAplotSmooth}
 \end{figure}            
 
 
