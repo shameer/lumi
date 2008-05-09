@@ -43,7 +43,7 @@ For the people using lumi package, please cite the following papers in your publ
 
 * For the package:
 
-Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", (Accepted by Bioinformatics). 
+Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", Bioinformatics 2008; (Advance Access published online on May 8, 2008)
 
 
 * For the VST (variance stabilization transformation) algorithm, please cite:
@@ -747,7 +747,7 @@ We would like to thanks the users and researchers around the world contribute to
 
 \section{References}
 
-1. Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", (Accepted by Bioinformatics). 
+1. Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", Bioinformatics 2008; (Advance Access published online on May 8, 2008) 
 
 2. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data",  Nucleic Acids Res. 2008 Jan 4
 
