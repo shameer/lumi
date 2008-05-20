@@ -16,14 +16,16 @@ function(x, type=c('data.frame', 'LumiBatch'))
 		} else {
 			if (nrow(x@controlData) == 0) {
 				controlData <- as.data.frame(exprs(x))
-				controlType <- pData(featureData(allControlInfo))$TargetID
+				controlType <- pData(featureData(allControlInfo))[,1]
 				if (length(which(toupper(controlType) == 'NEGATIVE')) > 10) {
 					ProbeID <- pData(featureData(allControlInfo))$ProbeID
 					controlNames <- names(controlData)
 					controlData <- data.frame(controlType=as.character(controlType), ProbeID=as.character(ProbeID), controlData)
 					names(controlData) <- c('controlType', 'ProbeID', controlNames)
 				} else {
-					controlData <- data.frame()
+					controlNames <- names(controlData)
+					controlData <- data.frame(controlType=as.character(controlType), controlData)
+					names(controlData) <- c('controlType', controlNames)
 				}
 			} else {
 				controlData <- x@controlData
