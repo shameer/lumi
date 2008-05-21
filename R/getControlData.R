@@ -16,7 +16,7 @@ function(x, type=c('data.frame', 'LumiBatch'))
 		} else {
 			if (nrow(x@controlData) == 0) {
 				controlData <- as.data.frame(exprs(x))
-				controlType <- pData(featureData(allControlInfo))[,1]
+				controlType <- pData(featureData(allControlInfo))[,'TargetID']
 				if (length(which(toupper(controlType) == 'NEGATIVE')) > 10) {
 					ProbeID <- pData(featureData(allControlInfo))$ProbeID
 					controlNames <- names(controlData)
