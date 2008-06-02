@@ -29,10 +29,24 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), ...) {
 		quantile = normalize.quantiles(x.matrix, ...),
 		vsn = exprs(vsn::vsn2(x.matrix, ...)) )
 	
+	## take the average as the parameters as the transformation parameters if there is no targetArray
+	if (is.null(attr(norm.matrix, 'targetArray')) && !is.null(attr(x.lumi, 'vstParameter'))) {
+		parameter <- attr(x.lumi, 'vstParameter')
+		fun <- attr(x.lumi, 'transformFun')
+		tt <- table(fun)
+		selFun <- names(tt)[which.max(tt)]		# the most frequent function as the transformation function
+		selInd <- which(fun == selFun)
+		parameter <- colMeans(parameter)
+		fun <- selFun
+		attr(norm.matrix, 'vstParameter') <- parameter
+		attr(norm.matrix, 'transformFun') <- fun
+	} 
+
 	if (is.matrix(norm.matrix)) {
 		colnames(norm.matrix) <- colnames(x.matrix)
 		rownames(norm.matrix) <- rownames(x.matrix)
-	} else if (!is.null(attr(norm.matrix, 'vstParameter'))) {
+	} 
+	if (!is.null(attr(norm.matrix, 'vstParameter'))) {
 		attr(x.lumi, 'vstParameter') <- attr(norm.matrix, 'vstParameter')
 		attr(x.lumi, 'transformFun') <- attr(norm.matrix, 'transformFun')
 		if (!is.null(attr(norm.matrix, 'targetArray')))
@@ -42,6 +56,7 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), ...) {
 	if (is(x.lumi, 'ExpressionSet')) {
 		new.lumi <- x.lumi
 		exprs(new.lumi) <- if (is(norm.matrix, 'ExpressionSet')) exprs(norm.matrix) else norm.matrix
+		
 	    # history tracking
 		if (is(x.lumi, 'LumiBatch')) {
 		    history.finished <- as.character(Sys.time())

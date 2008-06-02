@@ -146,7 +146,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				warning('Please provide the annotation file or lumi annotation library!')
 			}
 		} else {
-			warning('Please provide the annotation file or lumi annotation library!')
+			# warning('Please provide the annotation file or lumi annotation library!')
 		}
 	}
 	if (all(newId == id)) {
@@ -156,7 +156,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		warning('Duplicated IDs found and were merged!')
+		print('Duplicated IDs found and were merged!')
 		dupId <- unique(newId[duplicated(newId)])
 		## determine whether the detection p-value close to 0 or 1 is significant
 		detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]

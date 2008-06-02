@@ -13,7 +13,7 @@ function (lumiBatch, bg.correct = FALSE, bgcorrect.param = list(), variance.stab
 			cat("Variance Stabilizing Transform method:", vstMethod, "\n")
 		}
 		if (normalize) {
-			normMethod <- ifelse(is.null(normalize.param$method), 'rsn', normalize.param$method)
+			normMethod <- ifelse(is.null(normalize.param$method), 'quantile', normalize.param$method)
 			cat("Normalization method:", normMethod, "\n")
 		}
 		cat('\n')
