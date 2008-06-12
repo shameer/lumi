@@ -14,8 +14,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
 		warning('exprs slot is required and default pattern will be used!')
 	}
-	if (is.na(columnNameGrepPattern$se.exprs)) {
-		columnNameGrepPattern$beadNum <- columnNameGrepPattern$detection <- NA
+	if (is.na(columnNameGrepPattern$se.exprs) && checkDupId) {
+		# columnNameGrepPattern$beadNum <- columnNameGrepPattern$detection <- NA
 		warning('se.exprs slot is required for the VST transformation!\n We strongly suggest to include BEAD_STD columns!')
 		# columnNameGrepPattern$se.exprs <- 'BEAD_STD'
 		# warning('se.exprs slot is required and default pattern will be used!')
@@ -424,10 +424,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		cmd <- 'x.lumi <- new("ExpressionSet", exprs=exprs'
 	} else {
 		cmd <- 'x.lumi <- new("LumiBatch", exprs=exprs, se.exprs=se.exprs'
-		if (!is.null(detection)) cmd <- paste(cmd, ', detection=detection')
-		if (!is.null(beadNum)) cmd <- paste(cmd, ', beadNum=beadNum')
-		cmd <- paste(cmd, ', featureData=featureData')		
 	}
+	if (!is.null(detection)) cmd <- paste(cmd, ', detection=detection')
+	if (!is.null(beadNum)) cmd <- paste(cmd, ', beadNum=beadNum')
+	cmd <- paste(cmd, ', featureData=featureData')		
 	
 	## produce the phenoData object
 	if (!all(sampleID == label)) {
@@ -447,6 +447,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	cmd <- paste(cmd, ')')
 	eval(parse(text=cmd))
 	if (is.null(se.exprs)) {
+		if (checkDupId && convertNuID) {
+			## Add nuID if the annotation library is provided
+			x.lumi <- addNuId2lumi(x.lumi, lib=lib)			
+		}
+
 		## resume the old settings
 		options(stringsAsFactors = oldSetting)
 		return(x.lumi)

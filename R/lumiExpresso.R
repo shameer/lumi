@@ -1,11 +1,11 @@
 `lumiExpresso` <- 
-function (lumiBatch, bg.correct = FALSE, bgcorrect.param = list(), variance.stabilize = TRUE, 
+function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(), variance.stabilize = TRUE, 
 	varianceStabilize.param = list(), normalize=TRUE, normalize.param = list(), 
 	QC.evaluation = TRUE, QC.param = list(), verbose = TRUE) 
 {
 	if (verbose) {
 		if (bg.correct) {
-			bgMethod <- ifelse(is.null(bgcorrect.param$method), 'vst', bgcorrect.param$method)
+			bgMethod <- ifelse(is.null(bgcorrect.param$method), 'bgAdjust', bgcorrect.param$method)
 			cat("Background Correction:", bgMethod, "\n")
 		}
 		if (variance.stabilize) {

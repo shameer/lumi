@@ -44,22 +44,22 @@ if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGen
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
 if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
 
-setMethod("se.exprs", signature(object="LumiBatch"),
+setMethod("se.exprs", signature(object="ExpressionSet"),
           function(object) assayDataElement(object,"se.exprs"))
 
-setReplaceMethod("se.exprs", signature(object="LumiBatch",value="matrix"),
+setReplaceMethod("se.exprs", signature(object="ExpressionSet",value="matrix"),
                  function(object, value) assayDataElementReplace(object, "se.exprs", value))
 
-setMethod("beadNum", signature(object="LumiBatch"),
+setMethod("beadNum", signature(object="ExpressionSet"),
           function(object) assayDataElement(object,"beadNum"))
 
-setReplaceMethod("beadNum", signature(object="LumiBatch",value="matrix"),
+setReplaceMethod("beadNum", signature(object="ExpressionSet",value="matrix"),
                  function(object, value) assayDataElementReplace(object, "beadNum", value))
 
-setMethod("detection", signature(object="LumiBatch"),
+setMethod("detection", signature(object="ExpressionSet"),
           function(object) assayDataElement(object,"detection"))
 
-setReplaceMethod("detection", signature(object="LumiBatch",value="matrix"),
+setReplaceMethod("detection", signature(object="ExpressionSet",value="matrix"),
                  function(object, value) assayDataElementReplace(object, "detection", value))
 
 setMethod("getHistory",signature(object="LumiBatch"), function(object) object@history)
@@ -207,6 +207,26 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	return(x)
 })
 
+
+setMethod("combine", signature=c(x="LumiBatch", y="ExpressionSet"), function(x, y, ...) 
+{
+	if (missing(y)) return(x)
+	warning('The Lumibatch object was forced as ExpressionSet!')
+	x <- as(x, 'ExpressionSet')
+	if (length(list(...)) > 0) 
+	        return(combine(x, combine(y, ...)))
+	return(combine(x, y))
+})
+
+setMethod("combine", signature=c(x="ExpressionSet", y="LumiBatch"), function(x, y, ...) 
+{
+	if (missing(y)) return(x)
+	warning('The Lumibatch object was forced as ExpressionSet!')
+	y <- as(y, 'ExpressionSet')
+	if (length(list(...)) > 0) 
+	        return(combine(x, combine(y, ...)))
+	return(combine(x, y))
+})
 
 setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, ...) 
 {

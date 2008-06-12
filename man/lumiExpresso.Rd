@@ -6,7 +6,7 @@
   Goes from raw Illumina probe intensities to expression values
 }
 \usage{
-lumiExpresso(lumiBatch, bg.correct = FALSE, bgcorrect.param = list(), variance.stabilize = TRUE, 
+lumiExpresso(lumiBatch, bg.correct = TRUE, bgcorrect.param = list(), variance.stabilize = TRUE, 
 	varianceStabilize.param = list(), normalize = TRUE, normalize.param = list(), QC.evaluation = TRUE, 
 	QC.param = list(), verbose = TRUE)
 }

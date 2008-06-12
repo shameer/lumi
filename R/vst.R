@@ -45,6 +45,7 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 			c1 <- lmm$coef[2]
 			c2 <- lmm$coef[1]
 		} else {
+			## use iteraction to estimate the parameters when background level is not known
 			iterNum <- 0
 			c3.i <- 0
 			while(iterNum <= 20) {

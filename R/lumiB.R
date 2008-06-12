@@ -1,6 +1,6 @@
 lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...) 
 {
-
+	method <- match.arg(method)
 	if (is(x.lumi, 'ExpressionSet')) {
 	    # x.lumi is a LumiBatch object
 	    x.matrix <- exprs(x.lumi)		

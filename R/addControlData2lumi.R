@@ -3,18 +3,13 @@ function(controlData, x.lumi)
 {
 	if (missing(x.lumi) || missing(controlData)) stop('Both controlData and x.lumi are required!')
 	if (is.character(controlData)) {
-		controlFile <- controlData
-		allControlInfo <- lumiR.batch(controlFile, lib=NULL, checkDupId=FALSE)
-		controlData <- as.data.frame(exprs(allControlInfo))
-		controlType <- as.character(pData(featureData(allControlInfo))$TargetID)
-		ProbeID <- as.character(pData(featureData(allControlInfo))$ProbeID)
-		controlData <- data.frame(controlType=controlType, ProbeID=ProbeID, controlData)
+		controlData <- getControlData(controlData, type='data.frame')
 	}
 	if (is.matrix(controlData)) controlData <- as.data.frame(controlData)
 	if (is(controlData, 'data.frame')) {
 		## match the column names of controlData and LumiBatch object
 		sampleID <- as.character(pData(phenoData(x.lumi))$sampleID)
-		if (is.null(sampleID)) sampleID <- sampleNames(x.lumi)
+		if (length(sampleID) == 0) sampleID <- sampleNames(x.lumi)
 		controlSampleID <- names(controlData)
 		if ('TargetID' %in% controlSampleID) {
 			controlSampleID[controlSampleID == 'TargetID'] <- 'controlType'

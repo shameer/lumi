@@ -6,12 +6,13 @@
   Get control probe information from Bead Studio output or a LumiBatch object.
 }
 \usage{
-getControlData(x, type = c('data.frame', 'LumiBatch'))
+getControlData(x, type = c('data.frame', 'LumiBatch'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ the control data can be a LumiBatch object or the Control Probe Profile file outputted by BeadStudio }
   \item{type}{ determine the return data type }
+  \item{\dots}{ other parameters used by \code{\link{lumiR}} function }
 }
 \details{
   
