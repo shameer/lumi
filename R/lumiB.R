@@ -11,7 +11,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 	}
 	
 	if (!(is.function(method)) && !(method %in% c('bgAdjust', 'none', 'forcePositive', 'bgAdjust.affy'))) {
-		print('This method is not supported!')
+		cat('This method is not supported!\n')
 		return(x.lumi)
 	} else if (method == 'none') {
 		return(x.lumi)
@@ -33,7 +33,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 	} else if (is.function(method)) {
 		x.lumi <- method(x.lumi, ...)
 	} else {
-		print('The method is not supported!')
+		cat('The method is not supported!\n')
 		return(x.lumi)
 	}
 

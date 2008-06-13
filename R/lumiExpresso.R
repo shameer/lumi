@@ -1,5 +1,5 @@
 `lumiExpresso` <- 
-function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(), variance.stabilize = TRUE, 
+function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(method='bgAdjust'), variance.stabilize = TRUE, 
 	varianceStabilize.param = list(), normalize=TRUE, normalize.param = list(), 
 	QC.evaluation = TRUE, QC.param = list(), verbose = TRUE) 
 {
@@ -19,22 +19,22 @@ function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(), variance.stabi
 		cat('\n')
 	}
 	if (bg.correct) {
-		if (verbose) cat("Background correction ...\n")
+		if (verbose) cat("\nBackground correction ...\n")
 		lumiBatch <- do.call("lumiB", c(alist(lumiBatch), bgcorrect.param))
 		if (verbose) cat("done.\n")
 	}
 	if (variance.stabilize) {
-		if (verbose) cat("Variance stabilizing ...\n")
+		if (verbose) cat("\nVariance stabilizing ...\n")
 		lumiBatch <- do.call("lumiT", c(alist(lumiBatch), varianceStabilize.param))
 		if (verbose) cat("done.\n")
 	}
 	if (normalize) {
-		if (verbose) cat("Normalizing ...\n")
+		if (verbose) cat("\nNormalizing ...\n")
 		lumiBatch <- do.call("lumiN", c(alist(lumiBatch), normalize.param))
 		if (verbose) cat("done.\n")
 	}
 	if (QC.evaluation) {
-		if (verbose) cat("Quality control after preprocessing ...\n")
+		if (verbose) cat("\nQuality control after preprocessing ...\n")
 		lumiBatch <- do.call("lumiQ", c(alist(lumiBatch), QC.param))
 		if (verbose) cat("done.\n")
 	}

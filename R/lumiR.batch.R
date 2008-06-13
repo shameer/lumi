@@ -11,10 +11,10 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 	}
 	if (dirMode && length(fileList) == 1) {
 		fileList <- dir(fileList, pattern='.csv')
-		if (length(fileList) == 0) stop('No data files were found!')
+		if (length(fileList) == 0) stop('No data files were found!\n')
 	}
 
-	print('Inputting the data ...')
+	cat('Inputting the data ...\n')
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
 		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, ...)
@@ -30,7 +30,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 	}
 	if (!convertNuID) lib <- NULL	
 	if (!is.null(lib) || convertNuID) {
-		print('Adding nuID to the data ...')
+		cat('\nAdding nuID to the data ...\n')
 		x.lumi <- addNuId2lumi(x.lumi, lib=lib)
 	}
 
@@ -48,12 +48,12 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 			sampleInfo <- sampleInfoFile
 		}
 		## force the names to be capitalized
-		names(sampleInfo) <- toupper(names(sampleInfo))
-		ID <- sampleInfo$ID
-		if (is.null(ID)) {
+		colName <- toupper(names(sampleInfo))
+		ID <- sampleInfo[, colName == 'ID']
+		if (length(ID) == 0) {
 			ID <- sampleInfo[,1]
 			if (any(duplicated(ID))) {
-				warning('In sampleInfoFile, the ID column is required or the first column should be unique!')
+				warning('In sampleInfoFile, the ID column is required or the first column should be unique!\n')
 				setwd(oldDir)
 				return(x.lumi)
 			}
@@ -63,18 +63,21 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 		sampleName <- sampleNames(x.lumi)
 		ID <- ID[ID %in% sampleName]
 		if (nrow(sampleInfo) != length(ID)) {
-			warning('Some IDs provided in the sampleInfoFile do not exist the data file!')
+			warning('Some IDs provided in the sampleInfoFile do not exist the data file!\n')
 			if (length(ID) == 0) {
-				stop('The IDs provided in the sampleInfoFile do not match the data file!')
+				stop('The IDs provided in the sampleInfoFile do not match the data file!\n')
 			} 
 			
 		} 
 		x.lumi <- x.lumi[, ID]
-
-		pData <- sampleInfo[ID,]
-		label <- sampleInfo[ID, 'LABEL']
-		if (!is.null(label)) {
-			label <- ID
+		
+		if (is.null(pData(phenoData(x.lumi)))) {
+			pData <- sampleInfo[ID,]			
+		} else {
+			pData <- data.frame(pData(phenoData(x.lumi))[!(names(pData(phenoData(x.lumi))) %in% names(sampleInfo))], sampleInfo[ID,])
+		}
+		label <- sampleInfo[ID, colName == 'LABEL']
+		if (length(label) == length(ID)) {
 			rownames(pData) <- label
 			sampleNames(x.lumi) <- label
 		}

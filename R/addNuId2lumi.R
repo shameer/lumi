@@ -7,12 +7,12 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	exprs <- exprs(x.lumi)
 	id <- rownames(exprs)
 	if(all(sapply(id[1:20], is.nuID))) {
-		print('The lumiBatch object is already nuID annotated!')
+		cat('The lumiBatch object is already nuID annotated!\n')
 		return(x.lumi)
 	}
 	if (!is.null(lib)) {
 		if (length(grep('\\.db', lib)) > 0) {
-			warning(paste(lib, 'does not include nuID conversion information!'))
+			warning(paste(lib, 'does not include nuID conversion information!\n'))
 			lib <- NULL
 		}
 	}
@@ -39,7 +39,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				if (sepNum >= 2) {
 					sep <- ','
 				} else {
-					stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!')
+					stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!\n')
 				}
 			}
 		}
@@ -73,11 +73,11 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				width <- nchar(ann_target[1])
 				id <- formatC(as.numeric(id), width=width, flag='0', format='d')
 				comm_target <- id[id %in% ann_target]
-				if (length(comm_target) == 0) stop('The annotation file does not match the data!')
+				if (length(comm_target) == 0) stop('The annotation file does not match the data!\n')
 			}
 		} 
 		if (length(comm_target) != length(id)) {
-			warning('The annotation file does not match the data. Partial ids cannot be replaced!')
+			warning('The annotation file does not match the data. Partial ids cannot be replaced!\n')
 		}
 		names(nuID) <- ann_target
 
@@ -99,7 +99,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 					if (length(which(!is.na(newId))) == 0) {
 						targetID <- pData(featureData(x.lumi))$TargetID
 						newId <- mget(targetID, get(paste(lib, 'TARGETID2NUID', sep=''), mode='environment'), ifnotfound=NA)
-						if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!')
+						if (length(which(!is.na(newId))) == 0) stop('The library does not match the data!\n')
 					}
 				} 
 			} else {
@@ -116,7 +116,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				if (is.null(TargetID)) {
 					if (!all(TargetID[naInd] %in% controlId)) {
 						if (length(which(naInd)) < 10) {
-							warning(paste('Identifiers:', paste(TargetID[naInd], collapse=','), ' cannot be found in the ', lib, '!', sep=''))
+							warning(paste('Identifiers:', paste(TargetID[naInd], collapse=','), ' cannot be found in the ', lib, '!\n', sep=''))
 						} else {
 							warning(paste('Some identifiers cannot be found in the ', lib, '!', sep=''))
 						}
@@ -124,14 +124,14 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				}
 			} else if (!all(id[naInd] %in% controlId)) {
 				if (length(which(naInd)) < 10) {
-					warning(paste('Identifiers:', paste(id[naInd], collapse=','), ' cannot be found in the ', lib, '!', sep=''))
+					warning(paste('Identifiers:', paste(id[naInd], collapse=','), ' cannot be found in the ', lib, '!\n', sep=''))
 				} else {
-					warning(paste('Some identifiers cannot be found in the ', lib, '!', sep=''))
+					warning(paste('Some identifiers cannot be found in the ', lib, '!\n', sep=''))
 				}
 			}
 			newId[naInd] <- id[naInd]
 		} else {
-			stop(paste('Annotation library', lib, 'is not installed!'))
+			stop(paste('Annotation library', lib, 'is not installed!\n'))
 		}
 	} else {
 		annotation <- pData(featureData(x.lumi))
@@ -139,11 +139,11 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 		if (!is.null(annotation)) {
 			sequence <- annotation[, 'PROBE_SEQUENCE']
 			if (!is.null(sequence)) {
-				cat('Directly converting probe sequence to nuIDs ...')
+				cat('Directly converting probe sequence to nuIDs ...\n')
 				newId <- sapply(sequence, seq2id)
 				names(newId) <- id				
 			} else {
-				warning('Please provide the annotation file or lumi annotation library!')
+				warning('Please provide the annotation file or lumi annotation library!\n')
 			}
 		} else {
 			# warning('Please provide the annotation file or lumi annotation library!')
@@ -156,7 +156,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		print('Duplicated IDs found and were merged!')
+		cat('Duplicated IDs found and were merged!\n')
 		dupId <- unique(newId[duplicated(newId)])
 		## determine whether the detection p-value close to 0 or 1 is significant
 		detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]

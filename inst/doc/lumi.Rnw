@@ -446,7 +446,7 @@ Users can easily customize the processing parameters. For example, if the user w
 
 <<echo=TRUE>>=
 ## Do all the default preprocessing in one step
-lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='rsn'))
+# lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='rsn'))
 @ 
 
 

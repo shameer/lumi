@@ -282,7 +282,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		# It is based on annotationColumn
 		annotationColumn <- header[toupper(header) %in% toupper(annotationColumn)]
 		if (length(annotationColumn) == 0 && "SPECIES" %in% toupper(header)) {
-			print('Some annotation columns not available in the data.')
+			cat('Some annotation columns not available in the data.\n')
 		} else {
 			annotationInfo <- allData[,annotationColumn]
 		}
@@ -292,7 +292,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	if (checkDupId) {
 		dupId <- unique(id[duplicated(id)])
 		if (length(dupId) > 0) {
-			warning('Duplicated IDs found and were merged!')
+			cat('Duplicated IDs found and were merged!\n')
 			rmInd <- NULL
 			for (dupId.i in dupId) {
 				selInd.i <- which(id == dupId.i)

@@ -18,7 +18,7 @@ nuID2probeID <- function(nuID, lib="lumiHumanV1") {
 		names(probe) <- nuID
 		return(probe)
 	} else {
-		print(paste(lib, ' annotation library is required!', sep=''))
+		cat(paste(lib, ' annotation library is required!\n', sep=''))
 	}
 }
 
@@ -41,7 +41,7 @@ nuID2targetID <- function(nuID, lib="lumiHumanV1") {
 		names(target) <- nuID
 		return(target)
 	} else {
-		print(paste(lib, ' annotation library is required!', sep=''))
+		cat(paste(lib, ' annotation library is required!\n', sep=''))
 	}
 }
 
@@ -53,12 +53,12 @@ probeID2nuID <- function(probeID, lib="lumiHumanV1") {
 			return(nuID)
 		}
 	}
-	if (!require(annotate)) print('Please install "annotate" library!')
+	if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib, character.only=TRUE)) {
 		nuID <- unlist(lookUp(probeID, lib, 'PROBEID2NUID'))
 		return(nuID)
 	} else {
-		print(paste(lib, ' annotation library is required!', sep=''))
+		cat(paste(lib, ' annotation library is required!\n', sep=''))
 	}
 }
 
@@ -70,11 +70,11 @@ targetID2nuID <- function(targetID, lib="lumiHumanV1") {
 			return(nuID)
 		}
 	}
-	if (!require(annotate)) print('Please install "annotate" library!')
+	if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib, character.only=TRUE)) {
 		nuID <- unlist(lookUp(targetID, lib, 'TARGETID2NUID'))
 		return(nuID)
 	} else {
-		print(paste(lib, ' annotation library is required!', sep=''))
+		cat(paste(lib, ' annotation library is required!\n', sep=''))
 	}
 }

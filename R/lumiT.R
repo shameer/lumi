@@ -30,7 +30,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 		if (stdCorrection & is(x.lumi, 'LumiBatch')) {
 			bn <- beadNum(x.lumi)
 			if (is.null(bn)) {
-				print('No Standard Deviation correction was applied becasue of missing bead number information.')
+				cat('No Standard Deviation correction was applied becasue of missing bead number information.\n')
 			} else {
 				se.exprs <- se.exprs * sqrt(bn)
 			}
