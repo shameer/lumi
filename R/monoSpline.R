@@ -19,7 +19,7 @@ function(x, y, newX=NULL, nKnots=6, ifPlot=FALSE) {
 	
 	# Create Design matrix, constraints etc. for monotonic spline....
 	dat <- data.frame(x=x, y=y)
-	sm <- smoothCon(s(x, k=nKnots, bs="cr"), dat, knots=NULL)
+	sm <- smoothCon(s(x, k=nKnots, bs="cr"), dat, knots=NULL)[[1]]
 	if (length(sm$xp) < 6) warning('Few than 6 nKnots were specified!\n Possible inaccurate fitting!\n')
 	F <- mono.con(sm$xp)   # get constraints
 	G <- list(X=sm$X, C=matrix(0,0,0), sp=f.ug$sp, p=sm$xp, y=y, w=y*0+1, 
