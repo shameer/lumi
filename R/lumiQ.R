@@ -1,6 +1,9 @@
 `lumiQ` <-
 function(x.lumi, logMode=TRUE, detectionTh=0.01) {
-	if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
+	if (!is(x.lumi, 'LumiBatch')) {
+		cat('No Quality Control assessment of the object because it is not a "LumiBatch" object.\n')
+		return(x.lumi)
+	}
 	history.submitted <- as.character(Sys.time())
 
 	expr <- exprs(x.lumi)

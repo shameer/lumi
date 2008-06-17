@@ -143,10 +143,10 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				newId <- sapply(sequence, seq2id)
 				names(newId) <- id				
 			} else {
-				warning('Please provide the annotation file or lumi annotation library!\n')
+				cat('Probe sequence information is not available in the data file.\n No nuID conversion was conducted.\n')
 			}
 		} else {
-			# warning('Please provide the annotation file or lumi annotation library!')
+			# warning('Please provide the annotation file or lumi annotation library!\n')
 		}
 	}
 	if (all(newId == id)) {

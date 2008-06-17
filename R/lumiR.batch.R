@@ -1,4 +1,4 @@
-lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
+lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
 
 	oldDir <- getwd()
 	dirMode <- FALSE
@@ -13,14 +13,17 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 		fileList <- dir(fileList, pattern='.csv')
 		if (length(fileList) == 0) stop('No data files were found!\n')
 	}
+	
+	history.submitted <- as.character(Sys.time())
 
 	cat('Inputting the data ...\n')
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
-		x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, ...)
-		# x.lumi.i <- lumiR(file.i, parseColumnName=FALSE)
 		if (transform != 'none') {
+			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, ...)
 			x.lumi.i <- lumiT(x.lumi.i, method=transform, simpleOutput=TRUE)
+		} else {
+			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, QC = FALSE, ...)
 		}
 		if (i == 1) {
 			x.lumi <- x.lumi.i
@@ -40,7 +43,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 			if (file.exists(sampleInfoFile)) {
 				sampleInfo <- read.table(sampleInfoFile, head=TRUE, sep='\t', colClasses='character', comment='')
 			} else {
-				warning('The provided sampleInfoFile does not exist!')
+				warning('The provided sampleInfoFile does not exist\n!')
 				setwd(oldDir)
 				return(x.lumi)
 			}
@@ -85,6 +88,34 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, transform = c(
 		pdata <- new("AnnotatedDataFrame", data=pData)
 		phenoData(x.lumi) <- pdata
 	} 
+	
+	## ----------------------------------------
+	# Add history track
+	if (is(x.lumi, 'LumiBatch')) {
+	    history.finished <- as.character(Sys.time())
+		#history.command <- match.call()
+	    history.command <- capture.output(print(match.call(lumiR.batch)))  
+
+		## replace with the real file name
+		if (length(fileList) > 1) {
+			fileList <- paste('c("', paste(fileList, collapse='","', sep=''), '")', sep='')
+		} else {
+			fileList <- paste('"', fileList, '"', sep='')
+		}
+		if (length(grep(',', history.command)) > 0) {
+			history.command <- sub('\\(.+,', paste('(', fileList, ',', sep=''), history.command)
+		} else {
+			history.command <- sub('\\(.+\\)', paste('(', fileList, ')', sep=''), history.command)
+		}
+
+		lumiVersion <- packageDescription('lumi')$Version
+		x.lumi@history<- data.frame(submitted=history.submitted, 
+				finished=history.finished, command=history.command, lumiVersion=lumiVersion)		
+	}
+    
+	## initialize the QC slot in the LumiBatch object
+	if (QC) x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
+
 	setwd(oldDir)
 	return(x.lumi)
 }

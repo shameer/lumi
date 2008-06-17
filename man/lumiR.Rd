@@ -6,21 +6,22 @@
   Read in Illumina expression data. We assume the data was saved in a comma or tab separated text file.  
 }
 \usage{
-lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec = '.', parseColumnName=FALSE, checkDupId=TRUE,
-columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
+lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec = '.', parseColumnName = FALSE, checkDupId = TRUE,
+QC = TRUE, columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
 inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fileName}{ fileName of the data file }
   \item{sep}{ the separation character used in the text file.  }
-  \item{detectionTh}{ the p-value threshold of determining detectability of the expression. The detection value less than the detectionTh is claimed as detectable. }
+  \item{detectionTh}{ the p-value threshold of determining detectability of the expression. See more details in \code{\link{lumiQ}} }
   \item{na.rm}{ determine whether to remove NA }
   \item{convertNuID}{ determine whether convert the probe identifier as nuID }
   \item{lib}{ the annotation library used by \code{\link{addNuId2lumi}}  }
   \item{dec}{ the character used in the file for decimal points.}
   \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (Assume the sample information is separated by "\_".) }
   \item{checkDupId}{ determine whether to check duplicated TargetIDs or ProbeIds. The duplicated ones will be averaged.}
+  \item{QC}{ determine whether to do quality control assessment after read in the data.}
   \item{columnNameGrepPattern}{ the string grep patterns used to determine the slot corresponding columns.}
   \item{inputAnnotation}{ determine whether input the annotation information outputted by BeadStudio if exists.}
   \item{annotationColumn}{ the column names of the annotation information outputted by BeadStudio}

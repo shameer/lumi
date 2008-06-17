@@ -291,24 +291,24 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	## combining the QC information
 	if (length(x@QC) > 0 && length(y@QC) > 0) {
 		if (!is.null(x@QC$BeadStudioSummary) && !is.null(y@QC$BeadStudioSummary)) {
-			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary)) {
+			if (ncol(x@QC$BeadStudioSummary) == ncol(y@QC$BeadStudioSummary) && ncol(x@QC$BeadStudioSummary) > 0) {
 				BeadStudioSummary <- rbind(x@QC$BeadStudioSummary, y@QC$BeadStudioSummary)
 				x@QC$BeadStudioSummary <- BeadStudioSummary
 			} else {
-				x@QC <- NULL
+				x@QC <- list()
 			}
 		} else {
-			x@QC <- NULL
+			x@QC <- list()
 		}
 		if (!is.null(x@QC$sampleSummary) && !is.null(y@QC$sampleSummary)) {
 			if (nrow(x@QC$sampleSummary) == nrow(y@QC$sampleSummary)) {
 				sampleSummary <- cbind(x@QC$sampleSummary, y@QC$sampleSummary)
 				x@QC$sampleSummary <- sampleSummary
 			} else {
-				x@QC <- NULL
+				x@QC <- list()
 			}
 		} else {
-			x@QC <- NULL
+			x@QC <- list()
 		}
 		if (!is.null(x@QC)) {
 			history.x <- x@QC$history
@@ -320,7 +320,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 			x@QC$history <- rbind(history.x, history.y)
 		} 
 	} else {
-		x@QC <- NULL
+		x@QC <- list()
 	}
 	
 	## VST transformation parameters

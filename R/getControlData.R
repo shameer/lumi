@@ -5,12 +5,12 @@ function(x, type=c('data.frame', 'LumiBatch'), ...)
 	if (is.character(x)) {
 		if (type == 'data.frame') {
 			if ('columnNameGrepPattern' %in% names(list(...))) {
-				allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, ...)
+				allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, QC=FALSE, ...)
 			} else {
-				allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs=NA, detection=NA, beadNum=NA), ...)				
+				allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs=NA, detection=NA, beadNum=NA), QC=FALSE, ...)				
 			}
 		} else {
-			allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, ...)
+			allControlInfo <- lumiR.batch(x, lib=NULL, checkDupId=FALSE, convertNuID=FALSE, QC=FALSE, ...)
 			return(allControlInfo)
 		}
 		x <- allControlInfo

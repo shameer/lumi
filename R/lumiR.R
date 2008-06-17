@@ -1,6 +1,6 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
-	columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
+	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
 	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -12,11 +12,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 
 	if (is.na(columnNameGrepPattern$exprs)) {
 		columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
-		warning('exprs slot is required and default pattern will be used!')
+		warning('exprs slot is required and default pattern will be used!\n')
 	}
 	if (is.na(columnNameGrepPattern$se.exprs) && checkDupId) {
 		# columnNameGrepPattern$beadNum <- columnNameGrepPattern$detection <- NA
-		warning('se.exprs slot is required for the VST transformation!\n We strongly suggest to include BEAD_STD columns!')
+		warning('se.exprs slot is required for the VST transformation!\n We strongly suggest to include BEAD_STD columns!\n')
 		# columnNameGrepPattern$se.exprs <- 'BEAD_STD'
 		# warning('se.exprs slot is required and default pattern will be used!')
 	}
@@ -31,7 +31,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	options(stringsAsFactors = FALSE)
 	version <- 2
 
-	if (!file.exists(fileName)) stop('The file is not exist! Please check your file path!')
+	if (!file.exists(fileName)) stop('The file is not exist! Please check your file path!\n')
 	## ---------------------------------------
 	## identify the Metadata lines 
 	info <- readLines(fileName, n=20)    # take the first 20 lines to have a taste
@@ -56,10 +56,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			if (sepNum1[1] > 0 && length(sepNum1) == length(sepNum2)) {
 				sep <- ','
 			} else {
-				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!')
+				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!\n')
 			}
 		} else {
-			stop('Please sepecify the seperator used in the file!')
+			stop('Please sepecify the seperator used in the file!\n')
 		}
 	}
 	## determine whether the quote is used or not
@@ -91,10 +91,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
 		if (length(markerInd) > 0) {
 			if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
-				warning('The data file may not be in the Illumia BeadStudio output format!')
+				warning('The data file may not be in the Illumia BeadStudio output format!\n')
 			if (length(markerInd) > 1) {
 				if (length(grep('^\\[.*\\Profile]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
-					warning('The data file may not be in the Illumia BeadStudio output format!')
+					warning('The data file may not be in the Illumia BeadStudio output format!\n')
 			}
 			version <- 3
 			info <- info[-markerInd]
@@ -111,7 +111,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 				ind <- grep("BSGX Version", info, ignore.case=TRUE)
 			}
 			if (length(ind) == 0) 
-			    warning("The data file may not be in the Illumia BeadStudio output format.")
+			    warning("The data file may not be in the Illumia BeadStudio output format.\n")
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
@@ -123,7 +123,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 					normalization <- strsplit(info, split=sep)[[ind]][2]
 				}
 				if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
-				    warning("The raw data should not be normalized in BeadStudio.")
+				    warning("The raw data should not be normalized in BeadStudio.\n")
 				}
 			}
 		} else {
@@ -218,7 +218,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
     
 	## identify where the signal column exists
 	ind <- grep(columnNameGrepPattern$exprs, header, ignore.case=TRUE)
-	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!')
+	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!\n')
 	exprs <- as.matrix(allData[,ind])
 	if (!is.numeric(exprs[1])) {
 		exprs <- matrix(as.numeric(exprs), nrow=nrow(allData))
@@ -233,7 +233,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	}
 	if (length(ind) == 0) {
 		se.exprs <- NULL
-		 # stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!')
+		 # stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!\n')
 	} else {
 		se.exprs <- as.matrix(allData[,ind])
 		if (!is.numeric(se.exprs[1])) {
@@ -343,7 +343,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
 	if (any(duplicated(sampleID))) {
-		warning('Duplicated column names found in the raw data! \n A suffix number is added to the duplicated column names.')
+		warning('Duplicated column names found in the raw data! \n A suffix number is added to the duplicated column names.\n')
 		dupId <- which(duplicated(sampleID))
 		dupName <- unique(sampleID[dupId])
 		for (dupName.i in dupName) {
@@ -392,14 +392,14 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	colnames(exprs) <- label
 	if (!is.null(se.exprs)) {
 		if (ncol(exprs) != ncol(se.exprs)) 
-			stop('Different column numbers of exprs and se.exprs! Please check the input data format.')
+			stop('Different column numbers of exprs and se.exprs! Please check the input data format.\n')
 		colnames(se.exprs) <- label
 	}
 	if (!is.null(beadNum)) {
 		if (ncol(beadNum) == length(label)) {
 			colnames(beadNum) <- label
 		} else {
-			warning('The number of beadNum columns does not match! Please check the input data format.')
+			warning('The number of beadNum columns does not match! Please check the input data format.\n')
 			if (ncol(beadNum) > length(label)) beadNum <- beadNum[,1:length(label)]
 			if (ncol(beadNum) < length(label)) {
 				for (i in 1:(length(label) - ncol(beadNum)))
@@ -411,7 +411,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		if (ncol(detection) == length(label)) {
 			colnames(detection) <- label
 		} else {
-			warning('The number of detection columns does not match! Please check the input data format.')
+			warning('The number of detection columns does not match! Please check the input data format.\n')
 			if (ncol(detection) > length(label)) beadNum <- beadNum[,1:length(label)]
 			if (ncol(detection) < length(label)) {
 				for (i in 1:(length(label) - ncol(detection)))
@@ -488,7 +488,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	}
 	
 	## initialize the QC slot in the LumiBatch object
-	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
+	if (QC)	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
 
 	## Add nuID if the annotation library is provided
 	if (!convertNuID) lib <- NULL
