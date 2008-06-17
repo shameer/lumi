@@ -21,7 +21,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 	
 	history.submitted <- as.character(Sys.time())
 	if (method == 'bgAdjust') {
-		x.lumi <- bgAdjust(x.lumi, ...)
+		x.matrix <- exprs(bgAdjust(x.lumi, ...))
 	} else if (method == 'bgAdjust.affy') {
 		x.matrix <- apply(x.matrix, 2, bg.adjust, ...) 
 	} else if (method == 'forcePositive') {
@@ -31,7 +31,8 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 		offset <- rep(1, nrow(x.matrix)) %*% t(offset)
 		x.matrix <- x.matrix - offset
 	} else if (is.function(method)) {
-		x.lumi <- method(x.lumi, ...)
+		x.matrix <- method(x.lumi, ...)
+		if (is(x.matrix, 'ExpressionSet')) x.matrix <- exprs(x.matrix)
 	} else {
 		cat('The method is not supported!\n')
 		return(x.lumi)
