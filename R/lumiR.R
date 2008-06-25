@@ -1,7 +1,7 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
 	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
-	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...) 
+	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose=TRUE, ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
 	## 'exprs' and 'se.exprs' related columns are required
@@ -488,11 +488,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	}
 	
 	## initialize the QC slot in the LumiBatch object
-	if (QC)	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
+	if (QC)	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh, verbose=verbose)
 
 	## Add nuID if the annotation library is provided
 	if (!convertNuID) lib <- NULL
-	if (!is.null(lib) || convertNuID)  x.lumi <- addNuId2lumi(x.lumi, lib=lib)
+	if (!is.null(lib) || convertNuID)  x.lumi <- addNuId2lumi(x.lumi, lib=lib, verbose=verbose)
 
 	## resume the old settings
 	options(stringsAsFactors = oldSetting)

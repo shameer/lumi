@@ -8,7 +8,7 @@
 \usage{
 lumiR(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec = '.', parseColumnName = FALSE, checkDupId = TRUE,
 QC = TRUE, columnNameGrepPattern = list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
-inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), ...)
+inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,6 +25,7 @@ inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE'
   \item{columnNameGrepPattern}{ the string grep patterns used to determine the slot corresponding columns.}
   \item{inputAnnotation}{ determine whether input the annotation information outputted by BeadStudio if exists.}
   \item{annotationColumn}{ the column names of the annotation information outputted by BeadStudio}
+  \item{verbose}{ a boolean to decide whether to print out some messages }
   \item{\dots}{ other parameters used by \code{\link[utils]{read.table}} function }
 }
 \details{

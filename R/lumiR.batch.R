@@ -1,4 +1,4 @@
-lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...) {
+lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...) {
 
 	oldDir <- getwd()
 	dirMode <- FALSE
@@ -16,14 +16,17 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 
 	
 	history.submitted <- as.character(Sys.time())
 
-	cat('Inputting the data ...\n')
+	if (verbose) {
+		cat('Inputting the data ...\n')
+		if (transform != 'none') cat(paste('Transformation', transform, 'will be performed for each data file ...\n'))
+	}
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
 		if (transform != 'none') {
-			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, ...)
-			x.lumi.i <- lumiT(x.lumi.i, method=transform, simpleOutput=TRUE)
+			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, verbose=FALSE, ...)
+			x.lumi.i <- lumiT(x.lumi.i, method=transform, simpleOutput=TRUE, verbose=FALSE)
 		} else {
-			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, QC = FALSE, ...)
+			x.lumi.i <- lumiR(file.i, parseColumnName=FALSE, convertNuID = FALSE, QC = FALSE, verbose=FALSE, ...)
 		}
 		if (i == 1) {
 			x.lumi <- x.lumi.i
@@ -33,7 +36,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 
 	}
 	if (!convertNuID) lib <- NULL	
 	if (!is.null(lib) || convertNuID) {
-		cat('\nAdding nuID to the data ...\n')
+		if (verbose) cat('\nAdding nuID to the data ...\n')
 		x.lumi <- addNuId2lumi(x.lumi, lib=lib)
 	}
 
@@ -114,7 +117,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 
 	}
     
 	## initialize the QC slot in the LumiBatch object
-	if (QC) x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh)
+	if (QC) x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh, verbose=verbose)
 
 	setwd(oldDir)
 	return(x.lumi)

@@ -6,7 +6,7 @@
   Read BeadStudio output files in batch and combine them as a single LumiBatch object
 }
 \usage{
-lumiR.batch(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, ...)
+lumiR.batch(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,7 @@ lumiR.batch(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = T
   \item{QC}{ determine whether to do quality control assessment after read in the data.}
   \item{transform}{ determine whether to do transform after input each file }
   \item{sampleInfoFile}{ a Tab-separated text file or a data.frame keeping the sample information (optional) }
+  \item{verbose}{ a boolean to decide whether to print out some messages }
   \item{\dots}{ other parameters used by \code{\link{lumiR}} }
 }
 \details{

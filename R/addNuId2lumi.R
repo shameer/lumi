@@ -1,5 +1,5 @@
 `addNuId2lumi` <-
-function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='Probe_Id')) {
+function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='Probe_Id'), verbose=TRUE) {
 
     history.submitted <- as.character(Sys.time())
 
@@ -7,7 +7,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	exprs <- exprs(x.lumi)
 	id <- rownames(exprs)
 	if(all(sapply(id[1:20], is.nuID))) {
-		cat('The lumiBatch object is already nuID annotated!\n')
+		if (verbose) cat('The lumiBatch object is already nuID annotated!\n')
 		return(x.lumi)
 	}
 	if (!is.null(lib)) {
@@ -143,7 +143,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 				newId <- sapply(sequence, seq2id)
 				names(newId) <- id				
 			} else {
-				cat('Probe sequence information is not available in the data file.\n No nuID conversion was conducted.\n')
+				if (verbose) cat('Probe sequence information is not available in the data file.\n No nuID conversion was conducted.\n')
 			}
 		} else {
 			# warning('Please provide the annotation file or lumi annotation library!\n')
@@ -156,7 +156,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib=NULL, annotationColName=c(se
 	}
 
 	if (any(duplicated(newId)))  {
-		cat('Duplicated IDs found and were merged!\n')
+		if (verbose) cat('Duplicated IDs found and were merged!\n')
 		dupId <- unique(newId[duplicated(newId)])
 		## determine whether the detection p-value close to 0 or 1 is significant
 		detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]

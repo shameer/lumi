@@ -6,12 +6,13 @@
   A main function of between chip normalization of a LumiBatch object. Currently, four methods ("rsn", "ssn", "quantile", "loess", "vsn") are supported.
 }
 \usage{
-lumiN(x.lumi, method = c("quantile", "rsn", "ssn", "loess", "vsn"), ...)
+lumiN(x.lumi, method = c("quantile", "rsn", "ssn", "loess", "vsn"), verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 	\item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes}
   	\item{method}{ four different between chips normalization methods ("quantile", "rsn", "ssn", "loess", "vsn") are supported }
+    \item{verbose}{ a boolean to decide whether to print out some messages }
   	\item{\dots}{ other parameters used by corresponding method }
 }
 \details{

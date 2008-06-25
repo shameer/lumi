@@ -1,4 +1,4 @@
-lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...) 
+lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), verbose=TRUE, ...) 
 {
 	method <- match.arg(method)
 	if (is(x.lumi, 'ExpressionSet')) {
@@ -19,6 +19,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 		if (min(x.matrix) > 0)  return(x.lumi)
 	}
 	
+	if (verbose) cat(paste('Perform', method, 'background correction ...\n'))
 	history.submitted <- as.character(Sys.time())
 	if (method == 'bgAdjust') {
 		x.matrix <- exprs(bgAdjust(x.lumi, ...))

@@ -1,5 +1,5 @@
 `lumiN` <-
-function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), ...) {
+function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), verbose=TRUE, ...) {
 
 	if (is(x.lumi, 'ExpressionSet')) {
 	    # x.lumi is a lumi object
@@ -21,6 +21,7 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), ...) {
 	if (is(x.lumi, 'LumiBatch')) {
 		history.submitted <- as.character(Sys.time())
 	}
+	if (verbose) cat(paste('Perform', method, 'normalization ...\n'))
 
 	norm.matrix <- switch(method,
 		rsn = rsn(x.lumi, ...),

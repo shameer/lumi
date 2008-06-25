@@ -6,12 +6,13 @@
   Background correction of Illumina data
 }
 \usage{
-lumiB(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), ...)
+lumiB(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes. For 'bgAdjust' method, it should be a LumiBatch Object }
   \item{method}{ the background correction method, it can be any function with a LumiBatch Object as the first argument and return a LumiBatch Object }
+  \item{verbose}{ a boolean to decide whether to print out some messages }
   \item{\dots}{ other parameters used by the user provided background correction method  }
 }
 \details{

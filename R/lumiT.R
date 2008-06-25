@@ -1,5 +1,5 @@
 `lumiT` <-
-function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, ...) {
+function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, verbose = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	if (is(x.lumi, 'eSet')) {
 		if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
@@ -17,6 +17,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 			x.lumi <- lumiB(x.lumi, method='forcePositive')
 		}
 	}
+	if (verbose) cat(paste('Perform', method, 'transformation ...\n'))
 	history.submitted <- as.character(Sys.time())
 
     new.lumi <- x.lumi 

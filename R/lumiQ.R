@@ -1,9 +1,10 @@
 `lumiQ` <-
-function(x.lumi, logMode=TRUE, detectionTh=0.01) {
+function(x.lumi, logMode=TRUE, detectionTh=0.01, verbose=TRUE) {
 	if (!is(x.lumi, 'LumiBatch')) {
-		cat('No Quality Control assessment of the object because it is not a "LumiBatch" object.\n')
+		if (verbose) cat('No Quality Control assessment of the object because it is not a "LumiBatch" object.\n')
 		return(x.lumi)
 	}
+	if (verbose) cat('Perform Quality Control assessment of the LumiBatch object ...\n')
 	history.submitted <- as.character(Sys.time())
 
 	expr <- exprs(x.lumi)
