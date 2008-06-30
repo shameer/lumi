@@ -43,17 +43,17 @@ For the people using lumi package, please cite the following papers in your publ
 
 * For the package:
 
-Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", Bioinformatics 2008; (Advance Access published online on May 8, 2008)
+Du, P., Kibbe, W.A. and Lin, S.M., (2008) 'lumi: a pipeline for processing Illumina microarray', Bioinformatics 24(13):1547-1548
 
 
 * For the VST (variance stabilization transformation) algorithm, please cite:
 
-Lin, S.M., Du, P., Kibbe, W.A., "Model-based Variance-stabilizing Transformation for Illumina Microarray Data", Nucleic Acids Res. 2008 Jan 4 
+Lin, S.M., Du, P., Kibbe, W.A., (2008) 'Model-based  Variance-stabilizing Transformation for Illumina Microarray Data', Nucleic Acids Res. 36, e11
 
 
 * For nuID annotation packages, please cite:
 
-Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007). 
+Du, P., Kibbe, W.A. and Lin, S.M., (2007) 'nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays', Biology Direct, 2, 16. 
 
 Thanks for your help!
 
@@ -626,36 +626,8 @@ Based on the significant genes identified using \Rpackage{limma} or t-test, we c
 
 Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of BP (Biological Process). For other GO categories MF(Molecular Function) and CC (Cellular Component), it just follows the same procedure.
 
-\begin{Sinput}
-> if (require(GOstats) & require(lumiHumanAll.db)) {
-+ 
-+       ## Get the locuslink Id of the gene
-+	sigLL <- unique(unlist(lookUp(sigGene,'lumiHumanAll.db','ENTREZID')))
-+       sigLL <- as.character(sigLL[!is.na(sigLL)])
-+       params <- new("GOHyperGParams",
-+               geneIds= sigLL,
-+               annotation="lumiHumanAll.db",
-+               ontology="BP",
-+               pvalueCutoff= 0.01,
-+               conditional=FALSE,
-+               testDirection="over")
-+          
-+       hgOver <- hyperGTest(params)
-+          
-+       ## Get the p-values of the test
-+       gGhyp.pv <- pvalues(hgOver)
-+ 	
-+       ## select the Go terms with p-value less than 0.001
-+       sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.001])
-+ 	
-+       ## Here only show the significant GO terms of BP (Molecular Function)
-+       ## 	For other categories, just follow the same procedure.
-+       sigGO.Term <- getGOTerm(sigGO.ID)[["BP"]]
-+ }
-\end{Sinput}
 
-
-<<echo=F, eval=F>>=
+<<echo=T, eval=F>>=
 if (require(GOstats) & require(lumiHumanAll.db)) {
 
 	## Get the locuslink Id of the gene
@@ -747,11 +719,11 @@ We would like to thanks the users and researchers around the world contribute to
 
 \section{References}
 
-1. Du, P., Kibbe, W.A. and Lin, S.M., "lumi: a pipeline for processing Illumina microarray", Bioinformatics 2008; (Advance Access published online on May 8, 2008) 
+1. Du, P., Kibbe, W.A. and Lin, S.M., (2008) 'lumi: a pipeline for processing Illumina microarray', Bioinformatics 24(13):1547-1548
 
-2. Lin, S.M., Du, P., Kibbe, W.A.,  "Model-based Variance-stabilizing Transformation for Illumina Mi-croarray Data",  Nucleic Acids Res. 2008 Jan 4
+2. Lin, S.M., Du, P., Kibbe, W.A., (2008) 'Model-based  Variance-stabilizing Transformation for Illumina Microarray Data', Nucleic Acids Res. 36, e11
 
-3. Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
+3. Du, P., Kibbe, W.A. and Lin, S.M., (2007) 'nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays', Biology Direct, 2, 16.
 
 4. Barnes, M., Freudenberg, J., Thompson, S., Aronow, B. and Pav-lidis, P. (2005) "Experimental comparison and cross-validation of the Affymetrix and Illumina gene expression analysis platforms", Nucleic Acids Res, 33, 5914-5923.
 
