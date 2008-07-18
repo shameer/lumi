@@ -132,9 +132,14 @@ setMethod("summary",signature(object="LumiBatch"), function(object, type=c('data
 
 setMethod("show",signature(object="LumiBatch"), function(object) 
 {
-	cat('Summary of BeadStudio output:\n\t')
-	cat(notes(object)[[1]], sep='\n\t')
-	cat('Major Operation History:\n')
+	cat('Summary of data information:\n')
+	note <- notes(object)
+	n.names <- names(note)
+	for (i in seq(note)) {
+		if (!is.null(n.names)) cat('\t', paste(n.names[i], ':\n\t\t', sep=''))
+		cat(note[[i]], sep='\n\t\t')		
+	}
+	cat('\nMajor Operation History:\n')
 	print(getHistory(object)) 
 	cat('\nObject Information:\n')
 	callNextMethod()

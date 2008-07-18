@@ -3,7 +3,8 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Mapping nuID into Illumina TargetID }
 \description{
-Mapping nuID into Illumina TargetID
+Mapping nuID into Illumina TargetID.
+This function is obsoleted! Please use \code{\link{nuID2IlluminaID}} instead.
 }
 \usage{
 nuID2targetID(nuID, lib = "lumiHumanV1")

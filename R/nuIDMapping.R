@@ -1,4 +1,5 @@
 nuID2probeID <- function(nuID, lib="lumiHumanV1") {
+	cat('This function is obsoleted!\nPlease use "nuID2IlluminaID" instead.\n')
 	if (length(nuID) == 0) return(NULL)
 
 	if (!is.null(lib)) {
@@ -23,6 +24,7 @@ nuID2probeID <- function(nuID, lib="lumiHumanV1") {
 }
 
 nuID2targetID <- function(nuID, lib="lumiHumanV1") {
+	cat('This function is obsoleted!\nPlease use "nuID2IlluminaID" instead.\n')
 	if (length(nuID) == 0) return(NULL)
 	if (!is.null(lib)) {
 		if (length(grep('\\.db', lib)) > 0) {
@@ -46,6 +48,7 @@ nuID2targetID <- function(nuID, lib="lumiHumanV1") {
 }
 
 probeID2nuID <- function(probeID, lib="lumiHumanV1") {
+	cat('This function is obsoleted!\nPlease use "IlluminaID2nuID" instead.\n')
 	if (length(probeID) == 0) return(NULL)
 	if (!is.null(lib)) {
 		if (length(grep('\\.db', lib)) > 0) {
@@ -63,6 +66,7 @@ probeID2nuID <- function(probeID, lib="lumiHumanV1") {
 }
 
 targetID2nuID <- function(targetID, lib="lumiHumanV1") {
+	cat('This function is obsoleted!\nPlease use "IlluminaID2nuID" instead.\n')
 	if (length(targetID) == 0) return(NULL)
 	if (!is.null(lib)) {
 		if (length(grep('\\.db', lib)) > 0) {

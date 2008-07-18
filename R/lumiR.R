@@ -1,5 +1,5 @@
 `lumiR` <-
-function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
+function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib.mapping = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
 	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
 	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose=TRUE, ...) 
 {
@@ -208,7 +208,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
 		id <- as.character(as.vector(allData[,2]))
 		idName <- header[2]
-	} else if (!is.null(lib)) {
+	} else if (!is.null(lib.mapping)) {
 		probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
 		if (length(probeId.pos) > 0) {
 			id <- as.character(as.vector(allData[,probeId.pos]))
@@ -448,8 +448,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	eval(parse(text=cmd))
 	if (is.null(se.exprs)) {
 		if (checkDupId && convertNuID) {
-			## Add nuID if the annotation library is provided
-			x.lumi <- addNuId2lumi(x.lumi, lib=lib)			
+			## Add nuID if the ID Mapping library is provided
+			x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping)			
 		}
 
 		## resume the old settings
@@ -463,7 +463,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	if (!is.null(info)) {
 		info <- gsub('\t+', '\t', info)
 	}
-	experimentData(x.lumi)@other <- list(info)
+	notes(x.lumi) <- list('Data File Information'=info)
 
     # history tracking
     history.finished <- as.character(Sys.time())
@@ -484,15 +484,18 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	## Add the species information if exists
 	if (any(toupper(header) == 'SPECIES')) {
 		species <- as.character(allData[1,header[toupper(header) == 'SPECIES']])
-		annotation(x.lumi) <- species
+		annotation(x.lumi) <- switch(tolower(species),
+				'homo sapiens'='lumiHumanAll.db',
+				'mus musculus'='lumiMouseAll.db',
+				'rattus norvegicus'='lumiRatAll.db')
 	}
 	
 	## initialize the QC slot in the LumiBatch object
 	if (QC)	x.lumi <- lumiQ(x.lumi, detectionTh=detectionTh, verbose=verbose)
 
 	## Add nuID if the annotation library is provided
-	if (!convertNuID) lib <- NULL
-	if (!is.null(lib) || convertNuID)  x.lumi <- addNuId2lumi(x.lumi, lib=lib, verbose=verbose)
+	if (!convertNuID) lib.mapping <- NULL
+	if (!is.null(lib.mapping) || convertNuID)  x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping, verbose=verbose)
 
 	## resume the old settings
 	options(stringsAsFactors = oldSetting)

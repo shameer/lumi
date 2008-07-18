@@ -1,4 +1,4 @@
-lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...) {
+lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...) {
 
 	oldDir <- getwd()
 	dirMode <- FALSE
@@ -34,10 +34,10 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 
 			x.lumi <- combine(x.lumi, x.lumi.i)
 		}
 	}
-	if (!convertNuID) lib <- NULL	
-	if (!is.null(lib) || convertNuID) {
+	if (!convertNuID) lib.mapping <- NULL	
+	if (!is.null(lib.mapping) || convertNuID) {
 		if (verbose) cat('\nAdding nuID to the data ...\n')
-		x.lumi <- addNuId2lumi(x.lumi, lib=lib)
+		x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping)
 	}
 
 	if (!is.null(sampleInfoFile)) {

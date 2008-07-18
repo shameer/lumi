@@ -44,7 +44,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 				} 
 			}
 		}
-		plot(a1[,dimension[1]],a1[,dimension[2]], type='n', xlab=paste('Component', dimension[1]),ylab=paste('Component', dimension[2]), main=main)
+		plot(a1[,dimension[1]],a1[,dimension[2]], type='n', xlab=paste('Dimension', dimension[1]),ylab=paste('Dimension', dimension[2]), main=main)
 		text(a1[,dimension[1]],a1[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
 	}
 	attr(dd, 'geneNum') <- length(selProbe)

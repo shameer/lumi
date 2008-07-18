@@ -18,7 +18,7 @@
 
 \SweaveOpts{keep.source=TRUE}
 
-\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
+\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
 \begin{document}
 
 \setkeys{Gin}{width=1\textwidth} 
@@ -557,7 +557,7 @@ We use the Barnes data set [4] as an example, which has be created as a Biocondu
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  #  Not run
 > ## load the data
-> # example.lumi <- lumiR(fileName)	 # Not run
+> # example.lumi <- lumiR(fileName, lib.mapping='lumiHumanIDMapping.db')	 # Not run
  
 > ## load saved data
 > data(example.lumi) 

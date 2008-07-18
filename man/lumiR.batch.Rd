@@ -6,13 +6,13 @@
   Read BeadStudio output files in batch and combine them as a single LumiBatch object
 }
 \usage{
-lumiR.batch(fileList, convertNuID = TRUE, lib = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...)
+lumiR.batch(fileList, convertNuID = TRUE, lib.mapping = NULL, detectionTh = 0.01, QC = TRUE, transform = c('none', 'vst', 'log2', 'cubicRoot'), sampleInfoFile = NULL, verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fileList}{ a vector of file names or a directory keeping the data files in the format of .csv }
   \item{convertNuID}{ determine whether convert the probe identifier as nuID }
-  \item{lib}{ same as \code{\link{lumiR}} parameter lib (optional) }
+  \item{lib.mapping}{ same as \code{\link{lumiR}} parameter lib.mapping (optional) }
   \item{detectionTh}{ the p-value threshold of determining detectability of the expression. See more details in \code{\link{lumiQ}}  }
   \item{QC}{ determine whether to do quality control assessment after read in the data.}
   \item{transform}{ determine whether to do transform after input each file }
