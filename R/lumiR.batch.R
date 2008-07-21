@@ -80,7 +80,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 		if (is.null(pData(phenoData(x.lumi)))) {
 			pData <- sampleInfo[ID,]			
 		} else {
-			pData <- data.frame(pData(phenoData(x.lumi))[!(names(pData(phenoData(x.lumi))) %in% names(sampleInfo))], sampleInfo[ID,])
+			pData <- data.frame(pData(phenoData(x.lumi))[!(names(pData(phenoData(x.lumi))) %in% c(names(sampleInfo), 'ID', 'sampleID'))], sampleInfo[ID,])
 		}
 		label <- sampleInfo[ID, colName == 'LABEL']
 		if (length(label) == length(ID)) {

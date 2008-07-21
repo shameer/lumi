@@ -16,7 +16,11 @@ function(nuID, lib.mapping, filterTh=c(Strength1=95, Uniqueness=95), returnAllIn
 			mappingInfo <- mappingInfo[selInd,]
 		}
 	}
-	if (!returnAllInfo) mappingInfo <- mappingInfo[,'EntrezID']
+	if (!returnAllInfo) {
+		nuID <- rownames(mappingInfo)
+		mappingInfo <- mappingInfo[,'EntrezID']
+		names(mappingInfo) <- nuID
+	}
 	return(mappingInfo)
 }
 

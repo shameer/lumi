@@ -284,7 +284,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		if (length(annotationColumn) == 0 && "SPECIES" %in% toupper(header)) {
 			cat('Some annotation columns not available in the data.\n')
 		} else {
-			annotationInfo <- allData[,annotationColumn]
+			annotationInfo <- allData[,annotationColumn, drop=FALSE]
 		}
 	}
 
@@ -435,12 +435,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		rownames(pData) <- label
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
 			'The label of the sample'))
-		rownames(varMetadata) <- c('sampleID', 'label')
+		rownames(varMetadata) <- c('ID', 'label')
 	}  else {
 		pData <- data.frame(sampleID=sampleID)
 		rownames(pData) <- sampleID
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id'))
-		rownames(varMetadata) <- c('sampleID')
+		rownames(varMetadata) <- c('ID')
 	}
 	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
 	cmd <- paste(cmd, ', phenoData=pdata')
