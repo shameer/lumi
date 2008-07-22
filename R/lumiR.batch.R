@@ -55,16 +55,20 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 		}
 		## force the names to be capitalized
 		colName <- toupper(names(sampleInfo))
-		ID <- sampleInfo[, colName == 'ID']
-		if (length(ID) == 0) {
+		ind <- grep('ID$', colName, ignore.case=TRUE)
+		if (length(ind) == 0) {
 			ID <- sampleInfo[,1]
 			if (any(duplicated(ID))) {
 				warning('In sampleInfoFile, the ID column is required or the first column should be unique!\n')
 				setwd(oldDir)
 				return(x.lumi)
 			}
-		} 
+			ind <- 1
+		} else {
+			ID <- sampleInfo[, ind[1]]			
+		}
 		rownames(sampleInfo) <- ID
+		colnames(sampleInfo)[ind[1]] <- 'sampleID'
 
 		sampleName <- sampleNames(x.lumi)
 		ID <- ID[ID %in% sampleName]
@@ -80,7 +84,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 		if (is.null(pData(phenoData(x.lumi)))) {
 			pData <- sampleInfo[ID,]			
 		} else {
-			pData <- data.frame(pData(phenoData(x.lumi))[!(names(pData(phenoData(x.lumi))) %in% c(names(sampleInfo), 'ID', 'sampleID'))], sampleInfo[ID,])
+			pData <- data.frame(pData(phenoData(x.lumi))[!(toupper(names(pData(phenoData(x.lumi)))) %in% c(toupper(names(sampleInfo)), 'ID', 'SAMPLEID'))], sampleInfo[ID,])
 		}
 		label <- sampleInfo[ID, colName == 'LABEL']
 		if (length(label) == length(ID)) {

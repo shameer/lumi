@@ -435,12 +435,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		rownames(pData) <- label
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id', 
 			'The label of the sample'))
-		rownames(varMetadata) <- c('ID', 'label')
+		rownames(varMetadata) <- c('sampleID', 'label')
 	}  else {
 		pData <- data.frame(sampleID=sampleID)
 		rownames(pData) <- sampleID
 		varMetadata <- data.frame(labelDescription=c('The unique Illumina microarray Id'))
-		rownames(varMetadata) <- c('ID')
+		rownames(varMetadata) <- c('sampleID')
 	}
 	pdata <- new("AnnotatedDataFrame", data=pData, varMetadata=varMetadata)
 	cmd <- paste(cmd, ', phenoData=pdata')
