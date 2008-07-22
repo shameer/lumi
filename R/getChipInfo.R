@@ -74,7 +74,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 				if (fieldName.match == 'nuID') {
 					bestTable <- bestTable[, names(bestTable) != 'nuID']
 					rownames(bestTable) <- nuID
-					mapping <- bestTable[nuID[inputID], ]
+					mapping <- bestTable[inputID, ]
 				} else {
 					names(nuID) <- bestTable[,fieldName.match[1]]
 					mapping <- nuID[inputID]
@@ -96,7 +96,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 					table.i <- table.i[!dupInd.i,]
 					nuID.i <- table.i[,'nuID']
 					if (fieldName.match[which.max(matchLen.match)] == 'nuID') {
-						table.i <- table.i[, names(bestTable) != 'nuID']
+						table.i <- table.i[, names(table.i) != 'nuID']
 						rownames(table.i) <- nuID.i
 						mapping.i <- table.i[inputID, ]
 						mapping <- c(mapping, list(mapping.i))
@@ -116,11 +116,11 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			probeNumber <- probeNumber[ord]
 			matchProbeNumber <- matchLen.match[ord]
 			if (idMapping) {
-				rownames(mapping) <- inputID
 				if (is(mapping, 'list')) {
 					mapping <- mapping[ord]
 					names(mapping) <- tableName.match	
 				} else if (is(mapping, 'matrix')) {
+					rownames(mapping) <- inputID
 					mapping <- mapping[,ord]
 					colnames(mapping) <- tableName.match		
 				}

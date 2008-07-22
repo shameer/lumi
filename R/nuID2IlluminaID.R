@@ -9,12 +9,7 @@ function(nuID, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), 
 			return(nuID)
 		}
 		idMapping <- chipInfo$idMapping
-		if (is(idMapping, 'matrix') || is(idMapping, 'data.frame')) {
-			IlluminaID <- idMapping[nuID, ]
-		} else {
-			IlluminaID <- idMapping[nuID]
-		}
-		return(IlluminaID)
+		return(idMapping)
 	} else {
 		## directly get the table and return the mapping
 		if (is.null(lib.mapping)) {
