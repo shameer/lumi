@@ -125,7 +125,7 @@ The nuID mapping table includes following fields (columns):
 
 2.  Strength1: Strength of the best hit. This is measured as the longest contig between the probe and the hit sequence plus the number of bases of identity between the two sequences, divided by the total probe length, normalized to 100 for a perfect identical match.
 
-3.  Strength2: Strength of the second best gene hit. We are mapping to Entrez gene ids as multiple RefSeq accessions may have the same Entrez gene accession, reflecting differing splice sites, conflicting gene model evidence, or unresolved curation. As with Strength1, Strength2 is measured as the longest contig between the probe and the hit sequence plus the number of bases of identity between the two sequences, divided by the total probe length, normalized to 100 for a perfect identical match.
+3.  Strength2: Strength of the second best gene hit. We are mapping to Entrez gene ids as multiple RefSeq accessions may have the same Entrez gene accession, reflecting differing splice sites, conflicting gene model evidence, or unresolved curation. 
 
 4.  Uniqueness: (Strength1-Strength2)/Strength1*100.
 
