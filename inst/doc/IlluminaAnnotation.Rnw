@@ -18,7 +18,7 @@
 
 \SweaveOpts{keep.source=TRUE}
 
-\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng@northwestern.edu},  Jared Flatow$^\ddagger$\footnote{jflatow@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
+\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng@northwestern.edu},  Jared Flatow$^\ddagger$\footnote{jflatow@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
 \begin{document}
 
 \setkeys{Gin}{width=1\textwidth} 
