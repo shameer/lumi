@@ -40,8 +40,8 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			## Not include the Symbol column during matching the IDs.
 			fieldNames.i <- fieldNames.i[!(fieldNames.i %in% c('Symbol'))]
 			len.i <- NULL
-			for (j in seq(fieldNames.i)) {
-				field.ij <- as.character(table.i[,j])
+			for (fieldNames.ij in fieldNames.i) {
+				field.ij <- as.character(table.i[,fieldNames.ij])
 				len.ij <- length(which(inputID %in% field.ij))
 				len.i <- c(len.i, len.ij)
 			}
@@ -74,7 +74,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 				if (fieldName.match == 'nuID') {
 					bestTable <- bestTable[, names(bestTable) != 'nuID']
 					rownames(bestTable) <- nuID
-					mapping <- bestTable[inputID, ]
+					mapping <- bestTable[nuID[inputID], ]
 				} else {
 					names(nuID) <- bestTable[,fieldName.match[1]]
 					mapping <- nuID[inputID]
