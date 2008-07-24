@@ -1,33 +1,34 @@
 \name{targetID2nuID}
 \alias{targetID2nuID}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Mapping Illumina TargetID into nuID}
+\title{Mapping Illumina TargetID (GeneID) into nuID}
 \description{
-Mapping Illumina TargetID into nuID.
-This function is obsoleted! Please use \code{\link{IlluminaID2nuID}} instead.
+Mapping Illumina TargetID (GeneID) into nuID.
 }
 \usage{
-targetID2nuID(targetID, lib = "lumiHumanV1")
+targetID2nuID(targetID, lib.mapping = "lumiHumanIDMapping.db", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{targetID}{ a vector of Illumina TargetID }
-  \item{lib}{ a nuID indexed Illumina annotation library }
+  \item{targetID}{ a vector of Illumina TargetID (GeneID) }
+  \item{lib.mapping}{ an Illumina ID mapping library }
+  \item{\dots}{ other parameters of \code{\link{IlluminaID2nuID}} }
 }
 \details{
+The function will call \code{\link{IlluminaID2nuID}} when ID mapping library were provided.
 }
 \value{
-return a list with the same length as the input TargetID vector.
+see function \code{\link{IlluminaID2nuID}}
 }
 
 \references{
 Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 }
 \author{Pan Du}
-\seealso{See also \code{\link{nuID2targetID}} }
+\seealso{ \code{\link{nuID2targetID}}, \code{\link{IlluminaID2nuID}} }
 \examples{
-if (require(lumiHumanV1)) {
-    targetID2nuID('GI_21389350-S', lib='lumiHumanV1')
+if (require(lumiHumanIDMapping.db)) {
+    targetID2nuID('GI_21389350-S', lib='lumiHumanIDMapping.db')
 }
 }
 % R documentation directory.

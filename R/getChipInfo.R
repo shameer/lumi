@@ -1,5 +1,45 @@
 `getChipInfo` <-
 function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idMapping=FALSE, returnAllMatches=FALSE, verbose=TRUE) {
+	
+	## Function to make sure the output mapping matches the inputID.bak
+	matchInputID <- function(mapping, inputID.bak) {
+		## We assume mapping IDs are a subset of the names of inputID.bak
+		nc <- ncol(mapping)
+		if (is.null(nc)) {
+			len <- length(mapping)
+			if (len == length(inputID.bak)) return(mapping)
+			mapping.new <- rep(NA, len)
+			names(mapping.new) <- inputID.bak
+			mappingID <- names(mapping)
+			mapping.new[mappingID] <- mapping
+			type <- 'vector'
+		} else {
+			nr <- nrow(mapping)
+			if (nr == length(inputID.bak)) return(mapping)
+			mapping.new <- matrix(NA, nrow=length(inputID.bak), ncol=nc)
+			rownames(mapping.new) <- inputID.bak
+			colnames(mapping.new) <- colnames(mapping)
+			mappingID <- rownames(mapping)
+			mapping.new[mappingID,] <- mapping[mappingID,]
+			type <- 'matrix'
+		}
+		selID <- inputID.bak[inputID.bak %in% mappingID]
+		dupInd <- which(duplicated(selID))
+		if (length(dupInd) > 0) {
+			dupID <- unique(selID[dupInd])
+			for (dupId.i in dupID) {
+				ind.i <- which(inputID.bak == dupId.i)
+				if (type == 'matrix') {
+					mapping.new[ind.i, ] <- mapping[dupId.i, ]
+				} else {
+					mapping.new[ind.i] <- mapping[dupId.i]					
+				}
+			}
+		}
+		return(mapping.new)
+	}
+
+	
 	if (is(x, 'ExpressionSet')) {
 		inputID <- featureNames(x)
 	} else if (is(x, 'matrix') || is(x, 'data.frame')) {
@@ -7,6 +47,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 	} else {
 		inputID <- x
 	}
+	inputID.bak <- inputID
 	inputID <- unique(inputID)
 	species <- match.arg(species)
 	if (species == 'Unknown' && is.null(lib.mapping)) {
@@ -71,14 +112,17 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 				dupInd <- duplicated(bestTable[,fieldName.match[1]])
 				bestTable <- bestTable[!dupInd,]
 				nuID <- bestTable[,'nuID']
+				selInputID <- inputID[inputID %in% bestTable[,fieldName.match[1]]]
 				if (fieldName.match == 'nuID') {
 					bestTable <- bestTable[, names(bestTable) != 'nuID']
 					rownames(bestTable) <- nuID
-					mapping <- bestTable[inputID, ]
+					mapping <- as.matrix(bestTable[selInputID, ])
 				} else {
 					names(nuID) <- bestTable[,fieldName.match[1]]
-					mapping <- nuID[inputID]
+					mapping <- nuID[selInputID]
 				}
+				## match the original input IDs
+				mapping <- matchInputID(mapping, inputID.bak)
 			}
 		} else {
 			# if (matchField[which.max(matchLen)] != 'nuID') IDType <- 'nuID'
@@ -95,14 +139,17 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 					dupInd.i <- duplicated(table.i[,fieldName.match[i]])
 					table.i <- table.i[!dupInd.i,]
 					nuID.i <- table.i[,'nuID']
+					selInputID.i <- inputID[inputID %in% table.i[,fieldName.match[i]]]
 					if (fieldName.match[which.max(matchLen.match)] == 'nuID') {
 						table.i <- table.i[, names(table.i) != 'nuID']
 						rownames(table.i) <- nuID.i
-						mapping.i <- table.i[inputID, ]
+						mapping.i <- as.matrix(table.i[selInputID.i, ])
+						mapping.i <- matchInputID(mapping.i, inputID.bak)
 						mapping <- c(mapping, list(mapping.i))
 					} else {
 						names(nuID.i) <- table.i[,fieldName.match[i]]
-						mapping.i <- nuID[inputID]
+						mapping.i <- nuID[selInputID.i]
+						mapping.i <- matchInputID(mapping.i, inputID.bak)
 						mapping <- cbind(mapping, mapping.i)
 					}
 				}

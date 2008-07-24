@@ -23,7 +23,7 @@ When the parameter "chipVersion" is not provided, this function basically return
 The mapping information from Illumina ID to nuID. It will be a matrix with each column corresponding to one matched manifest file when parameter "returnAllMatches" is TRUE. In this case, the columns are sorted from the best match to worst.
 }
 \author{Pan Du}
-\seealso{ See Also \code{\link{getChipInfo}}, \code{\link{nuID2IlluminaID}} }
+\seealso{ \code{\link{getChipInfo}}, \code{\link{nuID2IlluminaID}} }
 \examples{
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

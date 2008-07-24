@@ -104,20 +104,20 @@ We strongly suggest outputting the header information when using BeadStudio, as 
 
 The recent version of BeadStudio can also output the annotation information together with the expression data. In the users also want to input the annotation information, they can set the parameter "inputAnnotation" as TRUE. At the same time, they can also specify which columns to be inputted by setting parameter "annotationColumn". The BeadStudio annotation columns include: SPECIES, TRANSCRIPT, ILMN\_GENE, UNIGENE\_ID, GI, ACCESSION, SYMBOL, PROBE\_ID, ARRAY\_ADDRESS\_ID, PROBE\_TYPE, PROBE\_START, PROBE\_SEQUENCE, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION, ONTOLOGY\_COMPONENT, ONTOLOGY\_PROCESS, ONTOLOGY\_FUNCTION, SYNONYMS, OBSOLETE\_PROBE\_ID. As the annotation data is huge, by default, we only input: ACCESSION, SYMBOL, PROBE\_START, CHROMOSOME, PROBE\_CHR\_ORIENTATION, PROBE\_COORDINATES, DEFINITION. As some annotation information may be outdated. We recommend using Bioconductor annotation packages to retrieve the annotation information.
 
-For convenience, another function \Rfunction{lumiR.batch} is designed to input files in batch. Basically it combines the output of each file. See the help of \Rfunction{lumiR.batch} for details.
- 
 \begin{figure}
 \includegraphics{dataFileSample}
 \caption{An example of the input data format}
 \label{fig:dataFileSample}
 \end{figure}
 
+For convenience, another function \Rfunction{lumiR.batch} is designed to input files in batch. Basically it combines the output of each file. See the help of \Rfunction{lumiR.batch} for details.  \Rfunction{lumiR.batch} function also allows users to add sample information in the phenoData slot of the LumiBatch object. This will be useful in the data analysis. The sampleInfoFile parameter is optional. The file is a Tab-separated text file. The first ID column is required. It represents sample ID, which is defined based on the column names of BeadStudio output file. For example, sample ID of column "1881436070\_A\_STA.AVG\_Signal" is "1881436070\_A\_STA". The sample ID column can also be found in the "Samples Table.txt" file output by BeadStudio. Another "Label" column (if provided) will be used as the sampleNames of LumiBatch object. All information of sampleInfoFile will be directly added in the phenoData slot in LumiBatch object, which can be retrieved by the command like: pData(phenoData(x.lumi)).
+ 
 
 \begin{Sinput}
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  	# Not Run
 > ## load the data
-> # x.lumi <- lumiR(fileName)		# Not Run
+> # x.lumi <- lumiR.batch(fileName, sampleInfoFile='sampleInfo.txt')		# Not Run
 \end{Sinput}
 
 Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor. The example data includes four samples "A01", "A02", "B01" and "B02". "A" and "B" represent different Illumina slides (8 microarrays on each slide), and "01" and "02" represent different samples.  That means "A01" and "B01" are technique replicates at different slides, the same for "A02" and "B02". 
@@ -505,7 +505,7 @@ In the \Rfunction{rsn} and \Rfunction{ssn} functions, there is a parameter calle
 Here is the example code:
 \begin{Sinput}
 ## Read in the Batch ith data file, suppose named as "fileName.i.txt"
-> x.lumi.i <- lumiR("fileName.i.txt")
+> x.lumi.i <- lumiR("fileName.i.txt") 
 ## variance stabilization (using vst or log2 transform)
 > x.lumiT.i <- lumiT(x.lumi.i)
 ## select the "targetArray" 
@@ -556,8 +556,8 @@ We use the Barnes data set [4] as an example, which has be created as a Biocondu
 > library(lumi)
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  #  Not run
-> ## load the data
-> # example.lumi <- lumiR(fileName, lib.mapping='lumiHumanIDMapping.db')	 # Not run
+> ## load the data if you want to provide the sample Information and map Illumina IDs to nuIDs.
+> # example.lumi <- lumiR.batch(fileName, lib.mapping='lumiHumanIDMapping.db', sampleInfoFile='sampleInfo.txt')		# Not Run
  
 > ## load saved data
 > data(example.lumi) 
@@ -588,7 +588,7 @@ To speed up the processing and reduce false positives, remove the unexpressed ge
 <<>>=
 presentCount <- detectionCall(example.lumi)
 selDataMatrix <- dataMatrix[presentCount > 0,]
-selProbe <- rownames(selDataMatrix)
+probeList <- rownames(selDataMatrix)
 @
 
 
@@ -603,18 +603,18 @@ if (require(limma)) {
 	fit <- eBayes(fit)
 	## Add gene symbols to gene properties
 	if (require(lumiHumanAll.db) & require(annotate)) {
-	    if (nrow(fit$genes) == 0) fit$genes <- data.frame(ID=rownames(selDataMatrix), stringsAsFactors=FALSE)
-              geneSymbol <- getSYMBOL(fit$genes$ID, 'lumiHumanAll.db')
-              fit$genes <- data.frame(fit$genes, geneSymbol=geneSymbol)
+               geneSymbol <- getSYMBOL(probeList, 'lumiHumanAll.db')
+               geneName <- sapply(lookUp(probeList, 'lumiHumanAll.db', 'GENENAME'), function(x) x[1])
+               fit$genes <- data.frame(ID= probeList, geneSymbol=geneSymbol, geneName=geneName, stringsAsFactors=FALSE)
           }
 	## print the top 10 genes
 	print(topTable(fit, coef='95:5-100:0', adjust='fdr', number=10))
 	
 	## get significant gene list with FDR adjusted p.values less than 0.01
 	p.adj <- p.adjust(fit$p.value[,2])		
-	sigGene.adj <- selProbe[ p.adj < 0.01]
+	sigGene.adj <- probeList[ p.adj < 0.01]
 	## without FDR adjustment
-	sigGene <- selProbe[ fit$p.value[,2] < 0.01]
+	sigGene <- probeList[ fit$p.value[,2] < 0.01]
 } 
 @
 
@@ -646,8 +646,11 @@ if (require(GOstats) & require(lumiHumanAll.db)) {
 	## Get the p-values of the test
 	gGhyp.pv <- pvalues(hgOver)
 	
-	## select the Go terms with p-value less than 0.001
-	sigGO.ID <- names(gGhyp.pv[gGhyp.pv < 0.001])
+	## Adjust p-values for multiple test (FDR)
+	gGhyp.fdr <- p.adjust(gGhyp.pv, 'fdr')
+
+	## select the Go terms with adjusted p-value less than 0.01
+	sigGO.ID <- names(gGhyp.fdr[gGhyp.fdr < 0.01])
 	
 	## Here only show the significant GO terms of BP (Molecular Function)
 	## 	For other categories, just follow the same procedure.

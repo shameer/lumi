@@ -32,7 +32,7 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
 }
 \references{  }
 \author{Pan Du}
-\seealso{ See Also \code{\link{help}} }
+\seealso{ \code{\link{nuID2IlluminaID}}, \code{\link{IlluminaID2nuID}} }
 \examples{
 	## load example data
 	data(example.lumi)

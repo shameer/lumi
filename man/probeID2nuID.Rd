@@ -3,30 +3,31 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Mapping Illumina ProbeID as nuID }
 \description{
-Mapping Illumina ProbeID as nuID.
-This function is obsoleted! Please use \code{\link{IlluminaID2nuID}} instead.
+Mapping Illumina ProbeID as nuID. 
 }
 \usage{
-probeID2nuID(probeID, lib = "lumiHumanV1")
+probeID2nuID(probeID, lib.mapping = "lumiHumanIDMapping.db", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{probeID}{ a vector of Illumina ProbeID }
-  \item{lib}{ a nuID indexed Illumina annotation library }
+  \item{lib.mapping}{ an Illumina ID mapping library }
+  \item{\dots}{ other parameters of \code{\link{IlluminaID2nuID}} }
 }
 \details{
+The function will call \code{\link{IlluminaID2nuID}} when ID mapping library were provided.
 }
 \value{
-return a list with the same length as the input TargetID vector.
+see function \code{\link{IlluminaID2nuID}}
 }
 \references{
 Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 }
 \author{ Pan Du }
-\seealso{ See Also  \code{\link{nuID2probeID}} }
+\seealso{ \code{\link{nuID2probeID}}, \code{\link{IlluminaID2nuID}} }
 \examples{
-if (require(lumiHumanV1)) {
-    probeID2nuID('0001240020', lib='lumiHumanV1')
+if (require(lumiHumanIDMapping.db)) {
+    probeID2nuID('0001240020', lib='lumiHumanIDMapping.db')
 }
 
 }
