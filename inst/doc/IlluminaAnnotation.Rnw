@@ -87,6 +87,16 @@ is.nuID('adfqeqe')
 
 \section{Illumina ID mapping packages}
 
+Figure \ref{idMapping} shows the overview of  Illumina ID mapping and annotation packages.  We will explain each step and provide examples in next sub-sections.  
+ 
+ 
+\begin{figure}
+\includegraphics{idMapping}
+\caption{Overview of Illumina ID mapping and annotation packages}
+\label{idMapping}
+\end{figure}
+
+
 \subsection{Mapping between Illumina IDs and nuIDs}
 Because of the unique advantages of nuIDs, converting Illumina IDs as nuIDs will make both probe annotation and maintenance easier. In the old versions of Illumina annotation packages, like \Rpackage{lumiHumanV1},  \Rpackage{lumiHumanV2}, \Rpackage{lumiMouseV1} and \Rpackage{lumiRatV1}, we included separate tables for TargetIDs and ProbeIDs mapping to nuIDs. This becomes difficult when we pool different version of nuIDs together because Illumina IDs may not be consistent across different versions and releases. To partially solve this problem, the lumiR function can automatically produce nuID based on the probe sequence included in the BeadStudio output file. If users have the Illumina manifest file of the chip, they can also use it for nuID conversion. The manifest file (.bgx) basically is  a zipped file by gzip. The first step is to unzip the manifest file. The unzipped manifest file is a Tab-separated file, you can open it in Excel. Suppose \verb+'MouseWG-6_V1_1_R2_11234304_A'+ is the manifest file and x.lumi is a LumiBatch object indexed by Illumina Probe IDs, the user can use the following code for nuID conversion:
 
