@@ -1,12 +1,12 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{lumi}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, annotate, Biobase, lumiHumanAll.db, lumiHumanIDMapping.db}
+%\VignetteDepends{lumi, annotate, Biobase, lumiHumanAll.db}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}
 
-\usepackage{amsmath}
+\usepackage{amsmath,pstricks}
 \usepackage{hyperref}
 \usepackage[authoryear,round]{natbib}
 
@@ -44,7 +44,6 @@ One problem of Illumina identifiers (both Illumina gene identifiers and Illumina
 
 <<Loading required libraries, eval=T>>=
 library(lumi)
-library(lumiHumanIDMapping.db)
 library(lumiHumanAll.db)
 @
 
@@ -111,7 +110,8 @@ The purpose of these packages is to provide ID mappings between different types 
 
 Get information of the ID mapping library:
 <<>>=
-  lumiHumanIDMapping()
+  if (require(lumiHumanIDMapping.db))
+ 	 lumiHumanIDMapping()
 @
 
 Get chip information of the example data in the \Rpackage{lumi} package.
@@ -119,7 +119,8 @@ Get chip information of the example data in the \Rpackage{lumi} package.
   ## Load Illumina example data in lumi package
   data(example.lumi)
   ## Match the chip information of this example data
-  getChipInfo(example.lumi, species='Human')
+  if (require(lumiHumanIDMapping.db))
+	getChipInfo(example.lumi, species='Human')
 @
 
 \subsection{Mapping from nuIDs to RefSeq database}
@@ -151,25 +152,30 @@ The nuID\_MappingInfo table also includes mapping from nuID to EntrezID, which w
 
 Get nuID mapping information in the ID mapping package:
 <<>>=
-      lumiHumanIDMapping_nuID()
+  if (require(lumiHumanIDMapping.db))
+	lumiHumanIDMapping_nuID()
 @
 
 Map nuID to RefSeq ID:
 <<>>=
      nuIDs <- featureNames(example.lumi)
       ## return all mapping information
-      nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
+    if (require(lumiHumanIDMapping.db))
+          nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
 @
 
 Map nuID to Entrez Gene ID:
 <<>>=
-      nuID2EntrezID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
+   if (require(lumiHumanIDMapping.db))
+        nuID2EntrezID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
 @
 
 Return all mapping information related with nuID
 <<>>=
-      mappingInfo <- nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', returnAllInfo =TRUE)
-      head(mappingInfo)
+   if (require(lumiHumanIDMapping.db)) {
+        mappingInfo <- nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', returnAllInfo =TRUE)
+        head(mappingInfo)
+   }
 @
 
 
