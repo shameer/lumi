@@ -45,7 +45,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 	} else if (is(x, 'matrix') || is(x, 'data.frame')) {
 		inputID <- rownames(x)		
 	} else {
-		inputID <- x
+		inputID <- as.character(x)
 	}
 	inputID.bak <- inputID
 	inputID <- unique(inputID)
@@ -74,6 +74,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 		matchLen <- NULL
 		matchField <- NULL
 		tableLen <- NULL
+		cut0.probeId <- FALSE  # determine whether to cut the 0s in front of the ProbeId. E.g. 0004760445 --> 4760445
 		for (i in seq(allTableNames)) {
 			tableName.i <- allTableNames[i]
 			table.i <- dbReadTable(conn, tableName.i)
@@ -84,6 +85,13 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			for (fieldNames.ij in fieldNames.i) {
 				field.ij <- as.character(table.i[,fieldNames.ij])
 				len.ij <- length(which(inputID %in% field.ij))
+				if (fieldNames.ij == 'ProbeId') {
+					len.ij.2 <- length(which(inputID %in% as.character(as.integer(field.ij))))
+					if (len.ij.2 > len.ij) {
+						cut0.probeId <- TRUE
+						len.ij <- len.ij.2
+					}
+				}
 				len.i <- c(len.i, len.ij)
 			}
 			max.ind.i <- which.max(len.i)
@@ -114,13 +122,18 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 				dupInd <- duplicated(bestTable[,fieldName.match[1]])
 				bestTable <- bestTable[!dupInd,]
 				nuID <- bestTable[,'nuID']
-				selInputID <- inputID[inputID %in% bestTable[,fieldName.match[1]]]
-				if (fieldName.match == 'nuID') {
+				if (fieldName.match[1] == 'ProbeId' && cut0.probeId) {
+					allID <- as.character(as.integer(bestTable[,fieldName.match[1]]))
+				} else {
+					allID <- bestTable[,fieldName.match[1]]					
+				}
+				selInputID <- inputID[inputID %in% allID]
+				if (fieldName.match[1] == 'nuID') {
 					bestTable <- bestTable[, names(bestTable) != 'nuID']
 					rownames(bestTable) <- nuID
 					mapping <- as.matrix(bestTable[selInputID, ])
 				} else {
-					names(nuID) <- bestTable[,fieldName.match[1]]
+					names(nuID) <- allID
 					mapping <- nuID[selInputID]
 				}
 				## match the original input IDs
@@ -141,7 +154,12 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 					dupInd.i <- duplicated(table.i[,fieldName.match[i]])
 					table.i <- table.i[!dupInd.i,]
 					nuID.i <- table.i[,'nuID']
-					selInputID.i <- inputID[inputID %in% table.i[,fieldName.match[i]]]
+					if (fieldName.match[1] == 'ProbeId' && cut0.probeId) {
+						allID.i <- as.character(as.integer(table.i[,fieldName.match[i]]))
+					} else {
+						allID.i <- table.i[,fieldName.match[i]]				
+					}
+					selInputID.i <- inputID[inputID %in% allID.i]
 					if (fieldName.match[which.max(matchLen.match)] == 'nuID') {
 						table.i <- table.i[, names(table.i) != 'nuID']
 						rownames(table.i) <- nuID.i
@@ -149,7 +167,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 						mapping.i <- matchInputID(mapping.i, inputID.bak)
 						mapping <- c(mapping, list(mapping.i))
 					} else {
-						names(nuID.i) <- table.i[,fieldName.match[i]]
+						names(nuID.i) <- allID.i
 						mapping.i <- nuID[selInputID.i]
 						mapping.i <- matchInputID(mapping.i, inputID.bak)
 						mapping <- cbind(mapping, mapping.i)
