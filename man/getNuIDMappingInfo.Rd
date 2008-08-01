@@ -6,11 +6,11 @@
   Get the mapping information (including mapping quality information) of nuIDs to the most recent RefSeq release. These information was kept in the IDMapping libraries.
 }
 \usage{
-getNuIDMappingInfo(nuID, lib.mapping)
+getNuIDMappingInfo(nuID = NULL, lib.mapping)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{nuID}{ a vector of nuIDs }
+  \item{nuID}{ a vector of nuIDs. If it is NULL, all mappings will be returned. }
   \item{lib.mapping}{ the ID mapping library }
 }
 \details{

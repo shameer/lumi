@@ -18,7 +18,7 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
   \item{verbose}{ determine whether print some warning information }
 }
 \details{
-  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchProbeNumber" is claimed as better. When the "matchProbeNumber" is the same, the manifest file will fewer probes is claimed as better.
+  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file will fewer probes is claimed as better.
 }
 \value{
   The function returns a list with following items:
@@ -26,9 +26,9 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
   \item{species}{the species of the chip designed for}
   \item{IDType}{the type of probe identifier}
   \item{chipProbeNumber}{the number of probes in the manifest file}
-  \item{matchProbeNumber}{the number of input probes matching the manifest file}
+  \item{matchedProbeNumber}{the number of input probes matching the manifest file}
   \item{idMapping}{id mapping information between Illumina ID and nuID}
-  When parameter "returnAllMatches" is TRUE, the items of "chipVersion", "IDType", "chipProbeNumber", "matchProbeNumber" will be a vector corresponding to the matched manifest files, whose "matchProbeNumber" is larger than zero, and the "idMapping" will be a matrix with each column corresponding to one matched manifest file. All of the items are sorted from the best match to worst (The higher "matchProbeNumber" is claimed as better. When the "matchProbeNumber" is the same, the manifest file with fewer probes is claimed as better.). 
+  When parameter "returnAllMatches" is TRUE, the items of "chipVersion", "IDType", "chipProbeNumber", "inputProbeNumber", "matchedProbeNumber" will be a vector corresponding to the matched manifest files, whose "matchedProbeNumber" is larger than zero, and the "idMapping" will be a matrix with each column corresponding to one matched manifest file. All of the items are sorted from the best match to worst (The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file with fewer probes is claimed as better.). 
 }
 \references{  }
 \author{Pan Du}

@@ -1,7 +1,7 @@
 `nuID2EntrezID` <-
-function(nuID, lib.mapping, filterTh=c(Strength1=95, Uniqueness=95), returnAllInfo=FALSE) {
+function(nuID=NULL, lib.mapping, filterTh=c(Strength1=95, Uniqueness=95), returnAllInfo=FALSE) {
 
-	if (missing(nuID) || missing(lib.mapping)) stop('Please provide all input parameters: nuID and lib.mapping!')
+	if (missing(lib.mapping)) stop('Please specify lib.mapping library!')
 	# 
 	mappingInfo <- getNuIDMappingInfo(nuID, lib.mapping=lib.mapping)
 	if (!is.null(filterTh)) {

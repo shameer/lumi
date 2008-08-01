@@ -6,11 +6,11 @@
   Map nuID to RefSeq ID based on IDMapping libraries.
 }
 \usage{
-nuID2RefSeqID(nuID, lib.mapping, filterTh = c(Strength1 = 95, Uniqueness = 95), returnAllInfo = FALSE)
+nuID2RefSeqID(nuID = NULL, lib.mapping, filterTh = c(Strength1 = 95, Uniqueness = 95), returnAllInfo = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{nuID}{ a vector of nuIDs }
+  \item{nuID}{ a vector of nuIDs. If it is NULL, all mappings will be returned. }
   \item{lib.mapping}{ the ID mapping library }
   \item{filterTh}{ the mapping quality filtering threshold used to filter the ID mapping. }
   \item{returnAllInfo}{ determine to return the detailed mapping information or just the matched RefSeq IDs }

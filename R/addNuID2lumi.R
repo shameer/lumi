@@ -148,7 +148,9 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 					}
 				}
 			}
-			chipInfo.print <- paste(names(chipInfo[1:5]), unlist(chipInfo[1:5]), sep=': ')
+			selInfoName <- names(chipInfo)
+			selInfoName <- selInfoName[selInfoName != 'idMapping']
+			chipInfo.print <- paste(selInfoName, unlist(chipInfo[selInfoName]), sep=': ')
 			notes(x.lumi) <- c(notes(x.lumi), list('Chip Information'=chipInfo.print))
 
 			annotation(x.lumi) <- switch(chipInfo$species,

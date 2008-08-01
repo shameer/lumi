@@ -3,7 +3,11 @@ function(IlluminaID, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unkno
 	species <- match.arg(species)
 	if ((is.null(chipVersion) || species == 'Unknown')) {
 		chipInfo <- getChipInfo(IlluminaID, lib.mapping=lib.mapping, species=species, idMapping=TRUE, ...)
-		if (chipInfo$IDType[1] == 'nuID') {
+		if (is.null(chipInfo$IDType)) {
+			nuID <- rep(NA, length(IlluminaID))
+			names(nuID) <- IlluminaID
+			return(nuID)
+		} else if (chipInfo$IDType[1] == 'nuID') {
 			cat('The input ID is nuID. So no ID converstion will be made!\n')
 			return(IlluminaID)
 		}

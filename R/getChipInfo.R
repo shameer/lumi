@@ -54,7 +54,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 		human.match <- getChipInfo(inputID, species='Human', idMapping=idMapping, returnAllMatches=returnAllMatches, verbose=FALSE)
 		mouse.match <- getChipInfo(inputID, species='Mouse', idMapping=idMapping, returnAllMatches=returnAllMatches, verbose=FALSE)
 		rat.match <- getChipInfo(inputID, species='Rat', idMapping=idMapping, returnAllMatches=returnAllMatches, verbose=FALSE)
-		bestChip <- which.max(c(length(human.match$matchProbeNumber), length(mouse.match$matchProbeNumber), length(rat.match$matchProbeNumber)))
+		bestChip <- which.max(c(length(human.match$matchedProbeNumber), length(mouse.match$matchedProbeNumber), length(rat.match$matchedProbeNumber)))
 		best.match <- switch(bestChip, human.match, mouse.match, rat.match)
 		return(best.match)
 	} else {
@@ -92,10 +92,12 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			tableLen <- c(tableLen, nrow(table.i))
 		}
 		bestMatchLen <- max(matchLen)
-		if (bestMatchLen < lenID && verbose) warning('Some input IDs can not be matched!\n')
 		if (bestMatchLen == 0) {
+			if (verbose) warning('No matches were found!\n')
 			return(list(chipVersion=NULL, species=species, IDType=NULL, chipProbeNumber=NULL, 
-				matchProbeNumber=bestMatchLen))
+				matchedProbeNumber=bestMatchLen), idMapping=NULL)
+		} else if (bestMatchLen < lenID && verbose) {
+			warning('Some input IDs can not be matched!\n')
 		}
 		if (!returnAllMatches) {
 			bestInd <- which(matchLen == bestMatchLen)
@@ -161,7 +163,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			tableName.match <- tableName.match[ord]
 			fieldName.match <- fieldName.match[ord]
 			probeNumber <- probeNumber[ord]
-			matchProbeNumber <- matchLen.match[ord]
+			matchLen.match <- matchLen.match[ord]
 			if (idMapping) {
 				if (is(mapping, 'list')) {
 					mapping <- mapping[ord]
@@ -174,7 +176,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), idM
 			}
 		}
 		returnList <- list(chipVersion=tableName.match, species=species, IDType=fieldName.match, chipProbeNumber=probeNumber, 
-			matchProbeNumber=matchLen.match)
+			inputProbeNumber=length(inputID), matchedProbeNumber=matchLen.match)
 		if (idMapping)  returnList <- c(returnList, list(idMapping=mapping))		
 
 		return(returnList)
