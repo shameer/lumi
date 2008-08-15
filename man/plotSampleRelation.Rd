@@ -6,7 +6,7 @@
   plot the sample relations based on MDS or hierarchical clustering
 }
 \usage{
-plotSampleRelation(x, selProbe = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL)
+plotSampleRelation(x, selProbe = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,7 @@ plotSampleRelation(x, selProbe = NULL, cv.Th = 0.1, standardize = TRUE, method =
   \item{method}{ "MDS" or "hierarchical clustering" }
   \item{dimension}{ the principle components to visualize the MDS plot }
   \item{color}{ the color for each sample during plot. Only support the "mds" method }
+  \item{\dots}{ Other parameters used by plot function. }
 }
 \details{
   Estimate the sample relations based on selected probes (based on large coefficient of variance (mean / standard variance)). Two methods can be used: MDS (Multi-Dimensional Scaling) or hierarchical clustering methods.

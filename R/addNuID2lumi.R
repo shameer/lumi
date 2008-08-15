@@ -184,15 +184,17 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		if (verbose) cat('Duplicated IDs found and were merged!\n')
 		dupId <- unique(newId[duplicated(newId)])
 		## determine whether the detection p-value close to 0 or 1 is significant
-		detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]
-		detect.high <- exprs[which.min(detection(x.lumi)[,1]), 1]
+		if (!is.null(detection(x.lumi))) {
+			detect.low <- exprs[which.max(detection(x.lumi)[,1]), 1]
+			detect.high <- exprs[which.min(detection(x.lumi)[,1]), 1]
+		}
 		
 		rmIndex <- NULL
 		for (dupId.i in dupId) {
 			dupIndex <- which(newId == dupId.i)
 			ave.exp <- colMeans(exprs(x.lumi)[dupIndex, ])
 			exprs(x.lumi)[dupIndex[1],] <- ave.exp
-			if (is(x.lumi, 'LumiBatch')) {
+			if (is(x.lumi, 'LumiBatch') && !is.null(beadNum(x.lumi)) && !is.null(detection(x.lumi))) {
 				totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
 				if (detect.low < detect.high) {
 					maxDetection <- apply(detection(x.lumi), 2, min)

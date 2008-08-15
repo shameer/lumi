@@ -1,5 +1,5 @@
 `plotSampleRelation` <-
-function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL) {
+function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL, ...) {
 	if (is(x, 'ExpressionSet')) {
 		dataMatrix <- exprs(x)
 	} else if (is.matrix(x)) {
@@ -30,7 +30,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 	method <- match.arg(method)
 	if (method == 'cluster') {
 		hc = hclust(dd, 'ave')
-		plot(hc, xlab='Sample', main=main)
+		plot(hc, xlab='Sample', main=main, ...)
 	} else {
 		## Multi-Dimension Scaling
 		a1 <- cmdscale(dd, k=max(dimension))
@@ -44,7 +44,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 				} 
 			}
 		}
-		plot(a1[,dimension[1]],a1[,dimension[2]], type='n', xlab=paste('Dimension', dimension[1]),ylab=paste('Dimension', dimension[2]), main=main)
+		plot(a1[,dimension[1]],a1[,dimension[2]], type='n', xlab=paste('Dimension', dimension[1]),ylab=paste('Dimension', dimension[2]), main=main, ...)
 		text(a1[,dimension[1]],a1[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
 	}
 	attr(dd, 'geneNum') <- length(selProbe)

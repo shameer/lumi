@@ -25,6 +25,8 @@ function(nuID=NULL, lib.mapping) {
 			if (length(selNuID) < length(nuID)) warning('Some input IDs can not be matched!\n')
 			mappingInfo[selNuID, ] <- as.matrix(nuIDMappingInfo[selNuID,])
 		}
+	} else {
+		mappingInfo <- nuIDMappingInfo
 	}
 	return(mappingInfo)
 }
