@@ -6,19 +6,20 @@
 	Retrieve the matched Illumina chip information by searching the provided probe identifiers through the Illumina identifiers in all manifest files.
 }
 \usage{
-getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown"), idMapping = FALSE, returnAllMatches = FALSE, verbose = TRUE)
+getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown"), chipVersion = NULL, idMapping = FALSE, returnAllMatches = FALSE, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ a vector of probe identifiers, ExpressionSet object or a matrix with probe identifiers as row names }
   \item{lib.mapping}{ the ID mapping library. If it is provided, the parameter "species" will be ignored. }
   \item{species}{ species of the chip designed for. If users do not know it, it can be set as "Unknown". }
+  \item{chipVersion}{ chipVersion information returned by function \code{\link{getChipInfo}} }
   \item{idMapping}{ determine whether return the idMapping information (between Illumina ID and nuID) }
   \item{returnAllMatches}{ determine whether return all matches or just the best match }
   \item{verbose}{ determine whether print some warning information }
 }
 \details{
-  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file will fewer probes is claimed as better.
+  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file with fewer probes is claimed as better. If x is NULL and chipVersion is provided, it will return the entire mapping table of the chip.
 }
 \value{
   The function returns a list with following items:

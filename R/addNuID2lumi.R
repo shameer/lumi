@@ -162,8 +162,8 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		annotation <- pData(featureData(x.lumi))
 		names(annotation) <- toupper(names(annotation))
 		if (!is.null(annotation)) {
-			sequence <- annotation[, 'PROBE_SEQUENCE']
-			if (!is.null(sequence)) {
+			if ('PROBE_SEQUENCE' %in% names(annotation)) {
+				sequence <- annotation[, 'PROBE_SEQUENCE']
 				cat('Directly converting probe sequence to nuIDs ...\n')
 				newId <- sapply(sequence, seq2id)
 				names(newId) <- id				

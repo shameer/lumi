@@ -20,7 +20,8 @@ nuID2IlluminaID(nuID, lib.mapping=NULL, species = c("Human", "Mouse", "Rat", "Un
 \details{
 The parameter "idType" represents different types of Illumina IDs. It returns the entire table when idType = "All". When idType = 'Probe', it returns "ProbeId" or "Probe\_Id". When idType = 'Gene', it returns "Target" or "ILMN\_Gene" IDs.
  
-When the parameter "chipVersion" is not provided, this function basically returned the "idMapping" item returned by function \code{\link{getChipInfo}}. 
+This function basically returned the "idMapping" item returned by function \code{\link{getChipInfo}}.
+If nuID is NULL and chipVersion is provided, it will return all mapping information of the chip. 
 }
 \value{
 The mapping information from nuID to Illumina ID. It will be a matrix with each column corresponding to one matched manifest file when parameter "returnAllMatches" is TRUE. In this case, the columns are sorted from the best match to worst.

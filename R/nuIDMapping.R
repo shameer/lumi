@@ -3,14 +3,14 @@ nuID2probeID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
 	if (length(nuID) == 0) return(NULL)
 
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0) {
+		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(nuID)
 		}
 	}
 	if (require(lib.mapping, character.only=TRUE)) {
 		if (length(grep('IDMapping.db', lib.mapping)) > 0) {
-			probe <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, type='Probe', ...)
+			probe <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, idType='Probe', ...)
 		} else {
 			env <- get(paste(lib.mapping, 'PROBEID2NUID', sep = ""), mode = "environment")
 			probe2nuID <- unlist(as.list(env))	
@@ -37,8 +37,8 @@ nuID2targetID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
 		}
 	}
 	if (require(lib.mapping, character.only=TRUE)) {
-		if (length(grep('IDMapping.db', lib.mapping)) > 0) {
-			target <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, type='Gene', ...)
+		if (length(grep('IDMapping.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
+			target <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, idType='Gene', ...)
 		} else {
 			env <- get(paste(lib.mapping, 'TARGETID2NUID', sep = ""), mode = "environment")
 			target2nuID <- unlist(as.list(env))	
@@ -59,7 +59,7 @@ probeID2nuID <- function(probeID, lib.mapping="lumiHumanIDMapping.db", ...) {
 
 	if (length(probeID) == 0) return(NULL)
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0) {
+		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(probeID)
 		}
@@ -81,7 +81,7 @@ targetID2nuID <- function(targetID, lib.mapping="lumiHumanIDMapping.db", ...) {
 
 	if (length(targetID) == 0) return(NULL)
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0) {
+		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(targetID)
 		}

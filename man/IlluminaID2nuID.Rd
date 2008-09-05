@@ -20,7 +20,8 @@ IlluminaID2nuID(IlluminaID, lib.mapping=NULL, species = c("Human", "Mouse", "Rat
 When the parameter "chipVersion" is not provided, this function basically returned the "idMapping" item returned by function \code{\link{getChipInfo}}. 
 }
 \value{
-The mapping information from Illumina ID to nuID. It will be a matrix with each column corresponding to one matched manifest file when parameter "returnAllMatches" is TRUE. In this case, the columns are sorted from the best match to worst.
+The mapping information from Illumina ID to nuID. It will be a matrix with each column corresponding to one matched manifest file when parameter "returnAllMatches" is TRUE. In this case, the columns are sorted from the best match to worst. If IlluminaID is NULL and chipVersion is provided, it will return all mapping information of the chip. 
+
 }
 \author{Pan Du}
 \seealso{ \code{\link{getChipInfo}}, \code{\link{nuID2IlluminaID}} }

@@ -281,8 +281,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	if (inputAnnotation) {
 		# It is based on annotationColumn
 		annotationColumn <- header[toupper(header) %in% toupper(annotationColumn)]
-		if (length(annotationColumn) == 0 && "SPECIES" %in% toupper(header)) {
-			cat('Some annotation columns not available in the data.\n')
+		if (length(annotationColumn) == 0) {
+			cat('Annotation columns are not available in the data.\n')
 		} else {
 			annotationInfo <- allData[,annotationColumn, drop=FALSE]
 		}
@@ -495,7 +495,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 
 	## Add nuID if the annotation library is provided
 	if (!convertNuID) lib.mapping <- NULL
-	if (!is.null(lib.mapping) || convertNuID)  x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping, verbose=verbose)
+	if (convertNuID)  x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping, verbose=verbose)
 
 	## resume the old settings
 	options(stringsAsFactors = oldSetting)
