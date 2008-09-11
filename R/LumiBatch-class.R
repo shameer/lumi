@@ -50,17 +50,53 @@ setMethod("se.exprs", signature(object="ExpressionSet"),
 setReplaceMethod("se.exprs", signature(object="ExpressionSet",value="matrix"),
                  function(object, value) assayDataElementReplace(object, "se.exprs", value))
 
-setMethod("beadNum", signature(object="ExpressionSet"),
-          function(object) assayDataElement(object,"beadNum"))
+setMethod("beadNum", signature(object="ExpressionSet"), function(object) {
+	if ('beadNum' %in% assayDataElementNames(example.lumi)) {
+		return(assayDataElement(object,"beadNum"))
+	} else {
+		return(NULL)
+	}
+})
 
-setReplaceMethod("beadNum", signature(object="ExpressionSet",value="matrix"),
-                 function(object, value) assayDataElementReplace(object, "beadNum", value))
+setReplaceMethod("beadNum", signature(object="ExpressionSet"), function(object, value) {
+		if (is.null(value)) {
+			assay <- assayData(object)
+			if (exists('beadNum', envir=assay)) {
+				oldMode <- storageMode(assay)
+				storageMode(assay) <- 'environment'
+				rm(beadNum, envir=assay)
+				storageMode(assay) <- oldMode
+				assayData(object) <- assay
+			}
+			return(object)
+		} else {
+			assayDataElementReplace(object, "beadNum", value)
+		}
+	})
 
-setMethod("detection", signature(object="ExpressionSet"),
-          function(object) assayDataElement(object,"detection"))
+setMethod("detection", signature(object="ExpressionSet"), function(object) {
+	if ('detection' %in% assayDataElementNames(example.lumi)) {
+		return(assayDataElement(object,"detection"))
+	} else {
+		return(NULL)
+	}
+})
 
-setReplaceMethod("detection", signature(object="ExpressionSet",value="matrix"),
-                 function(object, value) assayDataElementReplace(object, "detection", value))
+setReplaceMethod("detection", signature(object="ExpressionSet"), function(object, value) {
+		if (is.null(value)) {
+			assay <- assayData(object)
+			if (exists('detection', envir=assay)) {
+				oldMode <- storageMode(assay)
+				storageMode(assay) <- 'environment'
+				rm(detection, envir=assay)
+				storageMode(assay) <- oldMode
+				assayData(object) <- assay
+			}
+			return(object)
+		} else {
+			assayDataElementReplace(object, "detection", value)
+		}
+	})	
 
 setMethod("getHistory",signature(object="LumiBatch"), function(object) object@history)
 

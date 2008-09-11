@@ -10,12 +10,12 @@
 \alias{beadNum}
 \alias{beadNum<-}
 \alias{beadNum,ExpressionSet-method}
-\alias{beadNum<-,ExpressionSet,matrix-method}
+\alias{beadNum<-,ExpressionSet}
 
 \alias{detection}
 \alias{detection<-}
 \alias{detection,ExpressionSet-method}
-\alias{detection<-,ExpressionSet,matrix-method}
+\alias{detection<-,ExpressionSet}
 
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}
@@ -81,10 +81,10 @@
   \describe{
      \item{\code{se.exprs(LumiBatch)}, \code{se.exprs(LumiBatch,matrix)<-}:}{Access and
        set elements named \code{se.exprs} in the \code{AssayData-class} slot.}
-     \item{\code{beadNum(LumiBatch)}, \code{beadNum(LumiBatch,matrix)<-}:}{Access and
-       set elements named \code{beadNum} in the \code{AssayData-class} slot.}
-     \item{\code{detection(LumiBatch)}, \code{detection(LumiBatch,matrix)<-}:}{Access and
-       set elements named \code{detection} in the \code{AssayData-class} slot.}
+     \item{\code{beadNum(LumiBatch)}, \code{beadNum(LumiBatch)<-}:}{Access and
+       set elements named \code{beadNum} in the \code{AssayData-class} slot. Use "beadNum(LumiBatch) <- NULL" to remove the beadNum element.}
+     \item{\code{detection(LumiBatch)}, \code{detection(LumiBatch)<-}:}{Access and
+       set elements named \code{detection} in the \code{AssayData-class} slot. Use "detection(LumiBatch) <- NULL" to remove the detection element.}
      \item{\code{getHistory(LumiBatch)}:}{Access the operation history of \code{LumiBatch} object.}
   }
 
