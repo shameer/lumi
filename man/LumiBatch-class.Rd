@@ -4,18 +4,20 @@
 \alias{LumiBatch-class}
 \alias{LumiBatch}
 
+\alias{se.exprs}
+\alias{se.exprs<-}
 \alias{se.exprs,ExpressionSet-method}
-\alias{se.exprs<-,ExpressionSet,matrix-method}
+\alias{se.exprs<-,ExpressionSet-method}
 
 \alias{beadNum}
 \alias{beadNum<-}
 \alias{beadNum,ExpressionSet-method}
-\alias{beadNum<-,ExpressionSet}
+\alias{beadNum<-,ExpressionSet-method}
 
 \alias{detection}
 \alias{detection<-}
 \alias{detection,ExpressionSet-method}
-\alias{detection<-,ExpressionSet}
+\alias{detection<-,ExpressionSet-method}
 
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}

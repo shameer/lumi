@@ -75,7 +75,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	}
 
 	header <- strsplit(info[nMetaDataLines + 1], sep)[[1]]
-	probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
+	probeId.pos <- grep('Probe.?ID', header, ignore.case=TRUE)
 	if (length(probeId.pos) > 0) {
 		colClasses <- rep(NA, length(header))
 		colClasses[probeId.pos] <- 'character'
@@ -205,14 +205,14 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	targetID <- as.character(as.vector(allData[,1]))
 	id <- targetID
 	idName <- header[1]
-	if (length(grep('ProbeID', header[2], ignore.case=TRUE)) > 0) {
+	if (length(grep('Probe.?ID', header[2], ignore.case=TRUE)) > 0) {
 		id <- as.character(as.vector(allData[,2]))
 		idName <- header[2]
 	} else if (!is.null(lib.mapping)) {
-		probeId.pos <- grep('ProbeID', header, ignore.case=TRUE)
+		probeId.pos <- grep('Probe.?ID', header, ignore.case=TRUE)
 		if (length(probeId.pos) > 0) {
-			id <- as.character(as.vector(allData[,probeId.pos]))
-			idName <- header[probeId.pos]
+			id <- as.character(as.vector(allData[,probeId.pos[1]]))
+			idName <- header[probeId.pos[1]]
 		}
 	}
     

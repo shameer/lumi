@@ -44,14 +44,40 @@ if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGen
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
 if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
 
-setMethod("se.exprs", signature(object="ExpressionSet"),
-          function(object) assayDataElement(object,"se.exprs"))
+# setMethod("se.exprs", signature(object="ExpressionSet"),
+#        function(object) assayDataElement(object,"se.exprs"))
+# 
+# setReplaceMethod("se.exprs", signature(object="ExpressionSet",value="matrix"),
+#                  function(object, value) assayDataElementReplace(object, "se.exprs", value))
 
-setReplaceMethod("se.exprs", signature(object="ExpressionSet",value="matrix"),
-                 function(object, value) assayDataElementReplace(object, "se.exprs", value))
+
+setMethod("se.exprs", signature(object="ExpressionSet"), function(object) {
+	if ('se.exprs' %in% assayDataElementNames(object)) {
+		return(assayDataElement(object,"se.exprs"))
+	} else {
+		return(NULL)
+	}
+})
+
+setReplaceMethod("se.exprs", signature(object="ExpressionSet"), function(object, value) {
+		if (is.null(value)) {
+			assay <- assayData(object)
+			if (exists('se.exprs', envir=assay)) {
+				oldMode <- storageMode(assay)
+				storageMode(assay) <- 'environment'
+				rm(se.exprs, envir=assay)
+				storageMode(assay) <- oldMode
+				assayData(object) <- assay
+			}
+			return(object)
+		} else {
+			assayDataElementReplace(object, "se.exprs", value)
+		}
+	})
+
 
 setMethod("beadNum", signature(object="ExpressionSet"), function(object) {
-	if ('beadNum' %in% assayDataElementNames(example.lumi)) {
+	if ('beadNum' %in% assayDataElementNames(object)) {
 		return(assayDataElement(object,"beadNum"))
 	} else {
 		return(NULL)
@@ -75,7 +101,7 @@ setReplaceMethod("beadNum", signature(object="ExpressionSet"), function(object, 
 	})
 
 setMethod("detection", signature(object="ExpressionSet"), function(object) {
-	if ('detection' %in% assayDataElementNames(example.lumi)) {
+	if ('detection' %in% assayDataElementNames(object)) {
 		return(assayDataElement(object,"detection"))
 	} else {
 		return(NULL)

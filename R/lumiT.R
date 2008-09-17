@@ -89,19 +89,21 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 
 	if (simpleOutput) {
 		if (is(x.lumi, 'LumiBatch')) {
-			storage.mode <- storageMode(new.lumi)
-			if ("lockedEnvironment" == storage.mode) {
-				aData <- copyEnv(assayData(new.lumi))
-				# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
-				rm(list=c('se.exprs', 'beadNum'), envir=aData)
-				lockEnvironment(aData, bindings = TRUE)
-				assayData(new.lumi) <- aData
-			} else {
-				aData <- assayData(new.lumi)
-				# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
-				rm(list=c('se.exprs', 'beadNum'), envir=aData)
-				assayData(new.lumi) <- aData
-			}
+			se.exprs(x.lumi) <- NULL
+			beadNum(x.lumi) <- NULL
+			# storage.mode <- storageMode(new.lumi)
+			# if ("lockedEnvironment" == storage.mode) {
+			# 	aData <- copyEnv(assayData(new.lumi))
+			# 	# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+			# 	rm(list=c('se.exprs', 'beadNum'), envir=aData)
+			# 	lockEnvironment(aData, bindings = TRUE)
+			# 	assayData(new.lumi) <- aData
+			# } else {
+			# 	aData <- assayData(new.lumi)
+			# 	# rm(list=c('se.exprs', 'detection', 'beadNum'), envir=aData)
+			# 	rm(list=c('se.exprs', 'beadNum'), envir=aData)
+			# 	assayData(new.lumi) <- aData
+			# }
 		}
 		if (is(x.lumi, 'AffyBatch')) {
 			se.exprs(x.lumi) <- new('matrix')
