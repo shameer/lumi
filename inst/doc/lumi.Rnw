@@ -6,7 +6,7 @@
 
 \documentclass[a4paper]{article}
 
-\usepackage{amsmath}
+\usepackage{amsmath,pstricks}
 \usepackage{hyperref}
 \usepackage[authoryear,round]{natbib}
 
@@ -89,7 +89,7 @@ The \Rpackage{lumi} package has one major class: {\bf LumiBatch}. {\bf LumiBatch
 \section{Data preprocessing}
 
 The first thing is to load the  \Rpackage{lumi} package.
-<<eval=T>>=
+<<load library, eval=T>>=
 library(lumi)
 @
 
@@ -122,7 +122,7 @@ For convenience, another function \Rfunction{lumiR.batch} is designed to input f
 
 Here, we just load the pre-saved example data, example.lumi, which is a subset of the experiment data package \Rpackage{lumiBarnes} in the Bioconductor. The example data includes four samples "A01", "A02", "B01" and "B02". "A" and "B" represent different Illumina slides (8 microarrays on each slide), and "01" and "02" represent different samples.  That means "A01" and "B01" are technique replicates at different slides, the same for "A02" and "B02". 
 
-<<echo=T>>=
+<<load example data, echo=T>>=
 ## load example data (a LumiBatch object)
 data(example.lumi)
 ## summary of the example data
@@ -137,7 +137,7 @@ BeadStudio will usually separately output (or attached after the expressed data 
 \Rfunction{LumiQ} function will produce the data summary of a {\bf LumiBatch} object and organize the results in a QC slot of {\bf LumiBatch} object. When creating the {\bf LumiBatch} object, the \Rfunction{LumiQ} function will be called to initialize the QC slot of the {\bf LumiBatch} object.
 
 Summary of the quality control information of example.lumi data. If the QC slot of the {\bf LumiBatch} object is empty, function \Rfunction{lumiQ} will be automatically called to estimate the quality control information.
-<<echo=T>>=
+<<summary of example data, echo=T>>=
 ## summary of the quality control
 summary(example.lumi, 'QC')
 @
@@ -156,7 +156,7 @@ Figure \ref{fig:density} shows the density plot of the {\bf LumiBatch} object by
 
 \begin{figure}
 \centering
-<<fig=true, width=8, height=6, quiet=T, echo=F>>=
+<<densityPlot, fig=true, width=8, height=6, quiet=T, echo=F>>=
 plot(example.lumi, what='density')	## plot the density
 @
 \caption{Density plot of Illumina microarrays before normalization}
@@ -174,7 +174,7 @@ Figure \ref{fig:box} shows the box plot of the {\bf LumiBatch} object by using \
 
 \begin{figure}
 \centering
-<<fig=true, width=6, height=6, quiet=T, echo=F>>=
+<<boxplot, fig=true, width=6, height=6, quiet=T, echo=F>>=
 plot(example.lumi, what='boxplot') 	## box plot
 @
 \caption{Density plot of Illumina microarrays before normalization}
@@ -194,7 +194,7 @@ Figure \ref{fig:pairs} shows the pairwise sample correlation of the {\bf LumiBat
 
 \begin{figure}
 \centering
-<<fig=true, width=8, height=8, quiet=T, echo=F>>=
+<<pairPlot, fig=true, width=8, height=8, quiet=T, echo=F>>=
 plot(example.lumi, what='pair')		## pairwise plots
 @
 \caption{Pairwise plot with microarray correlation before normalization}
@@ -224,7 +224,7 @@ Figure \ref{fig:MAplot} shows the MA plot of the {\bf LumiBatch} object by using
 
 \begin{figure}
 \centering
-<<fig=true, width=8, height=8, quiet=T, echo=F>>=
+<<MAplot, fig=true, width=8, height=8, quiet=T, echo=F>>=
 ## pairwise MAplot
 plot(example.lumi, what='MAplot')	
 @
@@ -301,7 +301,7 @@ Because the STDEV (or STDERR) columns of the BeadStudio output file is the stand
 Function \Rfunction{lumiT} performs variance stabilizing transform with both input and output being {\bf LumiBatch} object.
 
 Do default VST variance stabilizing transform
-<<>>=
+<<VST transform>>=
 ## Do default VST variance stabilizing transform
 lumi.T <- lumiT(example.lumi)
 @ 
@@ -317,7 +317,7 @@ The \Rfunction{plotVST} can plot the transformation function of VST, see Figure 
 
 \begin{figure}
 \centering
-<<fig=true, width=8, height=8, quiet=T, echo=F>>=
+<<plotVST, fig=true, width=8, height=8, quiet=T, echo=F>>=
 trans <- plotVST(lumi.T)
 @
 \caption{VST transformation}
@@ -347,13 +347,13 @@ Another normalization method which is unique in the \Rpackage{lumi} package is t
 By default, function \Rfunction{lumiN} performs popular quantile normalization. \Rfunction{lumiN} also provides other options to do \verb+"rsn", "ssn", "loess", "vsn"+ normalization. See help of \Rfunction{lumiN} for details.
 
 Do default quantile between microarray normaliazation
-<<>>=
+<<Default normalization>>=
 ## Do quantile between microarray normaliazation
 lumi.N <- lumiN(lumi.T)
 @ 
 
 Users can also easily select other normalization method. For example, the following command will run RSN normalization.
-<<eval=T>>=
+<<Customized normalization, eval=T>>=
 ## Do RSN between microarray normaliazation
 # lumi.N <- lumiN(lumi.T, method='rsn')
 @ 
@@ -362,7 +362,7 @@ Users can also easily select other normalization method. For example, the follow
 \subsection{Quality control after normalization}
 To make sure the data quality meets our requirement, we do a second round of quality control of normalized data with different QC plots. Compare the plots before and after normalization, we can clearly see the improvements.
 
-<<>>=
+<<QC after normalization>>=
 ## Do quality control estimation after normalization
 lumi.N.Q <- lumiQ(lumi.N)
 
@@ -437,7 +437,7 @@ plot(lumi.N.Q, what='sampleRelation', method='mds', color=c("01", "02", "01", "0
 \subsection{Encapsulate the processing steps}
 The \Rfunction{lumiExpresso} function is to encapsulate the major functions of Illumina preprocessing. It is organized in a similar way as the \Rfunction{expresso} function in \Rpackage{affy} package. The following code basically did the same processing as the previous multi-steps and produced the same results lumi.N.Q.
 
-<<echo=TRUE>>=
+<<Encapsulate the processing steps, echo=TRUE>>=
 ## Do all the default preprocessing in one step
 lumi.N.Q <- lumiExpresso(example.lumi)
 @ 
@@ -445,7 +445,7 @@ lumi.N.Q <- lumiExpresso(example.lumi)
 Users can easily customize the processing parameters. For example, if the user wants to do "rsn" normalization, the user can run the following code. For more details, please read the help document of \Rfunction{lumiExpresso} function. 
 
 <<echo=TRUE>>=
-## Do all the default preprocessing in one step
+## Do all the preprocessing with customized settings
 # lumi.N.Q <- lumiExpresso(example.lumi, normalize.param=list(method='rsn'))
 @ 
 
@@ -453,7 +453,7 @@ Users can easily customize the processing parameters. For example, if the user w
 \subsection{Inverse VST transform to the raw scale}
 Figure \ref{fig:VST_log2} shows VST is very close to log2 in the high expression range. In convenience, users usually can directly use \verb+2^x+ to approximate the data in raw scale and estimate the fold-change. For the users concern more in the low expression range, we also provide the function \Rfunction{inverseVST} to resume the data in the raw scale. Need to mention, the inverse transform should be performed after statistical analysis, or else it makes no sense to transform back and forth. The \Rfunction{inverseVST}  function can directly applied to the  {\bf LumiBatch} object after \Rfunction{lumiT}   with VST transform, or VST transform plus RSN normalization (default method of \Rfunction{lumiN}). For the RSN normalized data, the inverse transform is based on the parameters of the Target Array because the Target Array is the benchmark data and is not changed after normalization. Other normalization methods, like quantile or loess, will change the values of all the arrays. As a result, no inverse VST transform available for them. Users may use some kind of approximation for the quantile normalized data by themselves. Here we just provide some examples of VST parameters retrieving and inverse VST transform.
  
-<<echo=TRUE>>=
+<<inverse VST, echo=TRUE>>=
 ## Parameters of VST transformed LumiBatch object
 names(attributes(lumi.T))
 ## VST parameters: "vstParameter"  and  "transformFun"
@@ -576,23 +576,24 @@ We use the Barnes data set [4] as an example, which has be created as a Biocondu
 
 \end{Sinput}
 
+
 \subsection{Identify differentially expressed genes}
 Identify the differentiated genes based on moderated t-test using \Rpackage{limma}.
 
 Retrieve the normalized data
-<<>>=
+<<retrieve normalized data>>=
 dataMatrix <- exprs(lumi.N.Q)
 @
 
 To speed up the processing and reduce false positives, remove the unexpressed genes
-<<>>=
+<<filtering>>=
 presentCount <- detectionCall(example.lumi)
 selDataMatrix <- dataMatrix[presentCount > 0,]
 probeList <- rownames(selDataMatrix)
 @
 
 
-<<echo=T>>=
+<<Identify differentially expressed genes, echo=T>>=
 ## Specify the sample type
 sampleType <- c('100:0', '95:5', '100:0', '95:5')
 if (require(limma)) {
@@ -627,7 +628,7 @@ Based on the significant genes identified using \Rpackage{limma} or t-test, we c
 Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of BP (Biological Process). For other GO categories MF(Molecular Function) and CC (Cellular Component), it just follows the same procedure.
 
 
-<<echo=T, eval=F>>=
+<<GO analysis, echo=T, eval=F>>=
 if (require(GOstats) & require(lumiHumanAll.db)) {
 
 	## Get the locuslink Id of the gene
@@ -660,7 +661,7 @@ if (require(GOstats) & require(lumiHumanAll.db)) {
 
 
 % Produce the significant GO term table
-<<echo=FALSE, results=tex, eval=F>>=
+<<Create selected GO table, echo=FALSE, results=tex, eval=F>>=
 if (require(GOstats) & require(lumiHumanAll.db) & require(xtable)) {
 
 	##get gene counts at each GO category
@@ -708,6 +709,18 @@ if (require(GOstats) & require(lumiHumanAll.db) & require(xtable)) {
 \label{ta:GOggterms}
 \end{center}
 \end{table}
+
+
+\subsection{GEO submission of the data}
+As more and more journals require the microarray data should be submitted to GEO website, we created GEO submission functions for users convenience. The submission file will be in the SOFT format. So users can submit all the data in a batch. There are two major functions users need to use.  \Rfunction{produceGEOSampleInfoTemplate} produces a template of sample information with some default fillings. Some fields have been filed in with default settings. Users should fill in or modify the detailed sample descriptions by referring some previous submissions. No blank fields are allowed. Users are also suggested to fill in the "Sample\_platform\_id" by checking information of the GEO Illumina platform. \Rfunction{produceGEOSubmissionFile} is the main function of produce GEO submission file including both normalized and raw data information in the SOFT format. By default, the R objects, lumiNormalized, lumiRaw and sampleInfo, will be saved in a file named 'supplementaryData.Rdata'. (See help information of \Rfunction{produceGEOSubmissionFile}) Users can include this R data file as a GEO supplementary data file.
+
+
+\begin{Sinput}
+## Produce the sample information template
+> produceGEOSampleInfoTemplate(lumi.example, lib.mapping = 'lumiHumanIDMapping.db', fileName = "GEOsampleInfo.txt")
+## After editing the 'GEOsampleInfo.txt' by filling in sample information
+> produceGEOSubmissionFile(lumi.N.Q, lumi.example, lib='lumiHumanIDMapping.db', sampleInfo='GEOsampleInfo.txt')
+\end{Sinput}
 
 
 \section{Session Info}
