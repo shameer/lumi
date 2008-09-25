@@ -221,6 +221,15 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	ddim <- dim(x)
 	
 	sampleName <- sampleNames(x)
+	## convert the names as index to avoid some potential problems of name inconsistency
+	if (!missing(j)) {
+		if (is.character(j)) {
+			sampleId <- sampleNames(x)
+			ind <- seq(sampleId)
+			names(ind) <- sampleId
+			j <- ind[j]
+		}	
+	}
 	## do default processing of 'ExpressionSet'
 	x <- callNextMethod()
 

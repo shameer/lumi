@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Produce GEO Sample Submission File in SOFT format }
 \description{
-  Produce GEO Sample Submission File in SOFT format based on the provided LumiBatch object and sample information
+  Produce GEO Sample Submission File in the SOFT format based on the provided LumiBatch object and sample information
 }
 \usage{
 produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib.mapping, sampleInfo = NULL, fileName = "GEOSubmissionFile.txt", supplementaryRdata = TRUE)
@@ -18,7 +18,9 @@ produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib.mapping, sampleInfo = NULL
   \item{supplementaryRdata}{ determine whether produce the Rdata supplement data, which include both lumiNormalized and lumiRaw R objects. }
 }
 \details{
-The function produces the GEO sample submission file including both normalized and raw data information. The sample information should be provided by the user as a data.frame or Tab separated text file. The template of the sample information file can be produced by function \code{\link{produceGEOSampleInfoTemplate}}. Users need to fill in the detailed sample descriptions in the template, especially the Sample\_title, Sample\_description and some protocols. 
+The function produces the GEO sample submission file including both normalized and raw data information  in the SOFT format. The sample information should be provided by the user as a data.frame or Tab separated text file following the format of the template, which can be produced by function \code{\link{produceGEOSampleInfoTemplate}}. Users need to fill in the detailed sample descriptions in the template, especially the Sample\_title, Sample\_description and some protocols. Users are also suggested to fill in the "Sample\_platform\_id" by checking information of the GEO Illumina platform.
+
+When the parameter "supplementaryRdata" is TRUE, the R objects, lumiNormalized, lumiRaw and sampleInfo, will be saved in a file named 'supplementaryData.Rdata'.
 }
 \value{
 Save the result as a text file in SOFT sample submission format. The supplementary Rdata will be saved in a file 'supplementaryData.Rdata'.
@@ -29,7 +31,9 @@ Save the result as a text file in SOFT sample submission format. The supplementa
 \seealso{ \code{\link{produceGEOSampleInfoTemplate}}, \code{\link{produceGEOPlatformFile}} }
 \examples{
 ## Not run
-## 'GEOsampleInfo.txt' is file with filled sample information
+## Produce the sample information template
+# produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping = NULL, fileName = "GEOsampleInfo.txt")
+## After editing the 'GEOsampleInfo.txt' by filling in sample information
 # produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib='lumiHumanIDMapping.db', sampleInfo='GEOsampleInfo.txt')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

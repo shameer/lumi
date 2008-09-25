@@ -11,7 +11,7 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 
 	link <- "http://www.ncbi.nlm.nih.gov/projects/geo/info/soft2.html"
 	templateTitle <- c("Sample_title", "Sample_type","Sample_channel_count","Sample_source_name_ch1","Sample_organism_ch1", "Sample_characteristics_ch1", "Sample_molecule_ch1","Sample_extract_protocol_ch1","Sample_label_ch1", "Sample_label_protocol_ch1", "Sample_hyb_protocol","Sample_scan_protocol","Sample_description","Sample_data_processing","Sample_platform_id", "Sample_supplementary_file")
-	templateContent <- c("","RNA","1","",organism,"","","standard as recommended by illumina","biotin","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"")
+	templateContent <- c("","RNA","1","",organism,"","total RNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"")
 	
 	## add code of parsing processing history 
 	hh <- getHistory(lumiNormalized)
@@ -53,7 +53,7 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 	}
 	template <- cbind(c('sampleID', labels), template)
 	if (!is.null(fileName)) {
-		cat('# For the detailed definition of the column names, please refer to', link, '\n', file=fileName)
+		cat('# For the detailed definition of the column names, please refer to', link, '\n', sep='', file=fileName)
 		write.table(template, sep='\t', quote=FALSE, file=fileName, append=TRUE, col.names=FALSE, row.names=FALSE)		
 	} else {
 		return(template)
