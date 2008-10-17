@@ -42,7 +42,8 @@ if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(objec
 if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
-if (is.null(getGeneric("density"))) setGeneric("density", function(x, ...) standardGeneric("density"))
+if (is.null(getGeneric("MAplot"))) setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
+
 
 # setMethod("se.exprs", signature(object="ExpressionSet"),
 #        function(object) assayDataElement(object,"se.exprs"))
@@ -665,11 +666,6 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
 			lower.panel=lowerPanel, main=main, ...)
 })
-
-
-if(is.null(getGeneric("MAplot")))
-	setGeneric("MAplot", function(object, ...)
-		standardGeneric("MAplot"))
   	
 
 setMethod("MAplot", signature(object="ExpressionSet"), 

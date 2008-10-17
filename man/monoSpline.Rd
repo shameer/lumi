@@ -30,8 +30,7 @@ return the transformed "newX" based on the smoothed curve
 
 x <- sort(runif(200) * 100)
 y <- x + rnorm(200) * 10
-temp <- monoSpline(x, y, newX=1:100, ifPlot=TRUE)
-
+temp <- lumi:::monoSpline(x, y, newX=1:100, ifPlot=TRUE)
 
 }
 \keyword{ methods }

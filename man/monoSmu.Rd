@@ -37,7 +37,7 @@ Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transform
 
 x <- sort(runif(200) * 100)
 y <- x + rnorm(200) * 10
-temp <- monoSmu(x, y, ifPlot=TRUE)
+temp <- lumi:::monoSmu(x, y, ifPlot=TRUE)
 
 }
 \keyword{ methods }
