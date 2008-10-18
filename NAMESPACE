@@ -1,15 +1,13 @@
 import(tools)
 import(methods)
-import(Biobase)
 
-importFrom(stats, density)
 importFrom(graphics, boxplot, hist, pairs, plot)
+importFrom(stats, density)
+import(Biobase)
+import(affy)
 
 exportClasses("LumiBatch")
-	
-exportMethods(
-"beadNum", "beadNum<-", "boxplot", "combine", "density", "detection", "detection<-", "getHistory", "hist", "MAplot", "pairs", "plot", "sampleNames", "se.exprs", "se.exprs<-", "show", "summary", "["
-)
+exportMethods("beadNum", "beadNum<-", "boxplot", "combine", "density", "detection", "detection<-", "getHistory", "hist", "MAplot", "pairs", "plot", "sampleNames", "se.exprs", "se.exprs<-", "show", "summary", "[")
 
 export("IlluminaID2nuID", "addControlData2lumi", "addNuID2lumi", "addNuId2lumi", "affyExpresso", "affyVstRma",                                                           
 "bgAdjust", "detectOutlier", "detectionCall", "estimateLumiCV", "getChipInfo", "getControlData", "getControlProbe",

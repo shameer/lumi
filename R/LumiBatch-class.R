@@ -43,6 +43,7 @@ if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) 
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
 if (is.null(getGeneric("MAplot"))) setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
+setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
 
 
 # setMethod("se.exprs", signature(object="ExpressionSet"),
@@ -715,11 +716,10 @@ setMethod('plot',
 	signature('LumiBatch', 'missing'),
 	function(x, what=c('density', 'boxplot', 'pair', 'MAplot', 'sampleRelation', 'outlier', 'cv'), main, ...)
 {
-
 	object <- x
 	if (!is(object, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	what <- match.arg(what)
-	
+
 	if (what == 'density') {
 		if (missing(main)) main <- 'Density plot of intensity'
 		density(object, xlab="intensity", ylab="density", main=main, ...)

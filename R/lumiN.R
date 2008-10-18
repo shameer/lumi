@@ -17,7 +17,12 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), verbose=TRU
 		if (max(x.matrix, na.rm=TRUE) < 50) {
 			warning('The data seems log2 transformed. VSN should be directly applied to the raw data!')
 		}
+	} else if (method == 'quantile') {
+		library(preprocessCore)
+	} else if (method == 'loess') {
+		library(affy)
 	}
+	
 	if (is(x.lumi, 'LumiBatch')) {
 		history.submitted <- as.character(Sys.time())
 	}
