@@ -172,8 +172,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			## remove the all NA columns, which can be produced when save in Excel
 			naCol <- apply(controlData, 2, function(x) all(is.na(x) | x == ''))
 			controlData <- controlData[,!naCol, drop=FALSE]
-			colnames(controlData) <- controlData[1,]
-			controlData <- controlData[-1,]
+			
+			## write the control data as a temporary file and parse it using lumiR
+			tmpFile <- tempfile(pattern = "file", tmpdir = tempdir())
+			write.table(controlData, tmpFile, sep='\t', col.names=FALSE, row.names=FALSE)			
+			controlData <- getControlData(tmpFile, type='data.frame')
+			unlink(tmpFile)
 		} else {
 			controlData <- data.frame()
 		}
