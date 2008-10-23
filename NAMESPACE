@@ -1,0 +1,20 @@
+import(tools)
+import(methods)
+
+importFrom(graphics, pairs, plot)
+importFrom(stats, density)
+import(Biobase)
+import(affy)
+
+exportClasses("LumiBatch")
+exportMethods("beadNum", "beadNum<-", "boxplot", "combine", "density", "detection", "detection<-", "getHistory", "hist", "MAplot", "pairs", "plot", "sampleNames", "se.exprs", "se.exprs<-", "show", "summary", "[")
+
+export("IlluminaID2nuID", "addControlData2lumi", "addNuID2lumi", "addNuId2lumi", "affyExpresso", "affyVstRma",                                                           
+"bgAdjust", "detectOutlier", "detectionCall", "estimateLumiCV", "getChipInfo", "getControlData", "getControlProbe",
+"getControlType", "getNuIDMappingInfo", "id2seq", "inverseVST", "is.nuID", "lumiB", "lumiExpresso", "lumiN", "lumiQ",                       
+"lumiR", "lumiR.batch", "lumiT", "nuID2EntrezID", "nuID2IlluminaID", "nuID2RefSeqID", "nuID2probeID", "nuID2targetID",
+"plotControlData", "plotHousekeepingGene", "plotSampleRelation", "plotStringencyGene", "plotVST", "probeID2nuID",
+"produceGEOPlatformFile", "produceGEOSampleInfoTemplate", "produceGEOSubmissionFile", "rsn", "seq2id", "ssn", "targetID2nuID","vst"
+)
+
+

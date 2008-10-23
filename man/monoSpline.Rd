@@ -28,9 +28,5 @@ return the transformed "newX" based on the smoothed curve
 \seealso{ \code{\link{monoSmu}}  }
 \examples{
 
-x <- sort(runif(200) * 100)
-y <- x + rnorm(200) * 10
-temp <- monoSpline(x, y, newX=1:100, ifPlot=TRUE)
-
 }
 \keyword{ methods }

@@ -10,7 +10,19 @@ bgAdjust <- function(lumiBatch, probs=0.5, ...) {
 		cat('There is no control probe information in the LumiBatch object!\n No background adjustment will be performed.\n')
 		return(lumiBatch)
 	}
-	control <- control[, sampleNames(lumiBatch)]
+	colName <- colnames(control)
+	sampleName <- sampleNames(lumiBatch)
+	if (!all(colName %in% sampleName)) {
+		sampleID <- pData(phenoData(lumiBatch))$sampleID
+		if (!all(colName %in% sampleID)) {
+			cat('Column names of controlData does not match with the LumiBatch object!\n No background adjustment will be performed.\n')
+			return(lumiBatch)			
+		} else {
+			control <- control[, sampleID]
+		}
+	} else {
+		control <- control[, sampleName]		
+	}
 	probeType <- rownames(control)
 	if ('negative' %in% probeType) control <- control[probeType == 'negative',]
 	quantile.ctrl <- apply(control, 2, quantile, probs=probs, ...)

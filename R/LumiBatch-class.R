@@ -43,7 +43,6 @@ if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) 
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
 if (is.null(getGeneric("MAplot"))) setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
-# setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
 
 
 # setMethod("se.exprs", signature(object="ExpressionSet"),

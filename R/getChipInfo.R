@@ -8,7 +8,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 		if (is.null(nc)) {
 			len <- length(mapping)
 			if (len == length(inputID.bak)) return(mapping)
-			mapping.new <- rep(NA, len)
+			mapping.new <- rep(NA, length(inputID.bak))
 			names(mapping.new) <- inputID.bak
 			mappingID <- names(mapping)
 			mapping.new[mappingID] <- mapping
