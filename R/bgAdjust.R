@@ -12,9 +12,9 @@ bgAdjust <- function(lumiBatch, probs=0.5, ...) {
 	}
 	colName <- colnames(control)
 	sampleName <- sampleNames(lumiBatch)
-	if (!all(colName %in% sampleName)) {
+	if (!all(sampleName %in% colName)) {
 		sampleID <- pData(phenoData(lumiBatch))$sampleID
-		if (!all(colName %in% sampleID)) {
+		if (!all(sampleID %in% colName)) {
 			cat('Column names of controlData does not match with the LumiBatch object!\n No background adjustment will be performed.\n')
 			return(lumiBatch)			
 		} else {
