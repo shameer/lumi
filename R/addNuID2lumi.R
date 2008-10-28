@@ -47,12 +47,12 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		dataLine1 <- strsplit(info[nMetaDataLines + 2], sep)[[1]]
 		quoteCount1 <- gregexpr('"', dataLine1[1])[[1]]
 		quoteCount2 <- gregexpr('\'', dataLine1[1])[[1]]
+		quote <- ''
+		if (sep == ',') quote <- '"'
 		if (length(quoteCount1) == 2) {
 			quote <- '"'
 		} else if (length(quoteCount2) == 2) {
 			quote <- '\''
-		} else {
-			quote <- ''
 		}
 
 		## Read in annotation data
@@ -76,8 +76,9 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 				if (length(comm_target) == 0) stop('The annotation file does not match the data!\n')
 			}
 		} 
-		if (length(comm_target) != length(id)) {
-			warning('The annotation file does not match the data. Partial ids cannot be replaced!\n')
+		if (length(comm_target) < length(id)) {
+			diffId.len <- length(id) - length(comm_target)
+			warning(paste('The annotation file does not match the data.',  diffId.len, 'ids cannot be replaced!\n'))
 		}
 		names(nuID) <- ann_target
 
@@ -111,12 +112,12 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 			}
 			## Check for the targetIDs cannot be found in the lib.mapping.
 			## Some known control genes will not be checked.
-			naInd <- is.na(newId)
+			naInd <- which(is.na(newId))
 			if (!usingTargetID) {
 				TargetID <- featureData(x.lumi)$TargetID
 				if (is.null(TargetID)) {
 					if (!all(TargetID[naInd] %in% controlId)) {
-						if (length(which(naInd)) < 10) {
+						if (length(naInd) < 10) {
 							warning(paste('Identifiers:', paste(TargetID[naInd], collapse=','), ' cannot be found in the ', lib.mapping, '!\n', sep=''))
 						} else {
 							warning(paste('Some identifiers cannot be found in the ', lib.mapping, '!\n', sep=''))
@@ -124,7 +125,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 					}
 				}
 			} else if (!all(id[naInd] %in% controlId)) {
-				if (length(which(naInd)) < 10) {
+				if (length(naInd) < 10) {
 					warning(paste('Identifiers:', paste(id[naInd], collapse=','), ' cannot be found in the ', lib.mapping, '!\n', sep=''))
 				} else {
 					warning(paste('Some identifiers cannot be found in the ', lib.mapping, '!\n', sep=''))
@@ -138,10 +139,10 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 			if (length(naInd) > 0) {
 				newId[naInd] <- id[naInd]
 				if (!all(id[naInd] %in% controlId))	{
-					if (length(which(naInd) > 500)) {
+					if (length(naInd) > 500) {
 						warning(paste('More than 500 identifiers cannot be found in the library:', lib.mapping, 
 								'!\n The provided library might be wrong or outdated!\n', sep=''))
-					} else if (length(which(naInd) < 10)) {
+					} else if (length(naInd) < 10) {
 						warning(paste('Identifiers:', paste(id[naInd], collapse=','), ' cannot be found in the ', lib.mapping, '!\n', sep=''))
 					} else {
 						warning(paste('Some identifiers cannot be found in the ', lib.mapping, '!\n', sep=''))
@@ -222,7 +223,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		## update the feautre data
 		featureData <- featureData(x.lumi)
 		rownames(pData(featureData)) <- newId
-		if (!is.null(pData(featureData)[,'PROBE_SEQUENCE'])) pData(featureData)[,'PROBE_SEQUENCE'] <- NULL
+		if (!is.null(pData(featureData)$'PROBE_SEQUENCE')) pData(featureData)$'PROBE_SEQUENCE' <- NULL
 		featureData(x.lumi) <- featureData
 
 		## Add history tracking
@@ -242,5 +243,5 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 `addNuId2lumi` <-
 function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='Probe_Id'), verbose=TRUE) {
 	cat('Function addNuId2lumi is deprecated!\n Please use addNuID2lumi instead!\n')
-	addNuId2lumi(x.lumi, annotationFile, sep, lib.mapping, annotationColName, verbose)
+	addNuID2lumi(x.lumi, annotationFile, sep, lib.mapping, annotationColName, verbose)
 }

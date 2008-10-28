@@ -67,7 +67,10 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 		if(!require(lib.mapping, character=TRUE)) stop(paste(lib.mapping, 'is required!'))
 		dbconn <- sub("\\.db", "_dbconn", lib.mapping)
 		conn <- do.call(dbconn, list())
-
+		
+		metaInfo <- dbReadTable(conn, 'metadata')
+		species <- metaInfo$value[metaInfo[,'name'] == "SPECIES"]
+		
 		allTableNames <- dbListTables(conn)
 		allTableNames <- allTableNames[!(allTableNames %in% c('nuID_MappingInfo', 'metadata'))]
 		if (!is.null(chipVersion)) {
