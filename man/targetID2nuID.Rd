@@ -6,7 +6,7 @@
 Mapping Illumina TargetID (GeneID) into nuID.
 }
 \usage{
-targetID2nuID(targetID, lib.mapping = "lumiHumanIDMapping.db", ...)
+targetID2nuID(targetID, lib.mapping = "lumiHumanIDMapping", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,8 +27,8 @@ Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucl
 \author{Pan Du}
 \seealso{ \code{\link{nuID2targetID}}, \code{\link{IlluminaID2nuID}} }
 \examples{
-if (require(lumiHumanIDMapping.db)) {
-    targetID2nuID('GI_21389350-S', lib='lumiHumanIDMapping.db')
+if (require(lumiHumanIDMapping)) {
+    targetID2nuID('GI_21389350-S', lib='lumiHumanIDMapping')
 }
 }
 % R documentation directory.

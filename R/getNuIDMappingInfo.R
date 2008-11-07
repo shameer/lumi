@@ -3,7 +3,8 @@ function(nuID=NULL, lib.mapping) {
 
 	if (missing(lib.mapping)) stop('Please specify lib.mapping library!')
 	if(!require(lib.mapping, character=TRUE)) stop(paste(lib.mapping, 'is required!'))
-	dbconn <- sub("\\.db", "_dbconn", lib.mapping)
+	# dbconn <- sub("\\.db", "_dbconn", lib.mapping)
+	dbconn <- paste(lib.mapping, "_dbconn", sep='')
 	conn <- do.call(dbconn, list())
     
 	allTableNames <- dbListTables(conn)	

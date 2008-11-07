@@ -557,7 +557,7 @@ We use the Barnes data set [4] as an example, which has be created as a Biocondu
 > ## specify the file name
 > # fileName <- 'Barnes_gene_profile.txt'  #  Not run
 > ## load the data if you want to provide the sample Information and map Illumina IDs to nuIDs.
-> # example.lumi <- lumiR.batch(fileName, lib.mapping='lumiHumanIDMapping.db', sampleInfoFile='sampleInfo.txt')		# Not Run
+> # example.lumi <- lumiR.batch(fileName, lib.mapping='lumiHumanIDMapping', sampleInfoFile='sampleInfo.txt')		# Not Run
  
 > ## load saved data
 > data(example.lumi) 
@@ -622,16 +622,20 @@ if (require(limma)) {
 Based on the significant genes identified using \Rpackage{limma} or t-test, we can do further analysis, like GO analysis (\Rpackage{GOstats} package) and machine learning (\Rpackage{MLInterface} package). Next, we will use GO analysis as an example.
 
 
-\subsection{Gene Ontology analysis}
-Based on the significant genes identified using \Rpackage{limma} or t-test, we can further do Gene Ontology annotation. We can use package \Rpackage{GOstats} to do the analysis.
+\subsection{Gene Ontology and other functional analysis}
+Based on the interested genes identified using \Rpackage{limma} or other tests, we can further do functional analysis. We can use package \Rpackage{GOstats}, \Rpackage{Category}  and other packages to do this type of analysis.
 
-Do Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of BP (Biological Process). For other GO categories MF(Molecular Function) and CC (Cellular Component), it just follows the same procedure.
+
+There is one important thing need to mention during this type of analysis. As we described in previous section, the lumi annotation packages are nuID indexed and are built by pooling all types of chips of the same species. This makes it different from the traditional Affymetrix annotation packages, which is one package for one type of chip. Because lots of methods in Category/GOstats  were originally designed based on the Affymetrix annotation packages, the default setting of these function may not work well for lumi annotation packages. However, this can be solved by first transferring the probe ids as Entrez Ids, and then do analysis at the Entrez Id level instead of the probe Id level. Please see our example for how to transfer Probe Ids as Entrez Ids.
+
+
+Following is an example of performing Hypergeometric test of Gene Ontology based on the significant gene list (for e. Table \ref{ta:GOggterms} shows the significant GO terms of Molecular Function with p-value less than 0.01. Here only show the significant GO terms of BP (Biological Process). For other GO categories MF(Molecular Function) and CC (Cellular Component), it just follows the same procedure.
 
 
 <<GO analysis, echo=T, eval=F>>=
 if (require(GOstats) & require(lumiHumanAll.db)) {
 
-	## Get the locuslink Id of the gene
+	## Convert the probe Ids as  Entrez Ids and make them unique
 	sigLL <- unique(unlist(lookUp(sigGene,'lumiHumanAll.db','ENTREZID')))
 	sigLL <- as.character(sigLL[!is.na(sigLL)])
 	params <- new("GOHyperGParams",
@@ -717,9 +721,9 @@ As more and more journals require the microarray data should be submitted to GEO
 
 \begin{Sinput}
 ## Produce the sample information template
-> produceGEOSampleInfoTemplate(lumi.example, lib.mapping = 'lumiHumanIDMapping.db', fileName = "GEOsampleInfo.txt")
+> produceGEOSampleInfoTemplate(lumi.example, lib.mapping = 'lumiHumanIDMapping', fileName = "GEOsampleInfo.txt")
 ## After editing the 'GEOsampleInfo.txt' by filling in sample information
-> produceGEOSubmissionFile(lumi.N.Q, lumi.example, lib='lumiHumanIDMapping.db', sampleInfo='GEOsampleInfo.txt')
+> produceGEOSubmissionFile(lumi.N.Q, lumi.example, lib='lumiHumanIDMapping', sampleInfo='GEOsampleInfo.txt')
 \end{Sinput}
 
 

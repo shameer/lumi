@@ -6,7 +6,7 @@
 Mapping Illumina ProbeID as nuID. 
 }
 \usage{
-probeID2nuID(probeID, lib.mapping = "lumiHumanIDMapping.db", ...)
+probeID2nuID(probeID, lib.mapping = "lumiHumanIDMapping", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,8 +26,8 @@ Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucl
 \author{ Pan Du }
 \seealso{ \code{\link{nuID2probeID}}, \code{\link{IlluminaID2nuID}} }
 \examples{
-if (require(lumiHumanIDMapping.db)) {
-    probeID2nuID('0001240020', lib='lumiHumanIDMapping.db')
+if (require(lumiHumanIDMapping)) {
+    probeID2nuID('0001240020', lib='lumiHumanIDMapping')
 }
 
 }

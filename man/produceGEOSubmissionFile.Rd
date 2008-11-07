@@ -12,7 +12,7 @@ produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib.mapping, sampleInfo = NULL
 \arguments{
   \item{lumiNormalized}{ The normalized data (LumiBatch object) }
   \item{lumiRaw}{  The raw data (LumiBatch object), e.g., returned by \code{\link{lumiR}} }
-  \item{lib.mapping}{ The Illumina ID Mapping library, e.g., "lumiHumanIDMapping.db" }
+  \item{lib.mapping}{ The Illumina ID Mapping library, e.g., "lumiHumanIDMapping" }
   \item{sampleInfo}{ The sample information filename or data.frame, which is returned by \code{\link{produceGEOSampleInfoTemplate}} }
   \item{fileName}{ The file name of GEO Submission file  }
   \item{supplementaryRdata}{ determine whether produce the Rdata supplement data, which include both lumiNormalized and lumiRaw R objects. }
@@ -34,7 +34,7 @@ Save the result as a text file in SOFT sample submission format. The supplementa
 ## Produce the sample information template
 # produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping = NULL, fileName = "GEOsampleInfo.txt")
 ## After editing the 'GEOsampleInfo.txt' by filling in sample information
-# produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib='lumiHumanIDMapping.db', sampleInfo='GEOsampleInfo.txt')
+# produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib='lumiHumanIDMapping', sampleInfo='GEOsampleInfo.txt')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -14,7 +14,7 @@ getNuIDMappingInfo(nuID = NULL, lib.mapping)
   \item{lib.mapping}{ the ID mapping library }
 }
 \details{
- The function basically return the nuID mapping information kept in the "nuID\_MappingInfo" table of IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). For more details of nuID mapping, please refer to the help of corresponding IDMapping library.
+ The function basically return the nuID mapping information kept in the "nuID\_MappingInfo" table of IDMapping libraries (lumiHumanIDMapping, lumiMouseIDMapping, lumiRatIDMapping). For more details of nuID mapping, please refer to the help of corresponding IDMapping library.
 }
 \value{
 	It returns a data.frame with each row corresponding to an input nuID.
@@ -23,9 +23,9 @@ getNuIDMappingInfo(nuID = NULL, lib.mapping)
 \examples{
 	## load example data
 	data(example.lumi)
-	if (require(lumiHumanIDMapping.db)) {
+	if (require(lumiHumanIDMapping)) {
 		nuIDs <- featureNames(example.lumi)
-		mappingInfo <- getNuIDMappingInfo(nuIDs, lib.mapping='lumiHumanIDMapping.db')
+		mappingInfo <- getNuIDMappingInfo(nuIDs, lib.mapping='lumiHumanIDMapping')
 		head(mappingInfo)
 	}
 }

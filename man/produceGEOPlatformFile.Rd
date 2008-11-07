@@ -11,7 +11,7 @@ produceGEOPlatformFile(x.lumi, lib.mapping = NULL, nuIDMode = FALSE, fileName = 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ The LumiBatch object keeping all probes }
-  \item{lib.mapping}{ The Illumina ID Mapping library, e.g., "lumiHumanIDMapping.db" }
+  \item{lib.mapping}{ The Illumina ID Mapping library, e.g., "lumiHumanIDMapping" }
   \item{nuIDMode}{ Determine whether producing the platform indexed by nuID }
   \item{fileName}{ Filename of the GEO Platform File name }
 }

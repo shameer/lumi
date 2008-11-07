@@ -1,15 +1,15 @@
-nuID2probeID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
+nuID2probeID <- function(nuID, lib.mapping="lumiHumanIDMapping", ...) {
 
 	if (length(nuID) == 0) return(NULL)
 
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
+		if (length(grep('lumi.*\\.db', lib.mapping)) == 0 && length(grep('lumi.*IDMapping', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(nuID)
 		}
 	}
 	if (require(lib.mapping, character.only=TRUE)) {
-		if (length(grep('IDMapping.db', lib.mapping)) > 0) {
+		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			probe <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, idType='Probe', ...)
 		} else {
 			env <- get(paste(lib.mapping, 'PROBEID2NUID', sep = ""), mode = "environment")
@@ -27,17 +27,17 @@ nuID2probeID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
 	}
 }
 
-nuID2targetID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
+nuID2targetID <- function(nuID, lib.mapping="lumiHumanIDMapping", ...) {
 
 	if (length(nuID) == 0) return(NULL)
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0) {
+		if (length(grep('lumi.*\\.db', lib.mapping)) == 0 && length(grep('lumi.*IDMapping', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(nuID)
 		}
 	}
 	if (require(lib.mapping, character.only=TRUE)) {
-		if (length(grep('IDMapping.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
+		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			target <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, idType='Gene', ...)
 		} else {
 			env <- get(paste(lib.mapping, 'TARGETID2NUID', sep = ""), mode = "environment")
@@ -55,18 +55,18 @@ nuID2targetID <- function(nuID, lib.mapping="lumiHumanIDMapping.db", ...) {
 	}
 }
 
-probeID2nuID <- function(probeID, lib.mapping="lumiHumanIDMapping.db", ...) {
+probeID2nuID <- function(probeID, lib.mapping="lumiHumanIDMapping", ...) {
 
 	if (length(probeID) == 0) return(NULL)
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
+		if (length(grep('lumi.*\\.db', lib.mapping)) == 0 && length(grep('lumi.*IDMapping', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(probeID)
 		}
 	}
 	if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib.mapping, character.only=TRUE)) {
-		if (length(grep('IDMapping.db', lib.mapping)) > 0) {
+		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			nuID <- IlluminaID2nuID(probeID, lib.mapping=lib.mapping, ...)
 		} else {
 			nuID <- unlist(lookUp(probeID, lib.mapping, 'PROBEID2NUID'))
@@ -77,18 +77,18 @@ probeID2nuID <- function(probeID, lib.mapping="lumiHumanIDMapping.db", ...) {
 	}
 }
 
-targetID2nuID <- function(targetID, lib.mapping="lumiHumanIDMapping.db", ...) {
+targetID2nuID <- function(targetID, lib.mapping="lumiHumanIDMapping", ...) {
 
 	if (length(targetID) == 0) return(NULL)
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping.db', lib.mapping)) == 0) {
+		if (length(grep('lumi.*\\.db', lib.mapping)) == 0 && length(grep('lumi.*IDMapping', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!'))
 			return(targetID)
 		}
 	}
 	if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib.mapping, character.only=TRUE)) {
-		if (length(grep('IDMapping.db', lib.mapping)) > 0) {
+		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			nuID <- IlluminaID2nuID(targetID, lib.mapping=lib.mapping, ...)
 		} else {
 			nuID <- unlist(lookUp(targetID, lib.mapping, 'TARGETID2NUID'))

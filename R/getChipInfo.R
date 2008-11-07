@@ -60,12 +60,13 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 	} else {
 		if (is.null(lib.mapping)) {
 			lib.mapping <- switch(species,
-				'Rat'='lumiRatIDMapping.db',
-				'Human'='lumiHumanIDMapping.db',
-				'Mouse'='lumiMouseIDMapping.db')			
+				'Rat'='lumiRatIDMapping',
+				'Human'='lumiHumanIDMapping',
+				'Mouse'='lumiMouseIDMapping')			
 		}		
 		if(!require(lib.mapping, character=TRUE)) stop(paste(lib.mapping, 'is required!'))
-		dbconn <- sub("\\.db", "_dbconn", lib.mapping)
+		# dbconn <- sub("\\.db", "_dbconn", lib.mapping)
+		dbconn <- paste(lib.mapping, "_dbconn", sep="")
 		conn <- do.call(dbconn, list())
 		
 		metaInfo <- dbReadTable(conn, 'metadata')
@@ -118,8 +119,8 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 			bestMatchLen <- max(matchLen)
 			if (bestMatchLen == 0) {
 				if (verbose) warning('No matches were found!\n')
-				return(list(chipVersion=NULL, species=species, IDType=NULL, chipProbeNumber=NULL, 
-					matchedProbeNumber=bestMatchLen), idMapping=NULL)
+				return(c(list(chipVersion=NULL, species=species, IDType=NULL, chipProbeNumber=NULL, 
+					matchedProbeNumber=bestMatchLen), idMapping=NULL))
 			} else if (bestMatchLen < lenID && verbose) {
 				warning('Some input IDs can not be matched!\n')
 			}			

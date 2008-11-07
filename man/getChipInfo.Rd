@@ -19,7 +19,7 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
   \item{verbose}{ determine whether print some warning information }
 }
 \details{
-  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping.db, lumiMouseIDMapping.db, lumiRatIDMapping.db). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file with fewer probes is claimed as better. If x is NULL and chipVersion is provided, it will return the entire mapping table of the chip.
+  The function searches the provided probe Identifiers (Illumina IDs or nuIDs) through all the manifest file ID information kept in the IDMapping libraries (lumiHumanIDMapping, lumiMouseIDMapping, lumiRatIDMapping). The Illumina IDs kept in the library include "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "Symbol", "ProbeId" ("Probe\_Id"). To determine the best match, the function calculate the number of matched probes. The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file with fewer probes is claimed as better. If x is NULL and chipVersion is provided, it will return the entire mapping table of the chip.
 }
 \value{
   The function returns a list with following items:
@@ -37,7 +37,7 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
 \examples{
 	## load example data
 	data(example.lumi)
-	if (require(lumiHumanIDMapping.db)) {
+	if (require(lumiHumanIDMapping)) {
 		chipInfo <- getChipInfo(example.lumi, species='Human')
 		chipInfo
 	}

@@ -11,7 +11,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		return(x.lumi)
 	}
 	if (!is.null(lib.mapping)) {
-		if (length(grep('\\.db', lib.mapping)) > 0 && length(grep('IDMapping', lib.mapping)) == 0) {
+		if (length(grep('lumi.*\\.db', lib.mapping)) == 0 && length(grep('lumi.*IDMapping', lib.mapping)) == 0) {
 			warning(paste(lib.mapping, 'does not include nuID conversion information!\n'))
 			lib.mapping <- NULL
 		}

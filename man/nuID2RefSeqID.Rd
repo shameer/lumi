@@ -29,9 +29,9 @@ nuID2RefSeqID(nuID = NULL, lib.mapping, filterTh = c(Strength1 = 95, Uniqueness 
 \examples{
 	## load example data
 	data(example.lumi)
-	if (require(lumiHumanIDMapping.db)) {
+	if (require(lumiHumanIDMapping)) {
 		nuIDs <- featureNames(example.lumi)
-		mappingInfo <- nuID2RefSeqID(nuIDs, lib.mapping='lumiHumanIDMapping.db')
+		mappingInfo <- nuID2RefSeqID(nuIDs, lib.mapping='lumiHumanIDMapping')
 		head(mappingInfo)
 	}
 }

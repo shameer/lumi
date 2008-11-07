@@ -9,7 +9,7 @@ function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSub
 	if (is.null(sampleInfo)) {
 		sampleInfo <- produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping=lib.mapping, fileName=NULL)
 	} else if (length(sampleInfo) == 1 && is.character(sampleInfo)) {
-		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, head=TRUE, strip.white=TRUE)
+		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, head=TRUE, strip.white=TRUE, quote='')
 	} else if (is.null(nrow(sampleInfo))) {
 		stop('Please provide correct sample information (a data.frame, matrix, or sampleInfo file)!\n')
 	}

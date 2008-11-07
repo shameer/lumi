@@ -6,7 +6,7 @@
 Mapping nuID into Illumina TargetID or GeneID.
 }
 \usage{
-nuID2targetID(nuID, lib.mapping = "lumiHumanIDMapping.db", ...)
+nuID2targetID(nuID, lib.mapping = "lumiHumanIDMapping", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,8 +26,8 @@ Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucl
 \author{ Pan Du }
 \seealso{ \code{\link{targetID2nuID}}, \code{\link{nuID2IlluminaID}} }
 \examples{
-if (require(lumiHumanIDMapping.db)) {
-    nuID2targetID("B2J6WGhV.RevOJYff4", lib.mapping = "lumiHumanIDMapping.db")
+if (require(lumiHumanIDMapping)) {
+    nuID2targetID("B2J6WGhV.RevOJYff4", lib.mapping = "lumiHumanIDMapping")
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

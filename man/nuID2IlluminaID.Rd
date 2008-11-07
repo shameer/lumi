@@ -32,8 +32,8 @@ The mapping information from nuID to Illumina ID. It will be a matrix with each 
 	## load example data
 	data(example.lumi)
 	nuIDs <- featureNames(example.lumi)
-	if (require(lumiHumanIDMapping.db)) {
-		illuminaID <- nuID2IlluminaID(nuIDs[1:5], lib='lumiHumanIDMapping.db')
+	if (require(lumiHumanIDMapping)) {
+		illuminaID <- nuID2IlluminaID(nuIDs[1:5], lib='lumiHumanIDMapping')
 		illuminaID
 	}
 }

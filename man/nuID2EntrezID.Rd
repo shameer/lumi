@@ -29,9 +29,9 @@ returns the matched Entrez IDs or a data.frame with each row corresponding to an
 \examples{
 	## load example data
 	data(example.lumi)
-	if (require(lumiHumanIDMapping.db)) {
+	if (require(lumiHumanIDMapping)) {
 		nuIDs <- featureNames(example.lumi)
-		mappingInfo <- nuID2EntrezID(nuIDs, lib.mapping='lumiHumanIDMapping.db')
+		mappingInfo <- nuID2EntrezID(nuIDs, lib.mapping='lumiHumanIDMapping')
 		head(mappingInfo)
 	}
 }

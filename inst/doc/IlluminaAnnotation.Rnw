@@ -103,14 +103,14 @@ Because of the unique advantages of nuIDs, converting Illumina IDs as nuIDs will
    x.lumi = addNuID2lumi(x.lumi, annotationFile='MouseWG-6_V1_1_R2_11234304_A')
 \end{Sinput}
 
-However, in many cases, the BeadStudio output file does not include the probe sequence information and the users do not have the manifest file, either. This makes it necessary to create a separately Illumina ID mapping package, which includes all ID mapping information all versions of Illumina chips. We created three ID mapping packages: \Rpackage{lumiHumanIDMapping.db}, \Rpackage{lumiMouseIDMapping.db} and \Rpackage{lumiRatIDMapping.db} for human, mouse and rat, respectively. 
+However, in many cases, the BeadStudio output file does not include the probe sequence information and the users do not have the manifest file, either. This makes it necessary to create a separately Illumina ID mapping package, which includes all ID mapping information all versions of Illumina chips. We created three ID mapping packages: \Rpackage{lumiHumanIDMapping}, \Rpackage{lumiMouseIDMapping.db} and \Rpackage{lumiRatIDMapping.db} for human, mouse and rat, respectively. 
 
 The purpose of these packages is to provide ID mappings between different types of Illumina identifiers of expression chips and nuIDs, and also mappings from nuIDs to the the most recent RefSeq release. Each library includes the data tables corresponding  to all released Illumian expression chips of a particular species before the package releasing date. In each manifest file table, it includes nuIDs and different types of Illumina IDs: "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "ProbeId" ("Probe\_Id"). It also includes a nuID\_MappingInfo table, which keeps the mapping information of nuID to RefSeq ID and its related mapping quality information. We will describe this part in more details in next sub-section. By using these ID mapping packages, users can also check the original chip information by providing a list of IDs. There is a function  \Rfunction{getChipInfo} in \Rpackage{lumi} package designed for this purpose.
 
 
 Get information of the ID mapping library:
 <<>>=
-  if (require(lumiHumanIDMapping.db))
+  if (require(lumiHumanIDMapping))
  	 lumiHumanIDMapping()
 @
 
@@ -119,7 +119,7 @@ Get chip information of the example data in the \Rpackage{lumi} package.
   ## Load Illumina example data in lumi package
   data(example.lumi)
   ## Match the chip information of this example data
-  if (require(lumiHumanIDMapping.db))
+  if (require(lumiHumanIDMapping))
 	getChipInfo(example.lumi, species='Human')
 @
 
@@ -152,7 +152,7 @@ The nuID\_MappingInfo table also includes mapping from nuID to EntrezID, which w
 
 Get nuID mapping information in the ID mapping package:
 <<>>=
-  if (require(lumiHumanIDMapping.db))
+  if (require(lumiHumanIDMapping))
 	lumiHumanIDMapping_nuID()
 @
 
@@ -160,20 +160,20 @@ Map nuID to RefSeq ID:
 <<>>=
      nuIDs <- featureNames(example.lumi)
       ## return all mapping information
-    if (require(lumiHumanIDMapping.db))
-          nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
+    if (require(lumiHumanIDMapping))
+          nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping', filterTh = c(Strength1 = 95, Uniqueness = 95))
 @
 
 Map nuID to Entrez Gene ID:
 <<>>=
-   if (require(lumiHumanIDMapping.db))
-        nuID2EntrezID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', filterTh = c(Strength1 = 95, Uniqueness = 95))
+   if (require(lumiHumanIDMapping))
+        nuID2EntrezID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping', filterTh = c(Strength1 = 95, Uniqueness = 95))
 @
 
 Return all mapping information related with nuID
 <<>>=
-   if (require(lumiHumanIDMapping.db)) {
-        mappingInfo <- nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping.db', returnAllInfo =TRUE)
+   if (require(lumiHumanIDMapping)) {
+        mappingInfo <- nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping', returnAllInfo =TRUE)
         head(mappingInfo)
    }
 @

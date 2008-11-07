@@ -17,7 +17,7 @@ inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE'
   \item{detectionTh}{ the p-value threshold of determining detectability of the expression. See more details in \code{\link{lumiQ}} }
   \item{na.rm}{ determine whether to remove NA }
   \item{convertNuID}{ determine whether convert the probe identifier as nuID }
-  \item{lib.mapping}{ a Illumina ID mapping package, e.g, lumiHumanIDMapping.db, used by \code{\link{addNuID2lumi}} }
+  \item{lib.mapping}{ a Illumina ID mapping package, e.g, lumiHumanIDMapping, used by \code{\link{addNuID2lumi}} }
   \item{dec}{ the character used in the file for decimal points.}
   \item{parseColumnName}{ determine whether to parse the column names and retrieve the sample information (Assume the sample information is separated by "\_".) }
   \item{checkDupId}{ determine whether to check duplicated TargetIDs or ProbeIds. The duplicated ones will be averaged.}
