@@ -15,7 +15,7 @@ rsn(x.lumi, targetArray = NULL, excludeFold = 2, span = 0.03, ifPlot = FALSE, ..
   \item{excludeFold}{ exclude the genes with fold change larger than "excludeFold" during fitting the curve in normalization }
   \item{span}{ the span parameter used by \code{\link{monoSmu}} }
   \item{ifPlot}{ determine whether to plot intermediate results }
-  \item{\dots} { other parameters used by \code{\link{monoSmu}} }
+  \item{\dots}{ other parameters used by \code{\link{monoSmu}} }
 }
 \details{
 The robust spline normalization (RSN) algorithm combines the features of quantile and loess normalization. It is designed to normalize the variance-stabilized data. The function will check whether the data is variance stabilized (vst or log2 transform), if not, it will automatically run lumiT before run rsn. For details of the algorithm, please see the reference.
