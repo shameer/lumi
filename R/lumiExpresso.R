@@ -35,7 +35,7 @@ function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(method='bgAdjust'
 	}
 	if (QC.evaluation) {
 		if (verbose) cat("\nQuality control after preprocessing ...\n")
-		lumiBatch <- do.call("lumiQ", c(alist(lumiBatch), QC.param))
+		lumiBatch <- do.call(lumiQ, c(alist(lumiBatch), QC.param))
 		if (verbose) cat("done.\n")
 	}
 	return(lumiBatch)

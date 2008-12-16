@@ -90,7 +90,7 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
 		    }
 			if (variance.stabilize) {
 				if (verbose) cat("Variance stabilizing ...\n")
-				afbatch.i <- do.call("lumiT", c(alist(afbatch.i, method = varianceStabilize.method), varianceStabilize.param))
+				afbatch.i <- do.call(lumiT, c(alist(afbatch.i, method = varianceStabilize.method), varianceStabilize.param))
 				if (verbose) cat("done.\n")
 			}
 			if (i == 1) {

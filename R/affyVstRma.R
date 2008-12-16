@@ -30,7 +30,7 @@ affyVstRma <- function (afbatch, bgcorrect.method = 'none', bgcorrect.param = li
 		if (!is(afbatch, 'AffyBatch')) stop('The input is not an AffyBatch object or a valid file list!')
 		if (bgcorrect.method != 'none') {
 			if (verbose)  cat("background correcting...")
-			afbatch <- do.call("bg.correct", c(alist(afbatch, method = bgcorrect.method), bgcorrect.param))
+			afbatch <- do.call(bg.correct, c(alist(afbatch, method = bgcorrect.method), bgcorrect.param))
 			if (verbose)  cat("done.\n")
 		}
 		if (verbose) cat("Variance stabilizing ...\n")
