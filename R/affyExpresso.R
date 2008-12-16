@@ -84,7 +84,7 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
 		    if (bg.correct) {
 		        if (verbose) 
 		            cat("background correcting...")
-					afbatch.i <- do.call("bg.correct", c(alist(afbatch.i, method = bgcorrect.method), bgcorrect.param))
+					afbatch.i <- do.call(bg.correct, c(alist(afbatch.i, method = bgcorrect.method), bgcorrect.param))
 		        if (verbose) 
 		            cat("done.\n")
 		    }
@@ -103,14 +103,14 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
 	    if (bg.correct) {
 	        if (verbose) 
 	            cat("background correcting...")
-	        afbatch <- do.call("bg.correct", c(alist(afbatch, method = bgcorrect.method), 
+	        afbatch <- do.call(bg.correct, c(alist(afbatch, method = bgcorrect.method), 
 	            bgcorrect.param))
 	        if (verbose) 
 	            cat("done.\n")
 	    }
 		if (variance.stabilize) {
 			if (verbose) cat("Variance stabilizing ...\n")
-			afbatch <- do.call("lumiT", c(alist(afbatch), varianceStabilize.param))
+			afbatch <- do.call(lumiT, c(alist(afbatch), varianceStabilize.param))
 			if (verbose) cat("done.\n")
 		}
 	}
@@ -118,7 +118,7 @@ affyExpresso <- function (afbatch, bg.correct = TRUE, bgcorrect.method = NULL, b
     if (normalize) {
         if (verbose) 
             cat("normalizing...")
-        afbatch <- do.call("normalize", c(alist(afbatch, normalize.method), 
+        afbatch <- do.call(normalize, c(alist(afbatch, normalize.method), 
             normalize.param))
         if (verbose) 
             cat("done.\n")

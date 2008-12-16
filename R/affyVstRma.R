@@ -12,12 +12,12 @@ affyVstRma <- function (afbatch, bgcorrect.method = 'none', bgcorrect.param = li
 
 			if (bgcorrect.method != 'none') {
 				if (verbose)  cat("background correcting...")
-				afbatch.i <- do.call("bg.correct", c(alist(afbatch.i, method = bgcorrect.method), bgcorrect.param))
+				afbatch.i <- do.call(bg.correct, c(alist(afbatch.i, method = bgcorrect.method), bgcorrect.param))
 				if (verbose)  cat("done.\n")
 			}
 			if (verbose) cat("Variance stabilizing ...\n")
 	# browser()
-			afbatch.i <- do.call("lumiT", c(alist(afbatch.i), VST.param))
+			afbatch.i <- do.call(lumiT, c(alist(afbatch.i), VST.param))
 
 			if (verbose) cat("done.\n")
 			if (i == 1) {
@@ -34,7 +34,7 @@ affyVstRma <- function (afbatch, bgcorrect.method = 'none', bgcorrect.param = li
 			if (verbose)  cat("done.\n")
 		}
 		if (verbose) cat("Variance stabilizing ...\n")
-		afbatch <- do.call("lumiT", c(alist(afbatch), VST.param))
+		afbatch <- do.call(lumiT, c(alist(afbatch), VST.param))
 		if (verbose) cat("done.\n")
 	}
 	## To avoid double transformation in the rma function

@@ -542,8 +542,8 @@ setMethod('density', signature(x='ExpressionSet'),
 		}
 	}
 	x.density <- apply(expr, 2, density, ...)
-    all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
-    all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
+    all.x <- do.call(cbind, lapply(x.density, function(x) x$x))
+    all.y <- do.call(cbind, lapply(x.density, function(x) x$y))
 
 	if (!is.null(symmetry)) {
 		nr <- nrow(all.x)

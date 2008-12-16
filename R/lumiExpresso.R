@@ -20,17 +20,17 @@ function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(method='bgAdjust'
 	}
 	if (bg.correct) {
 		if (verbose) cat("\nBackground correction ...\n")
-		lumiBatch <- do.call("lumiB", c(alist(lumiBatch), bgcorrect.param))
+		lumiBatch <- do.call(lumiB, c(alist(lumiBatch), bgcorrect.param))
 		if (verbose) cat("done.\n")
 	}
 	if (variance.stabilize) {
 		if (verbose) cat("\nVariance stabilizing ...\n")
-		lumiBatch <- do.call("lumiT", c(alist(lumiBatch), varianceStabilize.param))
+		lumiBatch <- do.call(lumiT, c(alist(lumiBatch), varianceStabilize.param))
 		if (verbose) cat("done.\n")
 	}
 	if (normalize) {
 		if (verbose) cat("\nNormalizing ...\n")
-		lumiBatch <- do.call("lumiN", c(alist(lumiBatch), normalize.param))
+		lumiBatch <- do.call(lumiN, c(alist(lumiBatch), normalize.param))
 		if (verbose) cat("done.\n")
 	}
 	if (QC.evaluation) {
