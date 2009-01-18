@@ -6,12 +6,12 @@
 \description{ Replace the Illumina Id (Target ID or Probe Id) as nuID (nucleotide universal identifier) for indexing genes in the LumiBatch object }
 
 \usage{
-addNuID2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib.mapping = NULL,  annotationColName = c(sequence = "Probe_Sequence", target = "Target", probe='Probe_Id'), verbose = TRUE)
+addNuID2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib.mapping = NULL,  annotationColName = c(sequence = "Probe_Sequence", target = "ILMN_Gene", probe='Probe_Id'), verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ a LumiBatch object }
-  \item{annotationFile}{ a annotation file, which includes the TargetID and probe sequence information}
+  \item{annotationFile}{ a annotation file, which includes the Illumina ID (target or probe ids) and probe sequence information}
   \item{sep}{ the separation used in the annotation file. Automatically detect the separator if it is "," or "\t". }
   \item{lib.mapping}{ a Illumina ID mapping package, e.g, lumiHumanIDMapping }
   \item{annotationColName}{ the annotation column name in the annotation file used for the probe sequence and TargetID and ProbeID }

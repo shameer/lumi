@@ -1,5 +1,5 @@
 `addNuID2lumi` <-
-function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColName=c(sequence='Probe_Sequence', target='Target', probe='Probe_Id'), verbose=TRUE) {
+function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColName=c(sequence='Probe_Sequence', target='ILMN_Gene', probe='Probe_Id'), verbose=TRUE) {
 
     history.submitted <- as.character(Sys.time())
 
@@ -58,22 +58,32 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		## Read in annotation data
 		annotation <- read.table(annotationFile, sep=sep, colClasses="character", header=TRUE, skip=nMetaDataLines,
 		 	blank.lines.skip=TRUE, row.names=NULL, check.names=FALSE, quote=quote, comment.char="", strip.white=TRUE, fill=TRUE)
-
-		colnames(annotation) <- toupper(colnames(annotation))
+		
+		allColName <- toupper(colnames(annotation))
+		colnames(annotation) <- allColName
 		## Create unique Id based on 50mer sequence
-		nuID <- sapply(annotation[, toupper(annotationColName['sequence'])], seq2id)
+		if (toupper(annotationColName['sequence']) %in% allColName) {
+			nuID <- sapply(annotation[, toupper(annotationColName['sequence'])], seq2id)			
+		} else {
+			stop('The "sequence" column cannot be found!\nPlease check the "annotationColName" of "sequence"!\n')
+		}
 		## check the TargetID first
-		ann_target <- annotation[, toupper(annotationColName['target'])]
-		comm_target <- id[id %in% ann_target]
+		comm_target <- NULL
+		if (toupper(annotationColName['target']) %in% allColName) {
+			ann_target <- annotation[, toupper(annotationColName['target'])]
+			comm_target <- id[id %in% ann_target]
+		}
 		if (length(comm_target) == 0) {
 			## check the ProbeID if id does not match the TargetID
-			ann_target <- annotation[, toupper(annotationColName['probe'])]
-			comm_target <- id[id %in% ann_target]
-			if (length(comm_target) == 0) {
-				width <- nchar(ann_target[1])
-				id <- formatC(as.numeric(id), width=width, flag='0', format='d')
+			if (toupper(annotationColName['probe']) %in% allColName) {
+				ann_target <- annotation[, toupper(annotationColName['probe'])]
 				comm_target <- id[id %in% ann_target]
-				if (length(comm_target) == 0) stop('The annotation file does not match the data!\n')
+				if (length(comm_target) == 0) {
+					width <- nchar(ann_target[1])
+					id <- formatC(as.numeric(id), width=width, flag='0', format='d')
+					comm_target <- id[id %in% ann_target]
+					if (length(comm_target) == 0) stop('The annotation file does not match the data!\n')
+				}
 			}
 		} 
 		if (length(comm_target) < length(id)) {
