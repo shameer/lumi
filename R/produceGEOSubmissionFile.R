@@ -1,5 +1,5 @@
 `produceGEOSubmissionFile` <-
-function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE) {
+function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE, ...) {
 	if (missing(lumiNormalized) || missing(lumiRaw) || missing(lib.mapping)) stop('Please provide all required input parameters!\n')
 	expr.norm <- exprs(lumiNormalized)
 	detect <- detection(lumiRaw)
@@ -21,7 +21,7 @@ function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSub
 		probeId <- nuID
 		nuID <- NULL
 	} else {
-		probeId <- nuID2probeID(nuID, lib=lib.mapping)		
+		probeId <- nuID2probeID(nuID, lib=lib.mapping, ...)		
 	}
 	
 	sampleID <- sampleInfo[, "sampleID"]
@@ -33,6 +33,7 @@ function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSub
 			cat('^SAMPLE =', sampleTitle[i], '\n', sep='', file=fileName, append=TRUE)			
 		}
 		sampleInfo.i <- paste('!', sampleInfoTitle[-1], ' = ', sampleInfo[i,-1], '\n', sep='', collapse='')
+		sampleInfo.i <- gsub("'", "\\'", sampleInfo.i)
 		cat(sampleInfo.i, file=fileName, append=TRUE, sep='')
 		tableHead <- "ID_REF"
 		cat("#ID_REF = \n", file=fileName, append=TRUE)

@@ -224,8 +224,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	ind <- grep(columnNameGrepPattern$exprs, header, ignore.case=TRUE)
 	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!\n')
 	exprs <- as.matrix(allData[,ind])
-	if (!is.numeric(exprs[1])) {
-		exprs <- matrix(as.numeric(exprs), nrow=nrow(allData))
+	if (!is.double(exprs[1])) {
+		exprs <- matrix(as.double(exprs), nrow=nrow(allData))
 	} 
 	colnames(exprs) <- header[ind]
 	
@@ -240,8 +240,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		 # stop('Input data format unrecognizable!\nThere is no column name contains "BEAD_STDEV"!\n')
 	} else {
 		se.exprs <- as.matrix(allData[,ind])
-		if (!is.numeric(se.exprs[1])) {
-			se.exprs <- matrix(as.numeric(se.exprs), nrow=nrow(allData))
+		if (!is.double(se.exprs[1])) {
+			se.exprs <- matrix(as.double(se.exprs), nrow=nrow(allData))
 		}
 		colnames(se.exprs) <- header[ind]
 	}
@@ -255,8 +255,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		detection <- NULL
 	} else {
 		detection <- as.matrix(allData[,ind])
-		if (!is.numeric(detection[1])) {
-			detection <- matrix(as.numeric(detection), nrow=nrow(allData))
+		if (!is.double(detection[1])) {
+			detection <- matrix(as.double(detection), nrow=nrow(allData))
 		}
 		colnames(detection) <- header[ind]
     
@@ -274,8 +274,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		beadNum <- NULL
 	} else {
 	    beadNum <- as.matrix(allData[,ind])
-		if (!is.numeric(beadNum[1])) {
-			beadNum <- matrix(as.numeric(beadNum), nrow=nrow(allData))
+		if (!is.double(beadNum[1])) {
+			beadNum <- matrix(as.double(beadNum), nrow=nrow(allData))
 		} 
 		colnames(beadNum) <- header[ind]
 	}
