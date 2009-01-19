@@ -12,7 +12,7 @@ addNuID2lumi(x.lumi, annotationFile=NULL, sep = NULL, lib.mapping = NULL,  annot
 \arguments{
   \item{x.lumi}{ a LumiBatch object }
   \item{annotationFile}{ a annotation file, which includes the Illumina ID (target or probe ids) and probe sequence information}
-  \item{sep}{ the separation used in the annotation file. Automatically detect the separator if it is "," or "\t". }
+  \item{sep}{ the separation used in the annotation file. Automatically detect the separator if it is "," or "\\t". }
   \item{lib.mapping}{ a Illumina ID mapping package, e.g, lumiHumanIDMapping }
   \item{annotationColName}{ the annotation column name in the annotation file used for the probe sequence and TargetID and ProbeID }
   \item{verbose}{ a boolean to decide whether to print out some messages }

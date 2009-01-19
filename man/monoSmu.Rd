@@ -28,7 +28,7 @@ function called by lumiN.rsn. The function first fits a monotonic spline between
 Return the transformed "newX" based on the smoothed curve
 }
 \references{ 
-Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transformation for Illumina Microarray Data}, submitted
+Lin, S.M., Du, P., Kibbe, W.A., (2008) 'Model-based  Variance-stabilizing Transformation for Illumina Microarray Data', Nucleic Acids Res. 36, e11
 }
 \author{ Simon Lin, Pan Du }
 

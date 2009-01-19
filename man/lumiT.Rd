@@ -29,7 +29,7 @@ Return a LumiBatch object with transformed expression values. It also includes t
 	
 }
 \references{
- Lin, S.M., Du, P., Kibbe, W.A.,  {\it Model-based Variance-stabilizing Transformation for Illumina Microarray Data}, submitted
+ Lin, S.M., Du, P., Kibbe, W.A., (2008) 'Model-based  Variance-stabilizing Transformation for Illumina Microarray Data', Nucleic Acids Res. 36, e11
  }
 \author{ Pan Du, Simon Lin }
 
