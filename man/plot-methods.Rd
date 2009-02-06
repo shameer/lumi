@@ -22,7 +22,9 @@ Creating quality control plots of a LumiBatch object
 }
 
 \details{
-The parameter "what" of \code{plot} function controls the type of QC plots, which includes:
+The parameter "what" of \code{plot} function controls the type of QC plots,
+which includes:
+\describe{
 \item{\bold{density}:}{ the density plot of the chips, see \code{\link{hist-methods}}}
 \item{\bold{boxplot}:}{ box plot of the chip intensities, see \code{\link{boxplot-methods}}}
 \item{\bold{pair}:}{ the correlation among chips, plot as a hierarchical tree, see \code{\link{pairs-methods}}}
@@ -32,7 +34,7 @@ The parameter "what" of \code{plot} function controls the type of QC plots, whic
 	\code{\link{detectOutlier}}}
 \item{\bold{cv}:}{ the density plot of the coefficients of variance of the chips. See \code{\link{estimateLumiCV}}}
 }
-
+}
 \seealso{ 
 \code{\link{LumiBatch-class}}, \code{\link{hist-methods}}, \code{\link{boxplot-methods}}, \code{\link{MAplot-methods}},
  	\code{\link{pairs-methods}}, \code{\link{plotSampleRelation}}, \code{\link{estimateLumiCV}}, \code{\link{detectOutlier}} 
