@@ -1,13 +1,13 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib.mapping = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
-	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='Detection', beadNum='Avg_NBEADS'),
+	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='DETECTION', beadNum='Avg_NBEADS'),
 	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose=TRUE, ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
 	## 'exprs' and 'se.exprs' related columns are required
 	if (is.null(columnNameGrepPattern$exprs)) columnNameGrepPattern$exprs <- 'AVG_SIGNAL'
 	if (is.null(columnNameGrepPattern$se.exprs)) columnNameGrepPattern$se.exprs <- 'BEAD_STD'
-	if (is.null(columnNameGrepPattern$detection)) columnNameGrepPattern$detection <- 'Detection'
+	if (is.null(columnNameGrepPattern$detection)) columnNameGrepPattern$detection <- 'DETECTION'
 	if (is.null(columnNameGrepPattern$beadNum)) columnNameGrepPattern$beadNum <- 'Avg_NBEADS'
 
 	if (is.na(columnNameGrepPattern$exprs)) {
@@ -388,7 +388,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		varMetadata <- data.frame(labelDescription=c(varMetadata$labelDescription, names(annotationInfo)))
 		varName <- c(varName, names(annotationInfo))
 	}
-	rownames(varMetadata) <- varName
+	rownames(varMetadata) <- make.names(varName, unique=T)
 	if (checkDupId)	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
@@ -491,7 +491,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		annotation(x.lumi) <- switch(tolower(species),
 				'homo sapiens'='lumiHumanAll.db',
 				'mus musculus'='lumiMouseAll.db',
-				'rattus norvegicus'='lumiRatAll.db')
+				'rattus norvegicus'='lumiRatAll.db',
+				'human'='lumiHumanAll.db',
+				'mouse'='lumiMouseAll.db',
+				'rat'='lumiRatAll.db',
+				'NA')
 	}
 	
 	## initialize the QC slot in the LumiBatch object

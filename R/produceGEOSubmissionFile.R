@@ -1,6 +1,6 @@
 `produceGEOSubmissionFile` <-
-function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE, ...) {
-	if (missing(lumiNormalized) || missing(lumiRaw) || missing(lib.mapping)) stop('Please provide all required input parameters!\n')
+function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE, ...) {
+	if (missing(lumiNormalized) || missing(lumiRaw)) stop('Please provide all required input parameters!\n')
 	expr.norm <- exprs(lumiNormalized)
 	detect <- detection(lumiRaw)
 	se.expr <- se.exprs(lumiRaw)
@@ -17,11 +17,19 @@ function(lumiNormalized, lumiRaw, lib.mapping, sampleInfo=NULL, fileName='GEOSub
 	if (any(sapply(sampleInfo[-1,-1], nchar) == 0)) stop('No blank fields are allowed in the sampleInfo table!\nYou can check some example submissions, like GSM296418, at the GEO website.\n')
 	if (supplementaryRdata) sampleInfo[, "Sample_supplementary_file"] <- 'supplementaryData.Rdata'
 	nuID <- featureNames(lumiNormalized)
-	if (!all(is.nuID(sample(nuID, 100)))) {
+	if (length(which(is.nuID(sample(nuID, 100)))) < 20) {
 		probeId <- nuID
 		nuID <- NULL
 	} else {
-		probeId <- nuID2probeID(nuID, lib=lib.mapping, ...)		
+		if (!is.null(lib.mapping)) {
+			probeId <- nuID2IlluminaID(nuID, lib=lib.mapping, idType=idType, ...)
+		} 
+		# else {
+		# 	fData <- pData(featureData(lumiRaw))
+		# 	if (!is.null(fData[,ID])) {
+		# 		probeId <- fData[,ID]
+		# 	}
+		# }
 	}
 	
 	sampleID <- sampleInfo[, "sampleID"]
