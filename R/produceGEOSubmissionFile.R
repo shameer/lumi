@@ -14,16 +14,18 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 		stop('Please provide correct sample information (a data.frame, matrix, or sampleInfo file)!\n')
 	}
 	sampleInfoTitle <- colnames(sampleInfo)
-	if (any(sapply(sampleInfo[-1,-1], nchar) == 0)) stop('No blank fields are allowed in the sampleInfo table!\nYou can check some example submissions, like GSM296418, at the GEO website.\n')
+	if (any(sapply(sampleInfo[,-1, drop=F], nchar) == 0)) stop('No blank fields are allowed in the sampleInfo table!\nYou can check some example submissions, like GSM296418, at the GEO website.\n')
 	if (supplementaryRdata) sampleInfo[, "Sample_supplementary_file"] <- 'supplementaryData.Rdata'
 	nuID <- featureNames(lumiNormalized)
+	probeId <- nuID
 	if (length(which(is.nuID(sample(nuID, 100)))) < 20) {
-		probeId <- nuID
 		nuID <- NULL
 	} else {
 		if (!is.null(lib.mapping)) {
 			probeId <- nuID2IlluminaID(nuID, lib=lib.mapping, idType=idType, ...)
-		} 
+		} else {
+			nuID <- NULL
+		}
 		# else {
 		# 	fData <- pData(featureData(lumiRaw))
 		# 	if (!is.null(fData[,ID])) {

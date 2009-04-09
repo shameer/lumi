@@ -225,9 +225,8 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	## convert the names as index to avoid some potential problems of name inconsistency
 	if (!missing(j)) {
 		if (is.character(j)) {
-			sampleId <- sampleNames(x)
-			ind <- seq(sampleId)
-			names(ind) <- sampleId
+			ind <- seq(sampleName)
+			names(ind) <- sampleName
 			j <- ind[j]
 		}	
 	}
@@ -248,12 +247,30 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 	if (!missing(j)) {
 		if (!is.null(x@QC)) {
 			QC <- x@QC
-			if (!is.null(QC$sampleSummary))
-				if (ncol(QC$sampleSummary) == ddim[2])
-					QC$sampleSummary <- QC$sampleSummary[,j,drop=FALSE]
-			if (!is.null(QC$BeadStudioSummary))
-				if (nrow(QC$BeadStudioSummary) == ddim[2])
-					QC$BeadStudioSummary <- QC$BeadStudioSummary[j,,drop=FALSE]
+			if (!is.null(QC$sampleSummary)) {
+				sampleSummary <- QC$sampleSummary
+				if (ncol(sampleSummary) == ddim[2]) {
+					QC$sampleSummary <- sampleSummary[,j,drop=FALSE]
+				} else if (ncol(sampleSummary) > 0) {
+					if (all(sampleName %in% colnames(sampleSummary))) {
+						QC$sampleSummary <- sampleSummary[,sampleName[j],drop=FALSE]
+					} else {
+						warning('The sampleSummary in QC slot does not match the sampleNames.\nThe subsetting did not execute on sampleSummary.\n')
+					}
+				}
+			}
+			if (!is.null(QC$BeadStudioSummary)) {
+				BeadStudioSummary <- QC$BeadStudioSummary
+				if (nrow(BeadStudioSummary) == ddim[2]) {
+					QC$BeadStudioSummary <- BeadStudioSummary[j,,drop=FALSE]
+				} else if (nrow(BeadStudioSummary) > 0) {
+					if (all(sampleName %in% rownames(BeadStudioSummary))) {
+						QC$BeadStudioSummary <- BeadStudioSummary[sampleName[j],,drop=FALSE]
+					} else {
+						warning('The BeadStudioSummary in QC slot does not match the sampleNames.\nThe subsetting did not execute on BeadStudioSummary.\n')
+					}
+				}
+			}
 			x@QC <- QC
 		}
 		if (!is.null(attr(x, 'vstParameter'))) {
@@ -269,8 +286,11 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 		## controlData information
 		if (nrow(x@controlData) > 0) {
 			if (is.numeric(j))  j <- sampleName[j]
-			if (all(j %in% colnames(x@controlData)))
+			if (all(j %in% colnames(x@controlData))) {
 				x@controlData <- x@controlData[,j, drop=FALSE]
+			} else {
+				warning('The controlData slot does not match the sampleNames.\nThe subsetting did not execute on controlData.\n')
+			}
 		}
 	}
 
@@ -288,7 +308,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 setMethod("combine", signature=c(x="LumiBatch", y="ExpressionSet"), function(x, y, ...) 
 {
 	if (missing(y)) return(x)
-	warning('The Lumibatch object was forced as ExpressionSet!')
+	warning('The Lumibatch object was forced as ExpressionSet.')
 	x <- as(x, 'ExpressionSet')
 	if (length(list(...)) > 0) 
 	        return(combine(x, combine(y, ...)))
@@ -298,7 +318,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="ExpressionSet"), function(x, 
 setMethod("combine", signature=c(x="ExpressionSet", y="LumiBatch"), function(x, y, ...) 
 {
 	if (missing(y)) return(x)
-	warning('The Lumibatch object was forced as ExpressionSet!')
+	warning('The Lumibatch object was forced as ExpressionSet.')
 	y <- as(y, 'ExpressionSet')
 	if (length(list(...)) > 0) 
 	        return(combine(x, combine(y, ...)))
@@ -314,12 +334,12 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 		stop(paste("objects must be the same class, but are ",
                  class(x), ", ", class(y), sep=""))
 	
-	if (any(sort(featureNames(x)) != sort(featureNames(y)))) stop('Two data sets have different row names!')
+	if (any(sort(featureNames(x)) != sort(featureNames(y)))) stop('Two data sets have different row names.')
 	## determine whether there are duplicated sample names
 	sampleName.x <- sampleNames(x)
 	sampleName.y <- sampleNames(y)
 	if (any(sampleName.x %in% sampleName.y)) {
-		warning('Two data sets have some duplicated sample names!\n "_2" were attached to the duplicated sample names!')
+		warning('Two data sets have some duplicated sample names.\n "_2" were attached to the duplicated sample names.')
 		sampleName.x <- sampleNames(x)   # paste(sampleNames(x), '_1', sep='')
 		sampleName.y <- paste(sampleNames(y), '_2', sep='')
 		sampleNames(x) <- sampleName.x
@@ -330,9 +350,9 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	featureName.com <- featureName.x[featureName.x %in% featureName.y]
 	if (length(featureName.com) < length(featureName.x) || length(featureName.com) != length(featureName.y)) {
 		if (length(featureName.com) > 0) {
-			warning('Two data sets have different featureNames, only the common ones were used!')			
+			warning('Two data sets have different featureNames, only the common ones were used.')			
 		} else {
-			stop('Two data sets have totally different featureNames!')
+			stop('Two data sets have totally different featureNames.')
 		}
 	}
 	## make sure two data sets have the sample order of features
@@ -458,7 +478,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 		expr <- log2(expr)
 	} 
 	if (!is.null(subset)) {
-		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (!is.numeric(subset)) stop('subset should be numeric.')
 		if (length(subset) == 1) {
 			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
@@ -502,7 +522,7 @@ setMethod('density', signature(x='ExpressionSet'),
 	} else if (is.numeric(x)) {
 		expr <- as.matrix(x)
 	} else {
-		stop('Un-supported class of x!')
+		stop('Un-supported class of x.')
 	}
 		
     if (logMode && (max(expr, na.rm=TRUE) > 50)) {
@@ -520,7 +540,7 @@ setMethod('density', signature(x='ExpressionSet'),
         xlab <- "intensity"
 
 	if (!is.null(subset)) {
-		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (!is.numeric(subset)) stop('subset should be numeric.')
 		if (length(subset) == 1) {
 			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
@@ -535,7 +555,7 @@ setMethod('density', signature(x='ExpressionSet'),
 	if (!is.null(symmetry)) {
 		x.range <- range(expr)
 		if (symmetry > x.range[1] && symmetry < x.range[2]) {
-			warning('symmetry point should not be within the range of x!')
+			warning('symmetry point should not be within the range of x.')
 			symmetry <- NULL
 		} else {
 			expr <- rbind(expr, 2*symmetry - expr)
@@ -559,7 +579,7 @@ setMethod('density', signature(x='ExpressionSet'),
 	matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, lty=lty, lwd=lwd, xlim=xlim, main=main)
 	if (!is.null(index.highlight)) {
 		if (index.highlight > ncol(all.x) || index.highlight < 1) {
-			warning('Highlight index out of range!')
+			warning('Highlight index out of range.')
 			index.highlight <- 1
 		}
 		lines(all.x[,index.highlight], all.y[,index.highlight], col=color.highlight, lwd=2, lty=1)
@@ -652,7 +672,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	}
 
 	if (!is.null(subset)) {
-		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (!is.numeric(subset)) stop('subset should be numeric.')
 		if (length(subset) == 1) {
 			subset <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
@@ -690,7 +710,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 		}
 	}
 	if (!is.null(subset)) {
-		if (!is.numeric(subset)) stop('subset should be numeric!')
+		if (!is.numeric(subset)) stop('subset should be numeric.')
 		if (length(subset) == 1) {
 			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
 		} else {
@@ -716,7 +736,7 @@ setMethod('plot',
 	function(x, what=c('density', 'boxplot', 'pair', 'MAplot', 'sampleRelation', 'outlier', 'cv'), main, ...)
 {
 	object <- x
-	if (!is(object, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
+	if (!is(object, 'LumiBatch')) stop('The object should be class "LumiBatch".')
 	what <- match.arg(what)
 
 	if (what == 'density') {
@@ -739,7 +759,7 @@ setMethod('plot',
 	} else if (what == 'outlier') {
 		detectOutlier(object, ifPlot=TRUE, ...)
 	} else {
-		print('Unsupported !')
+		print('Unsupported .')
 	}
 	return(invisible(TRUE))	
 })

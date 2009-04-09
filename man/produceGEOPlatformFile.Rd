@@ -6,13 +6,14 @@
 	Produce GEO Sample Submission File in SOFT format based on the provided LumiBatch object and Illumina ID Mapping library
 }
 \usage{
-produceGEOPlatformFile(x.lumi, lib.mapping = NULL, nuIDMode = FALSE, fileName = "GEOPlatformFile.txt")
+produceGEOPlatformFile(x.lumi, lib.mapping = NULL, nuIDMode = TRUE, includeAllChipProbe=FALSE, fileName = "GEOPlatformFile.txt")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x.lumi}{ The LumiBatch object keeping all probes }
   \item{lib.mapping}{ The Illumina ID Mapping library, e.g., "lumiHumanIDMapping" }
   \item{nuIDMode}{ Determine whether producing the platform indexed by nuID }
+  \item{includeAllChipProbe}{ Determine whether including all probes in the Manifest file or just the probes used in the x.lumi object }
   \item{fileName}{ Filename of the GEO Platform File name }
 }
 \details{
@@ -27,7 +28,8 @@ Save the result as a text file in SOFT platform submission format.
 
 \seealso{ \code{\link{produceGEOSubmissionFile}} }
 \examples{
-
+# data(example.lumi)
+# produceGEOPlatformFile(example.lumi, lib.mapping='lumiHumanIDMapping')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

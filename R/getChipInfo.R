@@ -146,14 +146,17 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 						allID <- bestTable[,fieldName.match[1]]					
 					}
 					selInputID <- inputID[inputID %in% allID]
-					if (fieldName.match[1] == 'nuID') {
-						bestTable <- bestTable[, names(bestTable) != 'nuID']
-						rownames(bestTable) <- nuID
-						mapping <- as.matrix(bestTable[selInputID, ])
-					} else {
-						names(nuID) <- allID
-						mapping <- nuID[selInputID]
-					}
+					
+					rownames(bestTable) <- allID
+					mapping <- as.matrix(bestTable[selInputID, ])
+					# if (fieldName.match[1] == 'nuID') {
+					# 	bestTable <- bestTable[, names(bestTable) != 'nuID']
+					# 	rownames(bestTable) <- nuID
+					# 	mapping <- as.matrix(bestTable[selInputID, ])
+					# } else {
+					# 	names(nuID) <- allID
+					# 	mapping <- nuID[selInputID]
+					# }
 					## match the original input IDs
 					mapping <- matchInputID(mapping, inputID.bak)
 				}

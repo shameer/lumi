@@ -1,16 +1,21 @@
 `produceGEOPlatformFile` <-
-function(x.lumi, lib.mapping=NULL, nuIDMode=FALSE, fileName='GEOPlatformFile.txt') {
+function(x.lumi, lib.mapping=NULL, nuIDMode=TRUE, includeAllChipProbe=FALSE, fileName='GEOPlatformFile.txt') {
 
-	chipInfo <- getChipInfo(x.lumi, lib.mapping=lib.mapping)
-	chipVersion <- chipInfo$chipVersion[1]
-	chipInfo <- getChipInfo(NULL, lib.mapping=lib.mapping, chipVersion=chipVersion, idMapping=TRUE)
+	if (includeAllChipProbe) {
+		chipInfo <- getChipInfo(x.lumi, lib.mapping=lib.mapping)
+		chipVersion <- chipInfo$chipVersion[1]
+		chipInfo <- getChipInfo(NULL, lib.mapping=lib.mapping, chipVersion=chipVersion, idMapping=TRUE)
+	} else {
+		chipInfo <- getChipInfo(x.lumi, lib.mapping=lib.mapping, idMapping=TRUE)
+		chipVersion <- chipInfo$chipVersion[1]
+	}
 	idMapping <- chipInfo$idMapping
 	chipVersion <- sub("(_V[0-9.]*)_.*$", "\\1", chipVersion)
 	organism <- switch(chipInfo$species,
 		'Rat'='Rattus norvegicus',
 		'Human'="Homo sapiens",
 		'Mouse'='Mus musculus')
-	
+
 	platformInfoTitle <- c("Platform_title", "Platform_technology", "Platform_distribution", "Platform_organism", "Platform_manufacturer", "Platform_manufacture_protocol", "Platform_description")
 	platformInfo <- c(paste("Illumina expression beadchip", chipVersion), "oligonucleotide beads", "commercial", organism, "Illumina Inc.", "see manufacturer's website", "see manufacturer's website")
 	if (nuIDMode) {
@@ -22,9 +27,9 @@ function(x.lumi, lib.mapping=NULL, nuIDMode=FALSE, fileName='GEOPlatformFile.txt
 	headerDef <- c("Illumina Probe ID", "nucleotide universal NUcleotide (convertible to and from probe sequence)", "Illumina Gene ID", "Internal id useful for custom design array", "Genbank accession number", "Gene Symbol", "Probe Sequence")
 	
 
-	cat('^PLATFORM =', platformInfo[1], '\n', file=fileName, append=FALSE)
+	cat('^PLATFORM =', platformInfo[1], '\n', sep='', file=fileName, append=FALSE)
 	platformInfoPrint <- paste('!', platformInfoTitle, ' = ', platformInfo, '\n', sep='')
-	cat(platformInfoPrint, file=fileName, append=TRUE)
+	cat(platformInfoPrint, file=fileName, sep='', append=TRUE)
 	mapName <- colnames(idMapping)
 	nuID <- idMapping[, 'nuID']
 	probeSequence <- id2seq(nuID)
@@ -44,9 +49,9 @@ function(x.lumi, lib.mapping=NULL, nuIDMode=FALSE, fileName='GEOPlatformFile.txt
 	mappingInfo <- rbind(headerTitle, mappingInfo)
 	
 	platformInfoPrint <- paste('#', headerTitle, ' = ', headerDef, '\n', sep='')
-	cat(platformInfoPrint, file=fileName, append=TRUE)
-	cat("!platform_table_begin\n", file=fileName, append=TRUE)
+	cat(platformInfoPrint, file=fileName, sep='', append=TRUE)
+	cat("!platform_table_begin\n", file=fileName, sep='', append=TRUE)
 	write.table(mappingInfo, sep='\t', quote=FALSE, file=fileName, append=TRUE, col.names=FALSE, row.names=FALSE)
-	cat("!platform_table_end\n", file=fileName, append=TRUE)
+	cat("!platform_table_end\n", file=fileName, sep='', append=TRUE)
 }
 

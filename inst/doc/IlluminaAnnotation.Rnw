@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{lumi}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, annotate, Biobase, lumiHumanAll.db}
+%\VignetteDepends{lumi, annotate, Biobase}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}
@@ -190,28 +190,34 @@ Get gene symbols:
 <<>>=
      data(example.lumi)
      nuIDs <- featureNames(example.lumi)
-     getSYMBOL(nuIDs[1:3], 'lumiHumanAll.db')
+     if (require(lumiHumanAll.db))
+     	getSYMBOL(nuIDs[1:3], 'lumiHumanAll.db')
 @
 
 Get Entrez Gene ID:
 <<>>=
-     getEG(nuIDs[1:3], 'lumiHumanAll.db')
+     if (require(lumiHumanAll.db))
+    	 getEG(nuIDs[1:3], 'lumiHumanAll.db')
 @
 
 Get related GO categories:
 <<>>=
-     goInfo <- getGO(nuIDs[1], 'lumiHumanAll.db')
-     goInfo[[1]][[1]]
+     if (require(lumiHumanAll.db)) {
+ 	 goInfo <- getGO(nuIDs[1], 'lumiHumanAll.db')
+	 goInfo[[1]][[1]]
+     }
 @
     
 A general look up function
 <<>>=
-     lookUp(nuIDs[1:3], "lumiHumanAll.db", what="SYMBOL")
+     if (require(lumiHumanAll.db))
+     	lookUp(nuIDs[1:3], "lumiHumanAll.db", what="SYMBOL")
 @
 
 Check what annotation elements available in the library
 <<>>=
-     ls('package:lumiHumanAll.db')
+     if (require(lumiHumanAll.db))
+	ls('package:lumiHumanAll.db')
 @
 
 

@@ -6,7 +6,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 	## check whether the object is nuID annotated.
 	exprs <- exprs(x.lumi)
 	id <- rownames(exprs)
-	if(all(sapply(id[1:20], is.nuID))) {
+	if(all(sapply(id[1:50], is.nuID))) {
 		if (verbose) cat('The lumiBatch object is already nuID annotated!\n')
 		return(x.lumi)
 	}
@@ -18,9 +18,18 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 	}
 
 	newId <- id
+
 	## ---------------------------------------
-	## identify the Metadata lines 
-	if (!is.null(annotationFile)) {
+	## First check whether probe sequence information is available 
+	annotation <- pData(featureData(x.lumi))
+	names(annotation) <- toupper(names(annotation))
+	if (toupper(annotationColName['sequence']) %in% names(annotation)) {
+		sequence <- annotation[, toupper(annotationColName['sequence'])]
+		cat('Directly converting probe sequence to nuIDs ...\n')
+		newId <- sapply(sequence, seq2id)
+		names(newId) <- id				
+	} else if (!is.null(annotationFile)) {
+		## identify the Metadata lines 
 		info <- readLines(annotationFile, n=10)    # take the first 10 lines to have a taste
 
 		## Use annotationColName[1] as an indicator of Where the metaData stops
@@ -144,7 +153,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 			newId[naInd] <- id[naInd]
 		} else {
 			chipInfo <- getChipInfo(featureNames(x.lumi), lib.mapping=lib.mapping, idMapping=TRUE, verbose=FALSE)
-			newId <- chipInfo$idMapping
+			newId <- chipInfo$idMapping[,'nuID']
 			naInd <- which(is.na(newId))
 			if (length(naInd) > 0) {
 				newId[naInd] <- id[naInd]
@@ -170,20 +179,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 					'Rat'='lumiRatAll.db')
 		}
 	} else {
-		annotation <- pData(featureData(x.lumi))
-		names(annotation) <- toupper(names(annotation))
-		if (!is.null(annotation)) {
-			if ('PROBE_SEQUENCE' %in% names(annotation)) {
-				sequence <- annotation[, 'PROBE_SEQUENCE']
-				cat('Directly converting probe sequence to nuIDs ...\n')
-				newId <- sapply(sequence, seq2id)
-				names(newId) <- id				
-			} else {
-				if (verbose) cat('Probe sequence information is not available in the data file.\n No nuID conversion was conducted.\n')
-			}
-		} else {
-			cat('Please provide the annotation file or lumi annotation library!\n')
-		}
+		cat('Please provide the annotation file or lumi annotation library!\n')
 	}
 	if (all(newId == id)) {
 		conversion <- FALSE
