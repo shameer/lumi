@@ -44,7 +44,7 @@ One problem of Illumina identifiers (both Illumina gene identifiers and Illumina
 
 <<Loading required libraries, eval=T>>=
 library(lumi)
-library(lumiHumanAll.db)
+# library(lumiHumanAll.db)
 @
 
 
