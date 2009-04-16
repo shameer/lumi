@@ -50,7 +50,6 @@ The evaluation requires the users to install packages: \Rpackage{lumi}, \Rpackag
 library("lumi")
 library("vsn")
 library("genefilter")
-library("geneplotter")
 library("RColorBrewer")
 library("limma")
 library("lumiBarnes")
@@ -139,7 +138,6 @@ normDataList <- list('VST-Quantile'=exprs(x.lumi.vst.quantile),
 	            'VSN'=exprs(x.lumi.vsn))		# , 'VSN-Quantile'=vsn.quantile)
 
 ## scatter plots: 
-## library("geneplotter")
 ## pairs(exprs(x.lumi.vsn), panel=function(...){par(new=TRUE);smoothScatter(..., nrpoints=0)})
 @
   

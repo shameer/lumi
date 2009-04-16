@@ -610,7 +610,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, main=NULL) 
 {
 	upperPanel <- function(x, y, fold=2) {
-		if (smoothScatter && require(geneplotter)) {
+		if (smoothScatter) {
 			par(new=TRUE)
 			smoothScatter(x[subset], y[subset], main='')
 		} else {
@@ -652,7 +652,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	    rect(breaks[-nB], 0, breaks[-1], y, col="cyan")
 	}
 
-	if (smoothScatter && require(geneplotter)) subset <- NULL
+	if (smoothScatter) subset <- NULL
 	expr <- exprs(x)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
@@ -691,7 +691,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 setMethod("MAplot", signature(object="ExpressionSet"), 
 	function(object, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, main=NULL) 
 {
-	if (smoothScatter && require(geneplotter)) subset <- NULL
+	if (smoothScatter) subset <- NULL
 	expr <- exprs(object)
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
@@ -723,7 +723,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 	if (length(subset) < nrow(expr) && is.null(main)) 
 		main <- paste('Pair plot based on', length(subset), 'random sampling.')
 
-	if (smoothScatter && require(geneplotter)) {
+	if (smoothScatter) {
 		mva.pairs(expr[index, ], log.it=FALSE, plot.method='smoothScatter', main=main, ...)
 	} else {
 		mva.pairs(expr[index, ], log.it=FALSE, plot.method='normal', main=main, ...)

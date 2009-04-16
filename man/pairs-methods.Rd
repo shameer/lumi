@@ -14,14 +14,14 @@
 \arguments{
 	\item{x}{ a \code{\link[Biobase]{ExpressionSet}} object}
 	\item{\dots}{ optional arguments to \code{\link[graphics]{pairs}}.}
-	\item{smoothScatter}{ whether use \code{\link[geneplotter]{smoothScatter}} function to plot points}	
+	\item{smoothScatter}{ whether use \code{\link[graphics]{smoothScatter}} function to plot points}	
 	\item{logMode}{ whether plot the data in log2 scale }
 	\item{subset}{subset of rows used to plot. It can be an index vector, or the length of a random subset}
 	\item{main}{ title of the plot }	
 }
 
 \details{
-To increase the plot efficiency, by default, we only plot RANDOMLY selected subset of points (based on parameter "subset"). If users want to plot all the points, they can set the parameter "subset = NULL". When smoothScatter is set as TRUE, the subsetting will be suppressed because \code{\link[geneplotter]{smoothScatter}} function has good plot efficiency for large number of points.
+To increase the plot efficiency, by default, we only plot RANDOMLY selected subset of points (based on parameter "subset"). If users want to plot all the points, they can set the parameter "subset = NULL". When smoothScatter is set as TRUE, the subsetting will be suppressed because \code{\link[graphics]{smoothScatter}} function has good plot efficiency for large number of points.
 }
 
 \seealso{
@@ -33,8 +33,7 @@ data(example.lumi)
 
 pairs(example.lumi)
 
-if (require(geneplotter))
-	pairs(example.lumi, smoothScatter=TRUE)
+pairs(example.lumi, smoothScatter=TRUE)
 }
 \keyword{methods}
 \keyword{hplot}
