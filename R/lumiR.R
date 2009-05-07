@@ -300,18 +300,18 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			rmInd <- NULL
 			for (dupId.i in dupId) {
 				selInd.i <- which(id == dupId.i)
-				exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,])
+				exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,,drop=FALSE])
 				if (is.null(beadNum)) {
-					se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,])
+					se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,,drop=FALSE])
 				} else {
-					totalBead.i <- colSums(beadNum[selInd.i,])
+					totalBead.i <- colSums(beadNum[selInd.i,,drop=FALSE])
 					beadNum[selInd.i[1],] <- totalBead.i				
-					temp <- colSums(se.exprs[selInd.i,]^2 * (beadNum[selInd.i,] - 1))
+					temp <- colSums(se.exprs[selInd.i,,drop=FALSE]^2 * (beadNum[selInd.i,,drop=FALSE] - 1))
 					temp <- temp / (totalBead.i - length(selInd.i))
-					se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,])))
+					se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,,drop=FALSE])))
 				}
 				if (!is.null(detection)) {
-					detection[selInd.i[1],] <- apply(detection[selInd.i,], 2, max)
+					detection[selInd.i[1],] <- apply(detection[selInd.i,,drop=FALSE], 2, max)
 				}
 				rmInd <- c(rmInd, selInd.i[-1])
 			}

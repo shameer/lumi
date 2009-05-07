@@ -12,11 +12,11 @@ nuID2RefSeqID(nuID = NULL, lib.mapping, filterTh = c(Strength1 = 95, Uniqueness 
 \arguments{
   \item{nuID}{ a vector of nuIDs. If it is NULL, all mappings will be returned. }
   \item{lib.mapping}{ the ID mapping library }
-  \item{filterTh}{ the mapping quality filtering threshold used to filter the ID mapping. }
+  \item{filterTh}{the mapping quality filtering threshold used to filter the ID mapping. Obsolete for lumi ID mapping package > version 1.3!}
   \item{returnAllInfo}{ determine to return the detailed mapping information or just the matched RefSeq IDs }
 }
 \details{
-  This function is based on the return of \code{\link{getNuIDMappingInfo}} function. It uses mapping quality information to filter out the bad mappings. The names of "filterTh" are basically the field names of "nuID\_MappingInfo" table, which include 'Strength1', 'Strength2', 'Uniqueness' and 'Total hits'. For the definition of these metrics, please refer to the IDMapping library or see the reference website.
+  This function is based on the return of \code{\link{getNuIDMappingInfo}} function. It uses mapping quality information to filter out the bad mappings. The parameter "filterTh" is obsolete for lumi ID mapping package > version 1.3, which only keeps the perfect mapping. For the old version of ID mapping package (< 1.3), the names of "filterTh" are basically the field names of "nuID\_MappingInfo" table, which include 'Strength1', 'Strength2', 'Uniqueness' and 'Total hits'. For the definition of these metrics, please refer to the IDMapping library or see the reference website.
 }
 \value{
 	returns the matched RefSeq IDs or a data.frame with each row corresponding to an input nuID (when "returnAllInfo" is TRUE).	

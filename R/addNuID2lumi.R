@@ -199,19 +199,19 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 		rmIndex <- NULL
 		for (dupId.i in dupId) {
 			dupIndex <- which(newId == dupId.i)
-			ave.exp <- colMeans(exprs(x.lumi)[dupIndex, ])
+			ave.exp <- colMeans(exprs(x.lumi)[dupIndex,, drop=FALSE])
 			exprs(x.lumi)[dupIndex[1],] <- ave.exp
 			if (is(x.lumi, 'LumiBatch') && !is.null(beadNum(x.lumi)) && !is.null(detection(x.lumi))) {
-				totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, ])
+				totalBeadNum <- colSums(beadNum(x.lumi)[dupIndex, , drop=FALSE])
 				if (detect.low < detect.high) {
 					maxDetection <- apply(detection(x.lumi), 2, min)
 				} else {
 					maxDetection <- apply(detection(x.lumi), 2, max)
 				}
 
-				temp <- colSums(se.exprs(x.lumi)[dupIndex,]^2 * (beadNum(x.lumi)[dupIndex,] - 1))
+				temp <- colSums(se.exprs(x.lumi)[dupIndex, , drop=FALSE]^2 * (beadNum(x.lumi)[dupIndex,, drop=FALSE] - 1))
 				temp <- temp / (totalBeadNum - length(dupIndex))
-				se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum(x.lumi)[dupIndex,])))
+				se.exprs(x.lumi)[dupIndex[1],] <- sqrt(temp * (colSums(1/beadNum(x.lumi)[dupIndex,, drop=FALSE])))
 				detection(x.lumi)[dupIndex[1],] <- maxDetection
 				beadNum(x.lumi)[dupIndex[1],] <- totalBeadNum
 			}
