@@ -15,9 +15,14 @@ setClass('LumiBatch',
 setMethod('initialize', 'LumiBatch', function(.Object, 
 	exprs = new('matrix'),
 	se.exprs = new('matrix'),		# standard deviation of the bead measurements of each probe
-	...) 
+    ...,
+    assayData)
 {
-	callNextMethod(.Object, exprs=exprs, se.exprs=se.exprs, ...)
+	if (missing(assayData))
+		assayData <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
+	else if (!missing(exprs) || !missing(se.exprs))
+		stop("only one of 'assayData' or ('exprs' and 'se.exprs') allowed")
+	callNextMethod(.Object, assayData=assayData, ...)
 })
 
 

@@ -8,7 +8,7 @@
 \description{ Creating \code{\link[graphics]{boxplot}} of sample intensities in a ExpressionSet object }
 
 \usage{
-\S4method{boxplot}{ExpressionSet}(x, range = 0, main, logMode = TRUE, subset = 5000, seed = 123, ...)
+\S4method{boxplot}{ExpressionSet}(x, range = 0, main, logMode = TRUE, subset = 5000, ...)
 }
 
 \arguments{
@@ -17,7 +17,6 @@
 \item{main}{ title of the boxplot }
 \item{logMode}{ whether plot the data in log2 scale or not}
 \item{subset}{subset of rows used to plot. It can be an index vector, or the length of a random subset}
-\item{seed}{ the random seed for random subset}
 \item{\dots}{ optional arguments to \code{\link[graphics]{boxplot}}.}
 }
 
