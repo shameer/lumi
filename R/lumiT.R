@@ -2,9 +2,11 @@
 function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, verbose = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	if (is(x.lumi, 'eSet')) {
-		if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
-		if (!all(dim(se.exprs(x.lumi)) == dim(exprs(x.lumi))))
-			stop('Dimensions of slots exprs and se.exprs do not match!')
+		if (method == 'vst') {
+			if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
+			if (!all(dim(se.exprs(x.lumi)) == dim(exprs(x.lumi))))
+				stop('Dimensions of slots exprs and se.exprs do not match!')
+		}
 	} else {
 		stop('The object should be class "eSet" inherited!')
 	}
