@@ -11,15 +11,17 @@ setClass('LumiBatch',
 	), controlData = data.frame(), QC = list()),
 	contains='ExpressionSet')
 
-
+#
 setMethod('initialize', 'LumiBatch', function(.Object, 
 	exprs = new('matrix'),
 	se.exprs = new('matrix'),		# standard deviation of the bead measurements of each probe
+	detection = new('matrix'),
+	beadNum = new('matrix'),
     ...,
     assayData)
 {
 	if (missing(assayData))
-		assayData <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
+		assayData <- assayDataNew(exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum)
 	else if (!missing(exprs) || !missing(se.exprs))
 		stop("only one of 'assayData' or ('exprs' and 'se.exprs') allowed")
 	callNextMethod(.Object, assayData=assayData, ...)
