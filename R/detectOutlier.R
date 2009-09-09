@@ -13,7 +13,6 @@ function(x, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
 	profile1 <- cbind(center, profile)
 	colnames(profile1) <- c('Center', colnames(profile))
 
-
 	if (metric == 'cor') {
 		d <- cor(profile1)
 		mad.d <- median(1 - d[2:nrow(d),1])
@@ -24,7 +23,26 @@ function(x, metric="euclidean", standardize=TRUE, Th=2, ifPlot=FALSE) {
 		d <- as.matrix(dist(t(profile1), method=metric))
 		mad.d <- median(d[2:nrow(d),1])
 	}
-
+	
+	## remove top 10% samples to re-estimate the Center
+	len <- ncol(x)
+	excludeInd <- which(rank(d[2:nrow(d),1]) > len * 0.9)
+	center <- rowMeans(profile[, -excludeInd])
+	profile1 <- cbind(center, profile)
+	colnames(profile1) <- c('Center', colnames(profile))
+	
+	## perform the estimation based on the new center again
+	if (metric == 'cor') {
+		d <- cor(profile1)
+		mad.d <- median(1 - d[2:nrow(d),1])
+	} else {
+		if (standardize) {
+			profile1 <- scale(profile1)
+		}
+		d <- as.matrix(dist(t(profile1), method=metric))
+		mad.d <- median(d[2:nrow(d),1])
+	}
+	
 	Th <- Th * mad.d
 	outlier <- (d[2:nrow(d),1] >= Th)
 	attr(outlier, 'sampleDistance') <- d

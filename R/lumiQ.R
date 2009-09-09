@@ -19,7 +19,7 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01, verbose=TRUE) {
 			rMin <- rowMin(expr)
 			expr <- expr[rMin > 0, ]
 		}
-		expr <- log2(expr)
+		expr <- log2(expr + 1)
 	} 
 	sampleName <- colnames(expr)
 

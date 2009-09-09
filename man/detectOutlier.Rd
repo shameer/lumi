@@ -18,7 +18,7 @@ detectOutlier(x, metric = "euclidean", standardize = TRUE, Th = 2, ifPlot = FALS
   \item{ifPlot}{ to plot the result (as a hierarchical tree) or not }
 }
 \details{
-The current outlier detection is based on the distance from the sample to the center (average of all samples).
+The current outlier detection is based on the distance from the sample to the center (average of all samples after removing 10 percent samples farthest away from the center).
 The assumption of the outlier detection is that there is only one single cluster and the distance from the sample
 to the center is Gaussian distributed.
 

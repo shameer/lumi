@@ -24,7 +24,7 @@ Creating quality control plots of a LumiBatch object
 \details{
 The parameter "what" of \code{plot} function controls the type of QC plots,
 which includes:
-\describe{
+\itemize{
 \item{\bold{density}:}{ the density plot of the chips, see \code{\link{hist-methods}}}
 \item{\bold{boxplot}:}{ box plot of the chip intensities, see \code{\link{boxplot-methods}}}
 \item{\bold{pair}:}{ the correlation among chips, plot as a hierarchical tree, see \code{\link{pairs-methods}}}
