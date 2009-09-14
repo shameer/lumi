@@ -6,17 +6,17 @@
   A main function of between chip normalization of a LumiBatch object. Currently, four methods ("rsn", "ssn", "quantile", "loess", "vsn") are supported.
 }
 \usage{
-lumiN(x.lumi, method = c("quantile", "rsn", "ssn", "loess", "vsn"), verbose = TRUE, ...)
+lumiN(x.lumi, method = c("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant"), verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 	\item{x.lumi}{ an ExpressionSet inherited object or a data matrix with columns as samples and rows as genes}
-  	\item{method}{ four different between chips normalization methods ("quantile", "rsn", "ssn", "loess", "vsn") are supported }
+  	\item{method}{ five different between chips normalization methods ("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant") are supported }
     \item{verbose}{ a boolean to decide whether to print out some messages }
   	\item{\dots}{ other parameters used by corresponding method }
 }
 \details{
-lumiN is an interface for different normalization methods. Currently it supports "RSN" (See \code{\link{rsn}}), "SSN" (See \code{\link{ssn}}), "loess" (See \code{\link[affy]{normalize.loess}}), "quantile" (See \code{\link[affy]{normalize.quantiles}}) and "VSN" (See \code{\link[vsn]{vsn}}). See details in individual functions. Note: the "VSN" normalization should be directly applied to the raw data instead of the lumiT processed data.
+lumiN is an interface for different normalization methods. Currently it supports "RSN" (See \code{\link{rsn}}), "SSN" (See \code{\link{ssn}}), "loess" (See \code{\link[affy]{normalize.loess}}), "quantile" (See \code{\link[affy]{normalize.quantiles}}), "VSN" (See \code{\link[vsn]{vsn}}) and "rankinvariant" (See \code{\link{rankinvariant}}) . See details in individual functions. Note: the "VSN" normalization should be directly applied to the raw data instead of the lumiT processed data.
 }
 
 \value{
@@ -28,7 +28,7 @@ If it is a LumiBatch object, it also includes the VST transform function and its
 \note{ 
 
 }
-\seealso{  \code{\link{rsn}}, \code{\link{ssn}} }
+\seealso{  \code{\link{rsn}}, \code{\link{ssn}}, \code{\link{rankinvariant}} }
 \examples{
 ## load example data
 data(example.lumi)

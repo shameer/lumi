@@ -3,6 +3,7 @@ import(methods)
 
 importFrom(graphics, pairs, plot)
 importFrom(stats, density)
+importFrom(MASS, rlm)
 import(Biobase)
 import(affy)
 
@@ -14,7 +15,7 @@ export("IlluminaID2nuID", "addControlData2lumi", "addNuID2lumi", "addNuId2lumi",
 "getControlType", "getNuIDMappingInfo", "id2seq", "inverseVST", "is.nuID", "lumiB", "lumiExpresso", "lumiN", "lumiQ",                       
 "lumiR", "lumiR.batch", "lumiT", "nuID2EntrezID", "nuID2IlluminaID", "nuID2RefSeqID", "nuID2probeID", "nuID2targetID",
 "plotControlData", "plotHousekeepingGene", "plotSampleRelation", "plotStringencyGene", "plotVST", "probeID2nuID",
-"produceGEOPlatformFile", "produceGEOSampleInfoTemplate", "produceGEOSubmissionFile", "rsn", "seq2id", "ssn", "targetID2nuID","vst"
+"produceGEOPlatformFile", "produceGEOSampleInfoTemplate", "produceGEOSubmissionFile", "rsn", "seq2id", "ssn", "targetID2nuID","vst","rankinvariant"
 )
 
 

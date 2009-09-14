@@ -1,5 +1,5 @@
 `lumiN` <-
-function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), verbose=TRUE, ...) {
+function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn', 'rankinvariant'), verbose=TRUE, ...) {
 
 	if (is(x.lumi, 'ExpressionSet')) {
 	    # x.lumi is a lumi object
@@ -21,6 +21,8 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), verbose=TRU
 		library(preprocessCore)
 	} else if (method == 'loess') {
 		library(affy)
+	} else if (method == 'rankinvariant') {
+		library(MASS)	# Add by Arno Velds
 	}
 	
 	if (is(x.lumi, 'LumiBatch')) {
@@ -33,7 +35,8 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn'), verbose=TRU
 		ssn = ssn(x.lumi, ...),
 		loess = normalize.loess(x.matrix, ...),
 		quantile = normalize.quantiles(x.matrix, ...),
-		vsn = exprs(vsn::vsn2(x.matrix, ...)) )
+		vsn = exprs(vsn::vsn2(x.matrix, ...)),
+		rankinvariant = rankinvariant(x.lumi, ...) )  # add by Arno Velds
 	
 	## take the average as the parameters as the transformation parameters if there is no targetArray
 	if (is.null(attr(norm.matrix, 'targetArray')) && !is.null(attr(x.lumi, 'vstParameter'))) {
