@@ -616,7 +616,7 @@ setMethod('density', signature(x='ExpressionSet'),
 setMethod("pairs", signature(x="ExpressionSet"), 
 	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, main=NULL) 
 {
-	upperPanel <- function(x, y, fold=2) {
+	upperPanel <- function(x, y) {
 		if (smoothScatter) {
 			par(new=TRUE)
 			smoothScatter(x[subset], y[subset], main='')
@@ -634,7 +634,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 		}
 	}
 
-	lowerPanel <- function(x, y, cex=1.44, fold=fold) {
+	lowerPanel <- function(x, y, cex=1.44) {
 		if (logMode) {
 			up <- length(which((x-y) > log2(fold)))
 			down <- length(which((y-x) > log2(fold)))
