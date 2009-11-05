@@ -20,8 +20,14 @@ setMethod('initialize', 'LumiBatch', function(.Object,
     ...,
     assayData)
 {
-	if (missing(assayData))
-		assayData <- assayDataNew(exprs=exprs, se.exprs=se.exprs, detection=detection, beadNum=beadNum)
+	if (missing(assayData)) {
+		cmd <- 'assayData <- assayDataNew(exprs=exprs, se.exprs=se.exprs'
+		nSample <- ncol(exprs)
+		if (ncol(detection) == nSample) cmd <- paste(cmd, ', detection=detection')
+		if (ncol(beadNum) == nSample) cmd <- paste(cmd, ', beadNum=beadNum')
+		cmd <- paste(cmd, ')')
+		eval(parse(text=cmd))
+	}
 	else if (!missing(exprs) || !missing(se.exprs))
 		stop("only one of 'assayData' or ('exprs' and 'se.exprs') allowed")
 	callNextMethod(.Object, assayData=assayData, ...)
