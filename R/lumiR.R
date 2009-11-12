@@ -91,12 +91,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
 		if (length(markerInd) > 0) {
 			if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
-				warning('The data file may not be in the Illumia BeadStudio output format!\n')
+				warning('The data file may not be in the Illumia BeadStudio or GenomeStudio output format!\n')
 			if (length(markerInd) > 1) {
 				if (length(grep('^\\[.*\\Profile]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
-					warning('The data file may not be in the Illumia BeadStudio output format!\n')
+					warning('The data file may not be in the Illumia BeadStudio or GenomeStudio output format!\n')
 			}
-			version <- 3
+			version <- 3  # version 3 also includes the GenomeStudio output format
 			info <- info[-markerInd]
 		}
 		if (length(info) > 0) {
@@ -108,10 +108,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			if (version == 2) {
 				ind <- grep("BeadStudio version", info, ignore.case=TRUE)
 			} else {
-				ind <- grep("BSGX Version", info, ignore.case=TRUE)
+				ind <- grep("SGX Version", info, ignore.case=TRUE)
 			}
 			if (length(ind) == 0) 
-			    warning("The data file may not be in the Illumia BeadStudio output format.\n")
+			    warning("The data file may not be in the Illumia BeadStudio or GenomeStudio output format.\n")
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
@@ -123,7 +123,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 					normalization <- strsplit(info, split=sep)[[ind]][2]
 				}
 				if (length(grep("none", normalization, ignore.case=TRUE)) == 0) {
-				    warning("The raw data should not be normalized in BeadStudio.\n")
+				    warning("We recommend the raw data not to be normalized in BeadStudio or GenomeStudio.\n")
 				}
 			}
 		} else {
@@ -140,7 +140,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	sectionInd <- grep('^\\[.*\\]', allData[,1], ignore.case=TRUE)
     
 	if (length(sectionInd) > 0) {
-		if (is.na(version)) verion <- 3
+		if (is.na(version)) version <- 3
 		otherData <- allData[sectionInd[1]:nrow(allData), ]
 		## we assume the first section is the expression data section
 		allData <- allData[1:(sectionInd[1]-1),, drop=FALSE]
