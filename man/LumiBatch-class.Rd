@@ -26,6 +26,7 @@
 \alias{combine,ExpressionSet,LumiBatch-method}
 \alias{combine,LumiBatch,ExpressionSet-method}
 \alias{[,LumiBatch-method}
+\alias{[,LumiBatch,ANY,ANY,ANY-method}
 \alias{sampleNames<-,LumiBatch,ANY-method}
 \alias{getHistory,LumiBatch-method}
 \alias{getHistory}
