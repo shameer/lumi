@@ -8,7 +8,7 @@
 \description{ Creating \code{\link[graphics]{boxplot}} of sample intensities in a ExpressionSet object }
 
 \usage{
-\S4method{boxplot}{ExpressionSet}(x, range = 0, main, logMode = TRUE, subset = 5000, ...)
+\S4method{boxplot}{ExpressionSet}(x, range = 0, main, logMode = TRUE, subset = NULL, ...)
 }
 
 \arguments{

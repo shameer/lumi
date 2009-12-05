@@ -10,7 +10,7 @@
 \usage{
 \S4method{density}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", 
 	col=1:dim(x)[2], lty=1:dim(x)[2], lwd=1, xlim = NULL, index.highlight = NULL, color.highlight = 2, 
-	symmetry = NULL, addLegend = TRUE, subset = 5000, main="", ...)
+	symmetry = NULL, addLegend = TRUE, subset = NULL, main="", ...)
 }
 
 \arguments{

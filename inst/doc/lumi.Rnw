@@ -163,22 +163,40 @@ plot(example.lumi, what='density')	## plot the density
 \label{fig:density}
 \end{figure}            
 
-% box plot
-Figure \ref{fig:box} shows the box plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{boxplot} functions.
+
+% density plot
+Figure \ref{fig:density} shows the density plot of the {\bf LumiBatch} object by using \Rfunction{plot} or \Rfunction{density} functions.
 \begin{Sinput}
-> ## plot the box plot
-> plot(example.lumi, what='boxplot')			
+> ## plot the density
+> plot(example.lumi, what='density')			
 > ## or
-> boxplot(example.lumi)
+> density(example.lumi)
 \end{Sinput}
 
 \begin{figure}
 \centering
-<<boxplot, fig=true, width=6, height=6, quiet=T, echo=F>>=
-plot(example.lumi, what='boxplot') 	## box plot
+<<densityPlot, fig=true, width=8, height=6, quiet=T, echo=F>>=
+plot(example.lumi, what='density')	## plot the density
 @
 \caption{Density plot of Illumina microarrays before normalization}
-\label{fig:box}
+\label{fig:density}
+\end{figure}            
+
+
+% CDF plot in reverse direction
+Figure \ref{fig:CDF} shows the plot of Cumulative Distribution Function (CDF) from high to low value or in reverse  of a {\bf LumiBatch} object by using \Rfunction{plotCDF} function. Comparing with the density plot, the CDF plot in reverse direction can better show the different at the high and middle expression range among different samples. 
+\begin{Sinput}
+> ## plot the CDF plot
+> plotCDF(example.lumi, reverse=TRUE)
+\end{Sinput}
+
+\begin{figure}
+\centering
+<<CDF, fig=true, width=6, height=6, quiet=T, echo=F>>=
+ plotCDF(example.lumi)
+@
+\caption{Cumulative Distribution Function (CDF) plot of Illumina microarrays before normalization}
+\label{fig:CDF}
 \end{figure}            
 
 % pair plot with microarray correlation
