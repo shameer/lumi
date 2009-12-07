@@ -1,6 +1,7 @@
 `lumiT` <-
 function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, verbose = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
+	method <- match.arg(method)
 	if (is(x.lumi, 'eSet')) {
 		if (method == 'vst') {
 			if (is.null(se.exprs(x.lumi)))  stop('Slot se.exprs is required!')
@@ -12,7 +13,6 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 	}
 	if (!is(x.lumi, 'LumiBatch')) stdCorrection <- FALSE
 
-	method <- match.arg(method)
 	## check the negative values
 	if (method == 'log2') {
 		if (min(exprs(x.lumi)) <= 0) {
