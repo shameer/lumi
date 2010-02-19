@@ -1,6 +1,6 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib.mapping = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
-	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='DETECTION', beadNum='Avg_NBEADS'),
+	QC=TRUE, columnNameGrepPattern=list(exprs='\\.AVG_SIGNAL', se.exprs='BEAD_STD', detection='DETECTION', beadNum='Avg_NBEADS'),
 	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose=TRUE, ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -302,13 +302,16 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 				selInd.i <- which(id == dupId.i)
 				exprs[selInd.i[1],] <- colMeans(exprs[selInd.i,,drop=FALSE])
 				if (is.null(beadNum)) {
-					se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,,drop=FALSE])
+					if (!is.null(se.exprs))
+						se.exprs[selInd.i[1],] <- colMeans(se.exprs[selInd.i,,drop=FALSE])
 				} else {
 					totalBead.i <- colSums(beadNum[selInd.i,,drop=FALSE])
-					beadNum[selInd.i[1],] <- totalBead.i				
-					temp <- colSums(se.exprs[selInd.i,,drop=FALSE]^2 * (beadNum[selInd.i,,drop=FALSE] - 1))
-					temp <- temp / (totalBead.i - length(selInd.i))
-					se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,,drop=FALSE])))
+					beadNum[selInd.i[1],] <- totalBead.i
+					if (!is.null(se.exprs)) {
+						temp <- colSums(se.exprs[selInd.i,,drop=FALSE]^2 * (beadNum[selInd.i,,drop=FALSE] - 1))
+						temp <- temp / (totalBead.i - length(selInd.i))
+						se.exprs[selInd.i[1],] <- sqrt(temp * (colSums(1/beadNum[selInd.i,,drop=FALSE])))
+					}				
 				}
 				if (!is.null(detection)) {
 					detection[selInd.i[1],] <- apply(detection[selInd.i,,drop=FALSE], 2, max)
@@ -336,7 +339,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		id <- id[keepInd]
 		targetID <- targetID[keepInd]
 	}
-	if (checkDupId) {
+	if (!any(duplicated(id))) {
 		rownames(exprs) <- id
 		if (!is.null(se.exprs)) rownames(se.exprs) <- id
 		if (!is.null(beadNum)) rownames(beadNum) <- id
@@ -389,7 +392,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		varName <- c(varName, names(annotationInfo))
 	}
 	rownames(varMetadata) <- make.names(varName, unique=T)
-	if (checkDupId)	rownames(reporterInfo) <- id
+	if (!any(duplicated(id)))	rownames(reporterInfo) <- id
 	featureData <- new("AnnotatedDataFrame", data=reporterInfo, varMetadata=varMetadata)
     
 	## check the dimensions of the input data

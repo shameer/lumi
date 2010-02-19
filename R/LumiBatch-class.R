@@ -379,6 +379,8 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 	## combine pheno data
 	phenoData(x) <- combine(phenoData(x),phenoData(y))
+	## combine protocolData 
+	protocolData(x) <- combine(protocolData(x),protocolData(y))
 	
 	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
 	## For the feature data, we assume all the data have the same information,

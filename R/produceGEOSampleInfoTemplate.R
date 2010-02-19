@@ -53,7 +53,7 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 	}
 	template <- cbind(c('sampleID', labels), template)
 	if (!is.null(fileName)) {
-		cat('# For the detailed definition of the column names, please refer to', link, '\n', sep='', file=fileName)
+		cat('# For the detailed definition of the column names, please refer to ', link, '\n', sep='', file=fileName)
 		write.table(template, sep='\t', quote=FALSE, file=fileName, append=TRUE, col.names=FALSE, row.names=FALSE)		
 	} else {
 		return(template)
