@@ -1,6 +1,6 @@
 `lumiR` <-
 function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = TRUE, lib.mapping = NULL, dec='.', parseColumnName=FALSE, checkDupId=TRUE, 
-	QC=TRUE, columnNameGrepPattern=list(exprs='\\.AVG_SIGNAL', se.exprs='BEAD_STD', detection='DETECTION', beadNum='Avg_NBEADS'),
+	QC=TRUE, columnNameGrepPattern=list(exprs='AVG_SIGNAL', se.exprs='BEAD_STD', detection='DETECTION', beadNum='Avg_NBEADS'),
 	inputAnnotation=TRUE, annotationColumn=c('ACCESSION', 'SYMBOL', 'PROBE_SEQUENCE', 'PROBE_START', 'CHROMOSOME', 'PROBE_CHR_ORIENTATION', 'PROBE_COORDINATES', 'DEFINITION'), verbose=TRUE, ...) 
 {
 	## the patterns used to grep columns in the BeadStudio output text file 
@@ -222,7 +222,12 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
     
 	## identify where the signal column exists
 	ind <- grep(columnNameGrepPattern$exprs, header, ignore.case=TRUE)
-	if (length(ind) == 0) stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!\n')
+	if (length(ind) == 0) {
+		stop('Input data format unrecognizable!\nThere is no column name contains "AVG_SIGNAL"!\n')
+	} else {
+		ind2 <- grep(paste("\\(", columnNameGrepPattern$exprs, "\\)", sep=""), header, ignore.case=TRUE)
+		if (length(ind2) == length(ind)/2) ind <- ind[!(ind %in% ind2)]
+	}
 	exprs <- as.matrix(allData[,ind])
 	if (!is.double(exprs[1])) {
 		exprs <- matrix(as.double(exprs), nrow=nrow(allData))
