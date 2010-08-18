@@ -352,7 +352,9 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	}
     
 	# get sample information
-	pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
+	pattern <- paste('[\\.\\:][^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
+	if (length(grep(pattern, colnames(exprs), ignore.case=TRUE)) == 0) 
+		pattern <- paste('[^[:alnum:]]*', columnNameGrepPattern$exprs, '[^[:alnum:]]*', sep='')
 	sampleID <-  sub(pattern, '', colnames(exprs), ignore.case=TRUE) 
 	if (any(duplicated(sampleID))) {
 		warning('Duplicated column names found in the raw data! \n A suffix number is added to the duplicated column names.\n')
