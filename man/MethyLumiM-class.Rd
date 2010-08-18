@@ -10,6 +10,10 @@
 \alias{methylated<-,MethyLumiM-method}
 \alias{unmethylated,MethyLumiM-method}
 \alias{unmethylated<-,MethyLumiM-method}
+\alias{methylated}
+\alias{methylated<-}
+\alias{unmethylated}
+\alias{unmethylated<-}
 
 \title{Class "MethyLumiM": for Illumina Methylation microarray data}
 \description{
