@@ -16,7 +16,7 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 		cv.gene <- apply(dataMatrix, 1, function(x) sd(x)/mean(x))
 		probeList <- rownames(dataMatrix)
 		if (cv.Th > 0) {
-			selProbe <- probeList[cv.gene > cv.Th]
+			selProbe <- probeList[abs(cv.gene) > cv.Th]
 			main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
 		} else {
 			selProbe <- probeList

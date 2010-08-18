@@ -36,7 +36,7 @@ function(controlData, lib=NULL, slideIndex=NULL, addLegend=TRUE, logMode=TRUE, .
 	selControlData <- controlData[ind, ]
 	hkgene <- allControlProbe[ind]
 	if (!is.null(lib)) {
-		require(annotate)
+		# require(annotate)
 		require(lib, character.only=TRUE)
 		hkSymbol <- getSYMBOL(hkgene, lib)
 		hkSymbol[is.na(hkSymbol)] <- hkgene[is.na(hkSymbol)]

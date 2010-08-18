@@ -50,7 +50,7 @@ function(x.lumi, targetArray=NULL, scaling=TRUE, bgMethod=c('density', 'mean', '
 		expr <- 2^(expr)
 	}
 
-	## Estimate the background level and the AUC (mean) after removing the background level
+	## Estimate the background level and the AUC of density curve (mean) after removing the background level
 	twoPoint <- apply(expr, 2, function(xx) {
 		hh <- hist(xx, 1000, plot=FALSE)
 		Th <- hh$breaks[which.max(hh$counts) + 1] * 2

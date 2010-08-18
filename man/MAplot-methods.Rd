@@ -1,6 +1,7 @@
 \name{MAplot-methods}
 \docType{methods}
 \alias{MAplot-methods}
+\alias{MAplot}
 \alias{MAplot.ExpressionSet}
 \alias{MAplot,ExpressionSet-method}
 

@@ -2,17 +2,17 @@
 function(x, y, newX=NULL, nKnots=6, ifPlot=FALSE) {
 	# behavior: if extropolation, outside values are constant to the
 	#  nearest inside one
-	if(!require(mgcv)) stop('Package "mgcv" should be installed!')
+	# if(!require(mgcv)) stop('Package "mgcv" should be installed!')
 	
 	nKnots <- round(nKnots)
 	if (is.null(newX)) newX <- x
 	
 	## make sure there is no other "s" functions before mgcv::s in the search path
-	rmPackage <- find('s')
-	if (rmPackage[1] != "package:mgcv") {
-		detach("package:mgcv")
-		library(mgcv)
-	}
+	# rmPackage <- find('s')
+	# if (rmPackage[1] != "package:mgcv") {
+	# 	detach("package:mgcv")
+	# 	library(mgcv)
+	# }
 	
 	# Show regular spline fit (and save fitted object)
 	f.ug <- gam(y ~ s(x, k=nKnots, bs="cr"))

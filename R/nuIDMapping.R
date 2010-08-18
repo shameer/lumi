@@ -64,7 +64,7 @@ probeID2nuID <- function(probeID, lib.mapping="lumiHumanIDMapping", ...) {
 			return(probeID)
 		}
 	}
-	if (!require(annotate)) cat('Please install "annotate" library!\n')
+	# if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib.mapping, character.only=TRUE)) {
 		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			nuID <- IlluminaID2nuID(probeID, lib.mapping=lib.mapping, ...)
@@ -86,7 +86,7 @@ targetID2nuID <- function(targetID, lib.mapping="lumiHumanIDMapping", ...) {
 			return(targetID)
 		}
 	}
-	if (!require(annotate)) cat('Please install "annotate" library!\n')
+	# if (!require(annotate)) cat('Please install "annotate" library!\n')
 	if (require(lib.mapping, character.only=TRUE)) {
 		if (length(grep('IDMapping', lib.mapping)) > 0) {
 			nuID <- IlluminaID2nuID(targetID, lib.mapping=lib.mapping, ...)
