@@ -41,7 +41,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 	if (max(exprs, na.rm=TRUE) > 100) {
 		log2Trans <- FALSE
 		
-		offset <- ifelse(min(exprs) < 0, min(exprs) - 1, 0)
+		offset <- ifelse(min(exprs, na.rm=TRUE) < 0, min(exprs, na.rm=TRUE) - 1, 0)
 		exprs <- log2(exprs - offset)
 	} else {
 		log2Trans <- TRUE
@@ -102,7 +102,7 @@ function(x.lumi, targetArray=NULL, excludeFold=2, span=0.03, ifPlot=FALSE,...) {
 
 	if (is.null(targetArray)) {
 		# find the sample which is the most similar to the mean profile of all samples,
-		meanProfile <- apply(exprs, 1, mean)
+		meanProfile <- apply(exprs, 1, mean, na.rm=TRUE)
 		targetArray <- which.min(abs(colSums(exprs - meanProfile)))
 	}
 

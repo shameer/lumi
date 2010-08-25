@@ -1,10 +1,21 @@
 -----------------------------------------------------
+version 2.1.1
+release data: 08/25/2010
+1. Add na.rm setting to lumiB, lumiT and lumiN
+(Thanks Wieliang Qiu from Harvard reporting this!)
+
+-----------------------------------------------------
 version 2.1.0
 release data: 08/16/2010
 1. Add Illumina Methylation data analysis components
 2. Change the package dependence as NameSpaces
 
-...
+......
+
+Sorry, many many updates and fixes not reported here ...
+
+......
+
 
 -----------------------------------------------------
 version 1.5.15-1.5.16

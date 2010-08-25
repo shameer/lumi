@@ -15,7 +15,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 
 	## check the negative values
 	if (method == 'log2') {
-		if (min(exprs(x.lumi)) <= 0) {
+		if (min(exprs(x.lumi), na.rm=TRUE) <= 0) {
 			x.lumi <- lumiB(x.lumi, method='forcePositive')
 		}
 	}
@@ -59,7 +59,7 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 						Iteration method will be used for VST.')
 					lowCutoff <- 1/4
 				} else {
-					backgroundStd <- mean(se.exprs[ind,i])
+					backgroundStd <- mean(se.exprs[ind,i], na.rm=TRUE)
 				}
 			} else if (is(x.lumi, 'AffyBatch')) {
 				lowCutoff <- 1/4

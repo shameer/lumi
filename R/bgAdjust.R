@@ -1,7 +1,7 @@
 bgAdjust <- function(lumiBatch, probs=0.5, ...) {
 	if (!is(lumiBatch, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	## by subtract an offset, which is estimated based on the quantile of the control probes
-	if (min(exprs(lumiBatch)) <= 1) {
+	if (min(exprs(lumiBatch), na.rm=TRUE) <= 1) {
 		cat('The data has already been background adjusted!\n')
 		return(lumiBatch)
 	}

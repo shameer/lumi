@@ -17,7 +17,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 		} else if (method == 'none') {
 			return(x.lumi)
 		} else if (method == 'forcePositive') {
-			if (min(x.matrix) > 0)  return(x.lumi)
+			if (min(x.matrix, na.rm=TRUE) > 0)  return(x.lumi)
 		}		
 		if (verbose) cat(paste('Perform', method, 'background correction ...\n'))
 	} else {
@@ -34,7 +34,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 		} else if (method == 'bgAdjust.affy') {
 			x.matrix <- apply(x.matrix, 2, bg.adjust, ...) 
 		} else if (method == 'forcePositive') {
-			offset <- apply(x.matrix, 2, min)
+			offset <- apply(x.matrix, 2, min, na.rm=TRUE)
 			offset[offset <= 0] <- offset[offset <= 0] - 1.01 	# to avoid higher fold-change when one value is less than 1
 			offset[offset > 0] <- 0
 			offset <- rep(1, nrow(x.matrix)) %*% t(offset)

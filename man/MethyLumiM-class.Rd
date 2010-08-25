@@ -14,6 +14,8 @@
 \alias{methylated<-}
 \alias{unmethylated}
 \alias{unmethylated<-}
+\alias{detection}
+\alias{detection<-}
 
 \title{Class "MethyLumiM": for Illumina Methylation microarray data}
 \description{
@@ -44,13 +46,15 @@ Class \code{"\link{Versioned}"}, by class "ExpressionSet", distance 4.
 \section{Methods}{
   \describe{
     \item{boxplot}{\code{signature(x = "MethyLumiM")}: ... }
-    \item{coerce}{\code{signature(from = "eSet", to = "MethyLumiM")}: map from \code{\link[methylumi]{MethyLumi-class}}, \code{\link[methylumi]{MethyLumiSet-class}} or other \code{\link[Biobase]{eSet-class}} inherited object to MethyLumiM class object }
+    \item{coerce}{\code{signature(from = "eSet", to = "MethyLumiM")}: map from \code{\link[methylumi]{MethyLumi-class}}, \code{\link[methylumi]{MethyLumiSet-class}} or other \code{\link[Biobase]{eSet-class}} inherited object to MethyLumiM class object. MethyLumiM object will only keep "exprs", "methylated", "unmethylated" and "detection" data matrix in the assayData.}
     \item{getHistory}{\code{signature(object = "MethyLumiM")}: access the operation history of \code{MethyLumiM} object. }
     \item{initialize}{\code{signature(.Object = "MethyLumiM")}: class initialization }
     \item{methylated}{\code{signature(object = "MethyLumiM")}: retrieve the data matrix measured by methylated probes}
     \item{methylated<-}{\code{signature(object = "MethyLumiM")}: set the data matrix measured by methylated probes }
     \item{unmethylated}{\code{signature(object = "MethyLumiM")}: retrieve the data matrix measured by unmethylated probes }
     \item{unmethylated<-}{\code{signature(object = "MethyLumiM")}: set the data matrix measured by unmethylated probes }
+    \item{detection}{\code{signature(object = "MethyLumiM")}: retrieve \code{detection} data matrix in \code{AssayData-class} }
+    \item{detection<-}{\code{signature(object = "MethyLumiM")}: set \code{detection} data matrix in \code{AssayData-class}  }
 	 }
 }
 \references{

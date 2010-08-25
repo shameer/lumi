@@ -53,10 +53,6 @@ setAs("eSet", "MethyLumiM", function(from) {
 	} else {
 		stop("Cann't convert as MethyLumiM object because methylated and unmethylated slots do not exist!\n")
 	}
-	aData <- assayData(from)
-	storageMode(aData) = "environment"
-	aData[['exprs']] = M
-	storageMode(aData) = "lockedEnvironment"
 	
 	if ("history" %in% slotNames(from)) {
 		history <- from@history
@@ -64,9 +60,31 @@ setAs("eSet", "MethyLumiM", function(from) {
 	} else {
 		history <- data.frame(submitted = I(vector()), finished = I(vector()), command = I(vector()), lumiVersion = I(vector()))
 	}
-
-	to <- new("MethyLumiM", assayData=aData, phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from), protocolData=protocolData(from))
-    history.finished <- as.character(Sys.time())
+	
+	aData <- assayData(from)
+	detection <- NULL
+	if (exists('pvals', assayData(from))) {
+		detection <- aData[['pvals']]
+		storageMode(aData) <- "environment"
+		aData[['detection']] <- detection
+		storageMode(aData) <- "lockedEnvironment"
+	} else if (exists('detection', assayData(from))) {
+		detection <- aData[['detection']]
+	}
+	
+	methy <- aData[['methylated']]
+	unmethy <- aData[['unmethylated']]
+	storageMode(aData) <- "environment"
+	ts <- ls(envir=aData)
+	rm(list=ts, envir=aData)
+	aData[['exprs']] <- M
+	aData[['methylated']] <- methy
+	aData[['unmethylated']] <- unmethy
+	if (!is.null(detection)) aData[['detection']] <- detection
+	storageMode(aData) <- "lockedEnvironment"	
+	to <- new("MethyLumiM", assayData=aData, phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from), protocolData=protocolData(from))		
+    
+	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(setAs)))  
 	lumiVersion <- packageDescription('lumi')$Version
 	to@history<- rbind(history, data.frame(submitted=history.submitted, finished=history.finished, 
@@ -97,7 +115,7 @@ setReplaceMethod("methylated", signature(object="MethyLumiM"), function(object, 
 			if (exists('methylated', envir=assay)) {
 				oldMode <- storageMode(assay)
 				storageMode(assay) <- 'environment'
-				rm(detection, envir=assay)
+				rm(methylated, envir=assay)
 				storageMode(assay) <- oldMode
 				assayData(object) <- assay
 			}
@@ -122,7 +140,7 @@ setReplaceMethod("unmethylated", signature(object="MethyLumiM"), function(object
 			if (exists('methylated', envir=assay)) {
 				oldMode <- storageMode(assay)
 				storageMode(assay) <- 'environment'
-				rm(detection, envir=assay)
+				rm(unmethylated, envir=assay)
 				storageMode(assay) <- oldMode
 				assayData(object) <- assay
 			}
@@ -131,6 +149,33 @@ setReplaceMethod("unmethylated", signature(object="MethyLumiM"), function(object
 			assayDataElementReplace(object, "unmethylated", value)
 		}
 	})	
+	
+
+
+setMethod("detection", signature(object="MethyLumiM"), function(object) {
+	if ('detection' %in% assayDataElementNames(object)) {
+		return(assayDataElement(object,"detection"))
+	} else {
+		return(NULL)
+	}
+})
+
+setReplaceMethod("detection", signature(object="MethyLumiM"), function(object, value) {
+		if (is.null(value)) {
+			assay <- assayData(object)
+			if (exists('detection', envir=assay)) {
+				oldMode <- storageMode(assay)
+				storageMode(assay) <- 'environment'
+				rm(detection, envir=assay)
+				storageMode(assay) <- oldMode
+				assayData(object) <- assay
+			}
+			return(object)
+		} else {
+			assayDataElementReplace(object, "detection", value)
+		}
+	})	
+
 
 setMethod("getHistory",signature(object="MethyLumiM"), function(object) object@history)
 
