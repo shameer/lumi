@@ -45,26 +45,6 @@ setValidity("LumiBatch", function(object)
 
 ##=================================================
 ## methods
-if (is.null(getGeneric("getHistory"))) setGeneric("getHistory", function(object) standardGeneric("getHistory"))
-if (is.null(getGeneric("beadNum"))) setGeneric("beadNum", function(object) standardGeneric("beadNum"))
-if (is.null(getGeneric("beadNum<-"))) setGeneric("beadNum<-", function(object, value) standardGeneric("beadNum<-"))
-
-if (is.null(getGeneric("detection"))) setGeneric("detection", function(object) standardGeneric("detection"))
-if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(object, value) standardGeneric("detection<-"))
-
-if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
-if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
-if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))
-setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
-setGeneric("plotCDF", function(x, ...) standardGeneric("plotCDF"))
-
-
-# setMethod("se.exprs", signature(object="ExpressionSet"),
-#        function(object) assayDataElement(object,"se.exprs"))
-# 
-# setReplaceMethod("se.exprs", signature(object="ExpressionSet",value="matrix"),
-#                  function(object, value) assayDataElementReplace(object, "se.exprs", value))
-
 
 setMethod("se.exprs", signature(object="ExpressionSet"), function(object) {
 	if ('se.exprs' %in% assayDataElementNames(object)) {

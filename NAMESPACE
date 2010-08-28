@@ -14,6 +14,10 @@ importMethodsFrom(Biobase,
 				varLabels, varMetadata,
 			    coerce, combine, dim, initialize, notes, storageMode, show, "[", "[[", "$")
 
+importClassesFrom(methylumi, MethyLumi, MethyLumiSet)
+importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethylated<-")
+importFrom(methylumi, methylumiR)
+
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(annotate, lookUp, getSYMBOL)
 importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)

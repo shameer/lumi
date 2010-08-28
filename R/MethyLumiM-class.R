@@ -94,13 +94,6 @@ setAs("eSet", "MethyLumiM", function(from) {
 })
 
 
-if (is.null(getGeneric("methylated"))) setGeneric("methylated", function(object) standardGeneric("methylated"))
-if (is.null(getGeneric("methylated<-"))) setGeneric("methylated<-", function(object, value) standardGeneric("methylated<-"))
-
-if (is.null(getGeneric("unmethylated"))) setGeneric("unmethylated", function(object) standardGeneric("unmethylated"))
-if (is.null(getGeneric("unmethylated<-"))) setGeneric("unmethylated<-", function(object, value) standardGeneric("unmethylated<-"))
-
-
 setMethod("methylated", signature(object="MethyLumiM"), function(object) {
 	if ('methylated' %in% assayDataElementNames(object)) {
 		return(assayDataElement(object,"methylated"))

@@ -8,14 +8,17 @@
 \alias{initialize,MethyLumiM-method}
 \alias{methylated,MethyLumiM-method}
 \alias{methylated<-,MethyLumiM-method}
+\alias{methylated<-,MethyLumiM,ANY-method}
 \alias{unmethylated,MethyLumiM-method}
 \alias{unmethylated<-,MethyLumiM-method}
+\alias{unmethylated<-,MethyLumiM,ANY-method}
+\alias{detection,MethyLumiM-method}
+\alias{detection<-,MethyLumiM-method}
+\alias{detection<-,MethyLumiM,ANY-method}
 \alias{methylated}
 \alias{methylated<-}
 \alias{unmethylated}
 \alias{unmethylated<-}
-\alias{detection}
-\alias{detection<-}
 
 \title{Class "MethyLumiM": for Illumina Methylation microarray data}
 \description{

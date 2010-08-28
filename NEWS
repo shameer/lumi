@@ -1,4 +1,10 @@
 -----------------------------------------------------
+version 2.1.2
+release data: 08/28/2010
+1. Import several classes and functions from methylumi package for methylation analysis
+2. Organize all generic functions together in a new file: AllGnereics.R
+
+-----------------------------------------------------
 version 2.1.1
 release data: 08/25/2010
 1. Add na.rm setting to lumiB, lumiT and lumiN
