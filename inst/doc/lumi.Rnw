@@ -32,9 +32,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Overview of lumi} 
-Illumina microarray is becoming a popular microarray platform. The BeadArray technology from Illumina makes its preprocessing and quality control different from other microarray technologies. Unfortunately, until now, most analyses have not taken advantage of the unique properties of the BeadArray system. The \Rpackage{lumi} Bioconductor package especially designed to process the Illumina microarray data. The \Rpackage{lumi} package provides an integrated solution for the bead-level Illumina microarray data analysis. The package covers data input, quality control, variance stabilization, normalization and gene annotation. 
+Illumina microarray is becoming a popular microarray platform. The BeadArray technology from Illumina makes its preprocessing and quality control different from other microarray technologies. Unfortunately, until now, most analyses have not taken advantage of the unique properties of the BeadArray system. The \Rpackage{lumi} Bioconductor package especially designed to process the Illumina microarray data, including Illumina Expression and Methylation microarray data. The \Rpackage{lumi} package provides an integrated solution for the bead-level Illumina microarray data analysis. The package covers data input, quality control, variance stabilization, normalization and gene annotation. 
 
-The \Rpackage{lumi} package provides unique functions for microarray processing. It includes a variance-stabilizing transformation (VST) algorithm [2] that takes advantage of the technical replicates available on every Illumina microarray. A robust spline normalization (RSN), which combines the features of the quantile and loess normalization, and simple scaling normalization (SSN) algorithms are also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots for expression and control probe data are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) [3] was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
+For details of processing Illumina methylation microarray, especially Infinium methylation microarray, please check another tutorial in \Rpackage{lumi} package: "Analyze Illumina Infinium methylation microarray data". All following description is focused on processing Illumina expression microarrays.
+
+The \Rpackage{lumi} package provides unique functions for expression microarray processing. It includes a variance-stabilizing transformation (VST) algorithm [2] that takes advantage of the technical replicates available on every Illumina microarray. A robust spline normalization (RSN), which combines the features of the quantile and loess normalization, and simple scaling normalization (SSN) algorithms are also implemented in this package. Options available in other popular normalization methods are also provided. Multiple quality control plots for expression and control probe data are provided in the package. To better annotate the Illumina data, a new, vendor independent nucleotide universal identifier (nuID) [3] was devised to identify the probes of Illumina microarray. The nuID indexed Illumina annotation packages is compatible with other Bioconductor annotation packages. Mappings from Illumina Target Id or Probe Id to nuID are also included in the annotation packages. The output of lumi processed results can be easily integrated with  other microarray data analysis, like differentially expressed gene identification, gene ontology analysis or clustering analysis.
 
 
 \section{Citation}
@@ -115,7 +117,7 @@ For convenience, another function \Rfunction{lumiR.batch} is designed to input f
 
 \begin{Sinput}
 > ## specify the file name
-> # fileName <- 'Barnes_gene_profile.txt'  	# Not Run
+> # fileName <- 'Barnes_gene_profile.txt' 
 > ## load the data
 > # x.lumi <- lumiR.batch(fileName, sampleInfoFile='sampleInfo.txt')		# Not Run
 \end{Sinput}
@@ -373,9 +375,9 @@ lumi.N <- lumiN(lumi.T)
 @ 
 
 Users can also easily select other normalization method. For example, the following command will run RSN normalization.
-<<Customized normalization, eval=T>>=
+<<Customized normalization, eval=F>>=
 ## Do RSN between microarray normaliazation
-# lumi.N <- lumiN(lumi.T, method='rsn')
+lumi.N <- lumiN(lumi.T, method='rsn')
 @ 
 
 

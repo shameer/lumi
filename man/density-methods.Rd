@@ -10,7 +10,7 @@
 \usage{
 \S4method{density}{ExpressionSet}(x, logMode=TRUE, xlab = NULL, ylab = "density", type = "l", 
 	col=1:dim(x)[2], lty=1:dim(x)[2], lwd=1, xlim = NULL, index.highlight = NULL, color.highlight = 2, 
-	symmetry = NULL, addLegend = TRUE, subset = NULL, main="", ...)
+	symmetry = NULL, addLegend = TRUE, legendPos="topright", subset = NULL, main="", ...)
 }
 
 \arguments{
@@ -27,6 +27,7 @@
 	\item{color.highlight}{ color of highlighted density curve }
 	\item{symmetry}{ the boundary position suppose to be symmetric distributed  }
 	\item{addLegend}{ whether add legend to the plot or not }
+	\item{legendPos}{the legend position. It can be a string specifying the position, or a length two vector specifying the x and y position. Please check \code{\link[graphics]{legend}} for more details. }
 	\item{subset}{ subset of rows used to plot. It can be an index vector, or the length of a random subset}
     \item{main}{ title for the plot}
 	\item{\dots}{ additional parameters for \code{\link[stats]{density}} function }

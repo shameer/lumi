@@ -19,6 +19,8 @@ importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethyl
 importFrom(methylumi, methylumiR)
 
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
+importFrom(KernSmooth, locpoly)
+importFrom(hdrcde, hdr.boxplot)
 importFrom(annotate, lookUp, getSYMBOL)
 importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)
 importMethodsFrom(RSQLite, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields)
@@ -30,18 +32,20 @@ importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 
-exportClasses("LumiBatch", "MethyLumiM")
-exportMethods("beadNum", "beadNum<-", "boxplot", "combine", "density", "detection", "detection<-", "getHistory", "hist", "MAplot", "plotCDF", "pairs", "plot", "sampleNames", "sampleNames<-", "exprs", "exprs<-", "se.exprs", "se.exprs<-", "methylated", "methylated<-", "unmethylated", "unmethylated<-",
-"show", "summary", "[", "coerce")
+exportClasses(LumiBatch, MethyLumiM)
+exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, sampleNames, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", methylated, "methylated<-", unmethylated, "unmethylated<-",
+show, summary, "[", coerce)
 
-export("IlluminaID2nuID", "addControlData2lumi", "addNuID2lumi", "addNuId2lumi",                                                            
-"bgAdjust", "detectOutlier", "detectionCall", "estimateLumiCV", "getChipInfo", "getControlData", "getControlProbe",
-"getControlType", "getNuIDMappingInfo", "id2seq", "inverseVST", "is.nuID", "lumiB", "lumiExpresso", "lumiN", "lumiQ",                       
-"lumiR", "lumiR.batch", "lumiT", "nuID2EntrezID", "nuID2IlluminaID", "nuID2RefSeqID", "nuID2probeID", "nuID2targetID",
-"plotControlData",  "plotHousekeepingGene", "plotSampleRelation", "plotStringencyGene", "plotVST", "probeID2nuID",
-"produceGEOPlatformFile", "produceGEOSampleInfoTemplate", "produceGEOSubmissionFile", "rsn", "seq2id", "ssn", "targetID2nuID","vst","rankinvariant",
-"plotColorBias2D", "plotColorBias1D", "boxplotColorBias", "colorBiasSummary", "estimateM", "estimateIntensity", "estimateBeta",
-"m2beta", "beta2m"
+export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            
+bgAdjust, detectOutlier, detectionCall, estimateLumiCV, getChipInfo, getControlData, getControlProbe,
+getControlType, getNuIDMappingInfo, id2seq, inverseVST, is.nuID, lumiB, lumiExpresso, lumiN, lumiQ,                       
+lumiR, lumiR.batch, lumiT, nuID2EntrezID, nuID2IlluminaID, nuID2RefSeqID, nuID2probeID, nuID2targetID,
+plotCDF, plotControlData, plotDensity, plotHousekeepingGene, plotSampleRelation, plotStringencyGene, plotVST, probeID2nuID,
+produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, rsn, seq2id, ssn, targetID2nuID, vst, rankinvariant,
+# methylation analysis functions
+adjColorBias.quantile, adjColorBias.ssn, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
+estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, m2beta, normalizeMethylation.quantile, 
+normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization 
 )
 
 

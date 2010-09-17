@@ -174,29 +174,15 @@ setMethod("getHistory",signature(object="MethyLumiM"), function(object) object@h
 
 
 setMethod("boxplot",signature(x="MethyLumiM"),
-	function(x, main, subset=NULL, ...) {
+	function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), ...) {
 		
-	if (!require(hdrcde)) stop("Please install the required hdrcde package./n")  
+	# if (!require(hdrcde)) stop("Please install the required hdrcde package./n")  
 
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
 
-	expr <- exprs(x)
-
-	if (!is.null(subset)) {
-		if (!is.numeric(subset)) stop('subset should be numeric.')
-		if (length(subset) == 1) {
-			index <- sample(1:nrow(expr), min(subset, nrow(expr)))
-		} else {
-			index <- subset
-			index <- index[index > 0 & index <= nrow(expr)]
-		}
-	} else {
-		index <- 1:nrow(expr)
-	}
-
-	dataMatrix <- expr[index,]
+	dataMatrix <- exprs(x)
 	labels <- colnames(dataMatrix)
 	if (is.null(labels)) labels <- as.character(1:ncol(dataMatrix))
 	## set the margin of the plot
@@ -207,7 +193,7 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 	par(mar=mar)
 
 	tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
-	hdr.boxplot(tmp, main=main, xlab='', ylab='M-value', ...)
+	hdr.boxplot(tmp, main=main, xlab='', ylab='M-value', prob=prob, col=col, ...)
 	par(xaxt='s')
 	axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
 	par(mar=old.mar)

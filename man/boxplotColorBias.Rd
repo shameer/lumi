@@ -38,7 +38,8 @@ Pan DU
  See Also as \code{\link[graphics]{boxplot}}
 }
 \examples{
-
+data(example.lumiMethy)
+boxplotColorBias(example.lumiMethy)
 }
 
 \keyword{methods}

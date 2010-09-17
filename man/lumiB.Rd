@@ -1,9 +1,9 @@
 \name{lumiB}
 \alias{lumiB}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Background correction of Illumina data }
+\title{ Background correction of Illumina Expression data }
 \description{
-  Background correction of Illumina data
+  Background correction of Illumina Expression data
 }
 \usage{
 lumiB(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdjust.affy'), verbose = TRUE, ...)

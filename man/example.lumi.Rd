@@ -1,7 +1,7 @@
 \name{example.lumi}
 \alias{example.lumi}
 \docType{data}
-\title{Example LumiBatch object includes example data}
+\title{Example Illumina Expression data in LumiBatch class}
 \description{
   Example data as a LumiBatch object which is a subset of Barnes data (Barnes, 2005)
 }

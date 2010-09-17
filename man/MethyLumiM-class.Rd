@@ -2,7 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{MethyLumiM-class}
-\alias{boxplot,MethyLumiM-method}
 \alias{coerce,eSet,MethyLumiM-method}
 \alias{getHistory,MethyLumiM-method}
 \alias{initialize,MethyLumiM-method}
@@ -48,7 +47,7 @@ Class \code{"\link{Versioned}"}, by class "ExpressionSet", distance 4.
 }
 \section{Methods}{
   \describe{
-    \item{boxplot}{\code{signature(x = "MethyLumiM")}: ... }
+    \item{boxplot}{\code{signature(x = "MethyLumiM")}: plot distribution of M-value }
     \item{coerce}{\code{signature(from = "eSet", to = "MethyLumiM")}: map from \code{\link[methylumi]{MethyLumi-class}}, \code{\link[methylumi]{MethyLumiSet-class}} or other \code{\link[Biobase]{eSet-class}} inherited object to MethyLumiM class object. MethyLumiM object will only keep "exprs", "methylated", "unmethylated" and "detection" data matrix in the assayData.}
     \item{getHistory}{\code{signature(object = "MethyLumiM")}: access the operation history of \code{MethyLumiM} object. }
     \item{initialize}{\code{signature(.Object = "MethyLumiM")}: class initialization }
@@ -61,13 +60,10 @@ Class \code{"\link{Versioned}"}, by class "ExpressionSet", distance 4.
 	 }
 }
 \references{
-
+1. Du, P., Zhang, X, Huang, C.C., Jafari, N., Kibbe, W.A., Hou, L., and Lin, S.M.,  (2010) 'Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis', (under review)
 }
 \author{
 Pan DU
-}
-\note{
-
 }
 
 \seealso{

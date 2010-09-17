@@ -1,14 +1,14 @@
 Package: lumi
 Type: Package
 Title: BeadArray Specific Methods for Illumina Methylation and Expression Microarrays
-Version: 2.1.2
-Date: 2010-08-28
+Version: 2.1.3
+Date: 2010-09-05
 Depends: R (>= 2.4.0), Biobase (>= 2.5.5)
-Imports: affy (>= 1.23.4), methylumi, annotate, Biobase (>= 2.5.5), mgcv (>= 1.4-0), preprocessCore, RSQLite, DBI, MASS, graphics, stats, methods
-Suggests: beadarray, limma, vsn, lumiBarnes, lumiHumanAll.db, lumiHumanIDMapping, genefilter, RColorBrewer
+Imports: affy (>= 1.23.4), methylumi, annotate, Biobase (>= 2.5.5), mgcv (>= 1.4-0), hdrcde, KernSmooth, preprocessCore, RSQLite, DBI, MASS, graphics, stats, methods
+Suggests: GeneAnswers, beadarray, limma, vsn, lumiBarnes, lumiHumanAll.db, lumiHumanIDMapping, genefilter, RColorBrewer
 Author: Pan Du, Gang Feng, Warren Kibbe, Simon Lin
 Maintainer: Pan Du <dupan@northwestern.edu>
-Description: The lumi package provides an integrated solution for the Illumina microarray data analysis. It includes functions of Illumina BeadStudio (GenomeStudio) data input, quality control, BeadArray-specific variance stabilization, normalization and gene annotation at the probe level. It also includes the functions of processing Illumina methylation microarrays.
+Description: The lumi package provides an integrated solution for the Illumina microarray data analysis. It includes functions of Illumina BeadStudio (GenomeStudio) data input, quality control, BeadArray-specific variance stabilization, normalization and gene annotation at the probe level. It also includes the functions of processing Illumina methylation microarrays, especially Illumina Infinium methylation microarrays.
 License: LGPL (>= 2)
 LazyLoad: yes
 biocViews: Microarray, OneChannel, Preprocessing, DNAMethylation, QualityControl, TwoChannel

@@ -4,7 +4,6 @@ setGeneric("unmethylated", function(object) standardGeneric("unmethylated"))
 setGeneric("unmethylated<-", function(object, value) standardGeneric("unmethylated<-"))
 setGeneric("getHistory", function(object) standardGeneric("getHistory"))
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
-setGeneric("plotCDF", function(x, ...) standardGeneric("plotCDF"))
 
 # if (is.null(getGeneric("methylated"))) setGeneric("methylated", function(object) standardGeneric("methylated"))
 # if (is.null(getGeneric("methylated<-"))) setGeneric("methylated<-", function(object, value) standardGeneric("methylated<-"))

@@ -1,7 +1,6 @@
-\name{plotCDF-methods}
+\name{plotCDF}
 \docType{methods}
 \alias{plotCDF}
-\alias{plotCDF-methods}
 \alias{plotCDF.ExpressionSet}
 \alias{plotCDF,ExpressionSet-method}
 
@@ -9,13 +8,13 @@
 \description{ plot the cumulative distribution function of a ExpressionSet object from high to low value or in reverse }
 
 \usage{
-\S4method{plotCDF}{ExpressionSet}(x, reverse=TRUE, logMode=TRUE, xlab = NULL, ylab = "Cumulative density", 
+ plotCDF(x, reverse=TRUE, logMode=TRUE, xlab = NULL, ylab = "Cumulative density", 
 	col=1:dim(x)[2], lwd=1, xlim = NULL, index.highlight = NULL, color.highlight = 2, 
 	addLegend = TRUE, main="", ...)
 }
 
 \arguments{
-	\item{x}{ a \code{\link[Biobase]{ExpressionSet}} object}
+	\item{x}{ a numeric or \code{\link[Biobase]{ExpressionSet}} object }
 	\item{reverse}{ determine whether plot the CDF from high to low value or not }
 	\item{logMode}{ determine whether the CDF plot is based on a log2 scale }
 	\item{xlab}{ xlab of the plotCDF plot }

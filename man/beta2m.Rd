@@ -23,6 +23,7 @@ Convert methylation Beta-value to M-value through a logistic transformation
 return methylation M-value with the same size of input Beta-value
 }
 \references{
+Du, P., Zhang, X, Huang, C.C., Jafari, N., Kibbe, W.A., Hou, L., and Lin, S.M.,  (2010) 'Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis', (under review)
 
 }
 \author{

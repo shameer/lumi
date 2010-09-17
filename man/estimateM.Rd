@@ -8,21 +8,22 @@ Estimate methylation M-value matrix
 Estimate methylation M-value matrix from MethyLumiM-class object or eSet-class object, which include methylated and unmethylated probe intensities
 }
 \usage{
-estimateM(methyLumiM, minValue = 100)
+estimateM(methyLumiM, returnType=c("ExpressionSet", "matrix"), offset=1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{ MethyLumiM-class object or eSet-class object, which include methylated and unmethylated probe intensities }
-  \item{minValue}{ minimum value of Illumina methylated and unmethylated probe intensities }
+  \item{returnType}{determine whether return an ExpressionSet (MethyLumiM in this case) or matrix object}
+  \item{offset}{ offset added to the  methylated and unmethylated probe intensities when estimating the M-value }
 }
 \details{
-M-value is the log2 ratio between Illumina methylated and unmethylated probe intensities. As variations of small intensities can cause big changes in the ratio estimation, the function add a parameter of "minValue". If the probe intensity is less than "minValue", it will be reset as "minValue".
+M-value is the log2 ratio between Illumina methylated and unmethylated probe intensities. As variations of small intensities can cause big changes in the ratio estimation, so an offset is added to methylated and unmethylated probe intensities when estimating the M-value.
 }
 \value{
- A matrix of methylation M-value
+ A MethyLumiM or matrix object of methylation M-value
 }
 \references{
-
+Du, P., Zhang, X, Huang, C.C., Jafari, N., Kibbe, W.A., Hou, L., and Lin, S.M.,  (2010) 'Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis', (under review)
 }
 \author{
 Pan DU
@@ -32,6 +33,9 @@ Pan DU
   See Also as \code{\link{estimateBeta}}, \code{\link{estimateIntensity}}
 }
 \examples{
+data(example.lumiMethy)
+methyLumiM = estimateM(example.lumiMethy)
+boxplot(methyLumiM)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

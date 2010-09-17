@@ -36,7 +36,9 @@ Pan DU
 See Also as \code{\link{plotColorBias2D}}
 }
 \examples{
-
+data(example.lumiMethy)
+# before adjustment
+plotColorBias1D(example.lumiMethy)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

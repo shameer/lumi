@@ -20,7 +20,7 @@ produceGEOSubmissionFile(lumiNormalized, lumiRaw, lib.mapping = NULL, idType = '
   \item{\dots}{ other parameters used by function \code{\link{nuID2IlluminaID}} }
 }
 \details{
-The function produces the GEO sample submission file including both normalized and raw data information  in the SOFT format. The sample information should be provided by the user as a data.frame or Tab separated text file following the format of the template, which can be produced by function \code{\link{produceGEOSampleInfoTemplate}}. Users need to fill in the detailed sample descriptions in the template, especially the Sample\_title, Sample\_description and some protocols. Users are also suggested to fill in the "Sample\_platform\_id" by checking information of the GEO Illumina platform.
+The function produces the GEO sample submission file including both normalized and raw data information  in the SOFT format. The sample information should be provided by the user as a data.frame or Tab separated text file following the format of the template, which can be produced by function \code{\link{produceGEOSampleInfoTemplate}}. Users need to fill in the detailed sample descriptions in the template, especially the Sample\_title, Sample\_description and some protocols. Users are also required to fill in the "Sample\_platform\_id" by checking information of the GEO Illumina platform.
 
 When the parameter "supplementaryRdata" is TRUE, the R objects, lumiNormalized, lumiRaw and sampleInfo, will be saved in a file named 'supplementaryData.Rdata'.
 }
