@@ -64,9 +64,7 @@ We use the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package to r
 > # example.lumiMethy <- as(example.lumiMethy, "MethyLumiM")
 \end{Sinput}
 
-Here, we just load the pre-saved example data, \Robject{example.lumiMethy}. The example methylation dataset includes 12 samples composed by two sub datasets: a titration dataset, and a control and treatment dataset. The titration dataset includes 8 samples: "A1", "A2", "B1", "B2", "C1", "C2", "D" and "E". They are mixtures of Sample A (a B-lymphocyte sample) and Sample B (is (a colon cancer sample from a female donor) at five different titration ratios: 100:0 (A), 90:10 (C), 75:25 (D), 50:50 (E) and 0:100 (B). 
-
-Another sub dataset is composed of two control samples and two treatment samples: "Ctrl1", "Ctrl2", "Treat1" and "Treat2". The two technique replicates were measured in different batches. We can see clear batch effects in colors bias. 
+Here, we just load the pre-saved example data, \Robject{example.lumiMethy}. The example methylation dataset is a titration dataset. It includes 8 samples: "A1", "A2", "B1", "B2", "C1", "C2", "D" and "E". They are mixtures of Sample A (a B-lymphocyte sample) and Sample B (is (a colon cancer sample from a female donor) at five different titration ratios: 100:0 (A), 90:10 (C), 75:25 (D), 50:50 (E) and 0:100 (B). 
 
 To save storage space, we randomly subset 10000 CpG sites among about 27000 measured CpG sites.
 
@@ -215,7 +213,7 @@ colorBiasSummary(example.lumiMethy[,1:8])
 @
 
 
-Function  \Rfunction{plotColorBias2D}  separately plots the methylated and unmethylated probe intensities in a 2-D scatter plot, and shows the interrogated CpG sites in red and green dots based on their color channels. Each time, \Rfunction{plotColorBias2D} can only plot one sample. By comparing the 2D scatter plots, we can easily see the details of color bias difference between samples. Figure \ref{fig:scatterColorBias1} and \ref{fig:scatterColorBias2} show two examples of color bias.
+Function  \Rfunction{plotColorBias2D}  separately plots the methylated and unmethylated probe intensities in a 2-D scatter plot, and shows the interrogated CpG sites in red and green dots based on their color channels. Each time, \Rfunction{plotColorBias2D} can only plot one sample. By comparing the 2D scatter plots, we can easily see the details of color bias difference between samples. Figure \ref{fig:scatterColorBias1} shows one example of color bias.
 
 
 \begin{figure}
@@ -227,20 +225,11 @@ plotColorBias2D(example.lumiMethy, selSample=1)
 \label{fig:scatterColorBias1}
 \end{figure}            
 
-\begin{figure}
-\centering
-<<scatterColorBias2, fig=true, width=8, height=8, quiet=T, echo=T>>=
-plotColorBias2D(example.lumiMethy, selSample="Ctrl1")
-@
-\caption{Scatter plot of methylated and unmethylated probe intensities to show color bias (example 2)}
-\label{fig:scatterColorBias2}
-\end{figure}            
-
 
 \subsection{Color bias adjustment}
 If we observed obvious color bias between two color channels by visually checking, then you have two options. The first is perform color bias adjustment, then we can treat two color channels as the same one. The second way is to separately process the data in two channels. Performing color bias adjustment first will make following up analysis much more convenient because we may not have access to the color channel information later on.
 
-The \Rpackage{lumi} package provides \Rfunction{lumiMethyC} function for color bias adjustment. The basic idea of color bias adjustment is to treat it as the normalization between two color channels. Function \Rfunction{lumiMethyC} provides two color bias adjustment methods: "quantile" and "ssn". Because two color channels have different number of probes and not match each other, we cannot directly apply regular "quantile" normalization used in expression microarray analysis. To solve this problem, we designed a  \Rfunction{smoothQuantileNormalization} method. Basically, it requires the quantile normalization should be smooth. By doing this, the \Rfunction{smoothQuantileNormalization} can further resolve one major withdraw of regular quantile normalization, i.e., quantile normalization doesn't work well in the areas with sparse density, like two extremes of data distribution. Figure \ref{fig:densityColorBiasSumAdj} and \ref{fig:boxplotColorBiasSumAdj} show density and boxplot of two color channels after color bias adjustment using smooth quantile normalization. Figure \ref{fig:scatterColorBias1Adj} and \ref{fig:scatterColorBias2Adj} show the scatter plots after color bias adjustment using smooth quantile normalization, we can see the distribution becomes very similar between two color channels.
+The \Rpackage{lumi} package provides \Rfunction{lumiMethyC} function for color bias adjustment. The basic idea of color bias adjustment is to treat it as the normalization between two color channels. Function \Rfunction{lumiMethyC} provides two color bias adjustment methods: "quantile" and "ssn". Because two color channels have different number of probes and not match each other, we cannot directly apply regular "quantile" normalization used in expression microarray analysis. To solve this problem, we designed a  \Rfunction{smoothQuantileNormalization} method. Basically, it requires the quantile normalization should be smooth. By doing this, the \Rfunction{smoothQuantileNormalization} can further resolve one major withdraw of regular quantile normalization, i.e., quantile normalization doesn't work well in the areas with sparse density, like two extremes of data distribution. Figure \ref{fig:densityColorBiasSumAdj} and \ref{fig:boxplotColorBiasSumAdj} show density and boxplot of two color channels after color bias adjustment using smooth quantile normalization. Figure \ref{fig:scatterColorBias1Adj} shows the scatter plots after color bias adjustment using smooth quantile normalization, we can see the distribution becomes very similar between two color channels.
 
 <<color bias adjustment, eval=T>>=
 ## summary of color bias information of individual samples
@@ -275,16 +264,6 @@ plotColorBias2D(lumiMethy.c.adj, selSample=1)
 @
 \caption{Scatter plot of methylated and unmethylated probe intensities after color bias adjustment (example 1)}
 \label{fig:scatterColorBias1Adj}
-\end{figure}            
-
-\begin{figure}
-\centering
-<<scatterColorBias2Adj, fig=true, width=8, height=8, quiet=T, echo=T>>=
-## plot the color bias adjusted scatter plot of two color channels
-plotColorBias2D(lumiMethy.c.adj, selSample="Ctrl1")
-@
-\caption{Scatter plot of methylated and unmethylated probe intensities after color bias adjustment (example 2)}
-\label{fig:scatterColorBias2Adj}
 \end{figure}            
 
 

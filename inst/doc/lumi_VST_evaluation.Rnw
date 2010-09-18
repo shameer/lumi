@@ -212,7 +212,12 @@ For $n$ groups, by its generalisation, the $F$-statistic.
 
 <<fstatistic>>=
 fac <- factor(paste(x.lumi$pctBlood, x.lumi$pctPlacenta, sep=":"))
-rf <- lapply(normDataList, function(x) rowFtests(x[presentCount > 0,], fac=fac))
+rf <- lapply(normDataList, function(x) {
+filtered.x = x[presentCount > 0,]
+ftest.x = rowFtests(filtered.x, fac=fac)
+ftest.x$IDs <- rownames(filtered.x)
+return(ftest.x)
+})
 ef <- sapply( rf, function(x) ecdf(x$p.value))
 @ 
 
@@ -278,7 +283,7 @@ topNumList <- seq(50, 3000, by=100)
 corTh <- 0.8
 highCorrNumMatrix <- NULL
 for (i in 1:length(rf)) {
-	probeList <- names(rf[[i]]$p.value)
+	probeList <- rf[[i]]$IDs
 	ordProbe.i <- probeList[order(abs(rf[[i]]$p.value), decreasing=FALSE)]
 	corr1 <- corrList[[i]]
 	matchNum.j <- NULL
