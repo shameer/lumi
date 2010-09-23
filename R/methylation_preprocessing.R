@@ -1,5 +1,5 @@
 # normalization
-lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), verbose=TRUE, ...) 
+lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
 {
 	# method <- match.arg(method)
 	method <- method[1]
@@ -21,8 +21,38 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), verbos
 	}
 			
 	if (is.function(method)) {
-		methyLumiM <- method(methyLumiM, ...)
-		if (!is(methyLumiM, 'MethyLumiM')) stop("The return of user defined method should be a MethyLumiM object!\n")
+		if (separateColor) {
+			annotation <- pData(featureData(methyLumiM))
+			if (is.null(annotation$COLOR_CHANNEL)) {
+				cat("No color bias adjustment because lack of COLOR_CHANNEL information!\n")
+				combData <- rbind(methy, unmethy)
+				processed.comb <- method(combData, ...)
+				if (!is(processed.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+				methy <- processed.comb[1:(nrow(processed.comb)/2), ]
+				unmethy <- processed.comb[(nrow(processed.comb)/2+1):nrow(processed.comb), ]
+			} else {
+				allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
+				allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
+				allRed <- rbind(methy[allRedInd,], unmethy[allRedInd,])
+				allGrn <- rbind(methy[allGrnInd,], unmethy[allGrnInd,])
+				processed.red <- method(allRed, ...)
+				if (!is(processed.red, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+				processed.grn <- method(allGrn, ...)
+				methy[allRedInd,] <- processed.red[1:(nrow(processed.red)/2), ]
+				unmethy[allRedInd,] <- processed.red[(nrow(processed.red)/2+1):nrow(processed.red), ]
+				methy[allGrnInd,] <- processed.grn[1:(nrow(processed.grn)/2), ]
+				unmethy[allGrnInd,] <- processed.grn[(nrow(processed.grn)/2+1):nrow(processed.grn), ]
+			}
+		} else {
+			combData <- rbind(methy, unmethy)
+			processed.comb <- method(combData, ...)
+			if (!is(processed.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+			methy <- processed.comb[1:(nrow(processed.comb)/2), ]
+			unmethy <- processed.comb[(nrow(processed.comb)/2+1):nrow(processed.comb), ]
+		}
+		methylated(methyLumiM) <- methy
+		unmethylated(methyLumiM) <- unmethy
+		methyLumiM <- estimateM(methyLumiM)
 	} else {
 		if (method == 'quantile') {
 			methyLumiM <- normalizeMethylation.quantile(methyLumiM, ...)
@@ -51,6 +81,9 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 	if (!is(methyLumiM, 'MethyLumiM')) {
 		stop('The object should be class "MethyLumiM" inherited!')
 	}
+	annotation <- pData(featureData(methyLumiM))
+	if (is.null(annotation$COLOR_CHANNEL))
+		cat("No color bias adjustment because lack of COLOR_CHANNEL information!\n")
 	
 	history.submitted <- as.character(Sys.time())
 	if (!(is.function(method))) {
@@ -66,8 +99,21 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 	}
 			
 	if (is.function(method)) {
-		methyLumiM <- method(methyLumiM, ...)
-		if (!is(methyLumiM, 'MethyLumiM')) stop("The return of user defined method should be a MethyLumiM object!\n")
+		allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
+		allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
+		allRed <- rbind(methy[allRedInd,], unmethy[allRedInd,])
+		allGrn <- rbind(methy[allGrnInd,], unmethy[allGrnInd,])
+		processedData <- method(allRed, allGrn, ...)
+		processed.red <- processedData$red
+		if (is.null(processed.red)) stop("The return of user defined method should be a list including 'red' and 'green' matrix!\n")
+		processed.grn <- processedData$green
+		methy[allRedInd,] <- processed.red[1:(nrow(processed.red)/2), ]
+		unmethy[allRedInd,] <- processed.red[(nrow(processed.red)/2+1):nrow(processed.red), ]
+		methy[allGrnInd,] <- processed.grn[1:(nrow(processed.grn)/2), ]
+		unmethy[allGrnInd,] <- processed.grn[(nrow(processed.grn)/2+1):nrow(processed.grn), ]
+		methylated(methyLumiM) <- methy
+		unmethylated(methyLumiM) <- unmethy
+		methyLumiM <- estimateM(methyLumiM)
 	} else {
 		if (method == 'quantile') {
 			methyLumiM <- adjColorBias.quantile(methyLumiM, ...)
@@ -86,7 +132,7 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 }
 
 
-lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'none'), verbose=TRUE, ...) 
+lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
 {
 	# method <- match.arg(method)
 	method <- method[1]
@@ -114,11 +160,40 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
 	}
 			
 	if (is.function(method)) {
-		methyLumiM <- method(methyLumiM, ...)
-		if (!is(methyLumiM, 'MethyLumiM')) stop("The return of user defined method should be a MethyLumiM object!\n")
+		if (separateColor) {
+			annotation <- pData(featureData(methyLumiM))
+			if (is.null(annotation$COLOR_CHANNEL)) {
+				cat("No color bias adjustment because lack of COLOR_CHANNEL information!\n")
+				combData <- rbind(methy, unmethy)
+				bgAdj.comb <- method(combData, ...)
+				if (!is(bgAdj.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+				methy <- bgAdj.comb[1:(nrow(bgAdj.comb)/2), ]
+				unmethy <- bgAdj.comb[(nrow(bgAdj.comb)/2+1):nrow(bgAdj.comb), ]
+			} else {
+				allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
+				allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
+				allRed <- rbind(methy[allRedInd,], unmethy[allRedInd,])
+				allGrn <- rbind(methy[allGrnInd,], unmethy[allGrnInd,])
+				bgAdj.red <- method(allRed, ...)
+				if (!is(bgAdj.red, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+				bgAdj.grn <- method(allGrn, ...)
+				methy[allRedInd,] <- bgAdj.red[1:(nrow(bgAdj.red)/2), ]
+				unmethy[allRedInd,] <- bgAdj.red[(nrow(bgAdj.red)/2+1):nrow(bgAdj.red), ]
+				methy[allGrnInd,] <- bgAdj.grn[1:(nrow(bgAdj.grn)/2), ]
+				unmethy[allGrnInd,] <- bgAdj.grn[(nrow(bgAdj.grn)/2+1):nrow(bgAdj.grn), ]
+			}
+		} else {
+			combData <- rbind(methy, unmethy)
+			bgAdj.comb <- method(combData, ...)
+			if (!is(bgAdj.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
+			methy <- bgAdj.comb[1:(nrow(bgAdj.comb)/2), ]
+			unmethy <- bgAdj.comb[(nrow(bgAdj.comb)/2+1):nrow(bgAdj.comb), ]
+		}
+		methylated(methyLumiM) <- methy
+		unmethylated(methyLumiM) <- unmethy
 	} else {
 		if (method == 'bgAdjust2C') {
-			methyLumiM <- bgAdjustMethylation(methyLumiM, ...)
+			methyLumiM <- bgAdjustMethylation(methyLumiM, separateColor=separateColor, ...)
 		} else if (method == 'forcePositive') {
 			x.matrix <- rbind(methy, unmethy)
 			offset <- apply(x.matrix, 2, min, na.rm=TRUE)
@@ -657,7 +732,7 @@ boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 		"both"="intensity of both methylated and unmethylated probes",
 		"methy"="intensity of methylated probes only",
 		"unmethy"="intensity of unmethylated probes only",
-		"sum"="sum of methylated and unmethylated probe intensity")
+		"sum"="CpG-site Intensity")
 	if (logMode) {
 		ylab <- paste("Log2", info)
 	} else {
@@ -736,7 +811,7 @@ plotColorBias1D <- function(methyLumiM, removeGenderProbes=FALSE, logMode=TRUE, 
 		"both"="intensity of both methylated and unmethylated probes",
 		"methy"="intensity of methylated probes only",
 		"unmethy"="intensity of unmethylated probes only",
-		"sum"="sum of methylated and unmethylated probe intensity")
+		"sum"="CpG-site Intensity")
 	if (logMode) {
 		xlab <- paste("Log2", info)
 	} else {

@@ -12,16 +12,16 @@
 \arguments{
 \item{x}{ a \code{\link{MethyLumiM-class}} object}
 \item{main}{ title of the boxplot }
-\item{prob}{ the quantiles used to plot in different levels of colors}
+\item{prob}{ Probability coverage required for HDRs (highest density regions), see \code{\link[hdrcde]{hdr.boxplot}}}
 \item{col}{ the plot color to represent the data in different quantile levels}
 \item{\dots}{ optional arguments to \code{\link[hdrcde]{hdr.boxplot}}.}
 }
 
 \details{
- Because the density plot of M-values usually includes two modes, using the traditional boxplot cannot accurately represent the distribution of the data. Here we use different color levels to represent the M-values in different quantile levels. The M-values less than the lowest quantile level specified in "prob" are plotted as dots, which is similar with the outliers in the regular boxplot.
+ Because the density plot of M-values usually includes two modes, using the traditional boxplot cannot accurately represent the distribution of the data. Here we use different color levels to represent the M-values in different quantile levels. The M-values locating outside the range of the maximum probability specified in "prob" are plotted as dots, which is similar with the outliers in the regular boxplot.
 }
 \seealso{
-\code{\link{MethyLumiM-class}}, \code{\link[hdrcde]{hdr.boxplot}}
+\code{\link{MethyLumiM-class}}, \code{\link[hdrcde]{hdr.boxplot}} and \code{\link{boxplot,ExpressionSet-method}}
 }
 \examples{
 ## load example data

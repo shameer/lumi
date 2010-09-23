@@ -24,7 +24,7 @@
 The boxplot function has a "subset" parameter. By default, it is set as 5000, i.e., randomly selected 5000 probes to plot the boxplot. The purpose of this is to plot the picture faster, but it will also make the boxplot has slightly different each time. If the user wants to make sure the boxplot is the same each time, you can set the "subset" parameter as NULL. 
 }
 \seealso{
-\code{\link{LumiBatch-class}}, \code{\link[graphics]{boxplot}}
+\code{\link{LumiBatch-class}}, \code{\link[graphics]{boxplot}} and \code{\link{boxplot,MethyLumiM-method}}
 }
 \examples{
 ## load example data

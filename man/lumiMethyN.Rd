@@ -8,12 +8,13 @@ Normalize the Illumina Infinium methylation data
 Normalize the Illumina Infinium methylation data, which is an object in MethyLumiM class.
 }
 \usage{
-lumiMethyN(methyLumiM, method = c("ssn", "quantile", "none"), verbose = TRUE, ...)
+lumiMethyN(methyLumiM, method = c("ssn", "quantile", "none"), separateColor = FALSE, verbose = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
  \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
- \item{method}{ supported normalization methods }
+ \item{method}{ supported normalization methods or user provided function, whose input and output should be a intensity matrix (pool of methylated and unmethylated probe intensities) }
+ \item{separateColor}{determine whether to separately process two color channels}
  \item{verbose}{a boolean to decide whether to print out some messages }
  \item{\dots}{ other parameters used by corresponding method }
 }
