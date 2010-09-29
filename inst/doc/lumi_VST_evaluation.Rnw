@@ -1,5 +1,5 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
-%\VignetteIndexEntry{lumi}
+%\VignetteIndexEntry{Evaluation of VST algorithm in lumi package}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
 %\VignetteDepends{lumi, lumiBarnes, affy, limma, Biobase, vsn, genefilter, RColorBrewer}
 %\VignettePackage{lumi}

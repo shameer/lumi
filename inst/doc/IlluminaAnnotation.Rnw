@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
-%\VignetteIndexEntry{lumi}
+%\VignetteIndexEntry{Resolve the inconsistency of Illumina identifiers through nuID}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, annotate, Biobase}
+%\VignetteDepends{lumi, lumiHumanIDMapping, lumiHumanAll.db, annotate, Biobase}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}

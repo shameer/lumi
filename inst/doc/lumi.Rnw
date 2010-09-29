@@ -1,7 +1,8 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
-%\VignetteIndexEntry{lumi}
+
+%\VignetteIndexEntry{Using lumi, a package processing Illumina Microarray}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
-%\VignetteDepends{lumi, affy, Biobase}
+%\VignetteDepends{lumi, limma, lumiHumanAll.db, annotate}
 %\VignettePackage{lumi}
 
 \documentclass[a4paper]{article}

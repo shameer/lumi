@@ -110,8 +110,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			} else {
 				ind <- grep("SGX Version", info, ignore.case=TRUE)
 			}
-			if (length(ind) == 0) 
-			    warning("The data file may not be in the Illumia BeadStudio or GenomeStudio output format.\n")
+			if (length(ind) == 0) 	ind <- grep("GenomeStudio version", info, ignore.case=TRUE)
+			if (length(ind) == 0)   warning("The data file may not be in the Illumia BeadStudio or GenomeStudio output format.\n")
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
