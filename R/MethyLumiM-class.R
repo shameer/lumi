@@ -49,7 +49,7 @@ setAs("eSet", "MethyLumiM", function(from) {
 	from <- asS4(from)
 	
 	if (exists('methylated', assayData(from)) && exists('methylated', assayData(from))) {
-		M <- estimateM(from)
+		M <- estimateM(from, returnType="matrix")
 	} else {
 		stop("Cann't convert as MethyLumiM object because methylated and unmethylated slots do not exist!\n")
 	}

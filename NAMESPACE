@@ -44,7 +44,7 @@ plotCDF, plotControlData, plotDensity, plotHousekeepingGene, plotSampleRelation,
 produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, rsn, seq2id, ssn, targetID2nuID, vst, rankinvariant,
 # methylation analysis functions
 adjColorBias.quantile, adjColorBias.ssn, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
-estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, m2beta, normalizeMethylation.quantile, 
+estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization 
 )
 

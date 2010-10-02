@@ -606,23 +606,27 @@ setMethod('density', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, main=NULL) 
+	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, dotColor=1, main=NULL) 
 {
 	upperPanel <- function(x, y) {
 		if (smoothScatter) {
 			par(new=TRUE)
 			smoothScatter(x[subset], y[subset], main='')
 		} else {
-			points(x[subset], y[subset], pch='.', cex=3)
+			if (length(dotColor) == length(x)) {
+				points(x[subset], y[subset], col=dotColor[subset], pch='.', cex=3)
+			} else {
+				points(x[subset], y[subset], col=dotColor, pch='.', cex=3)
+			}
 		}
 		
 		abline(0, 1, col="red", lty=1)
 		if (logMode) {
-			abline(log2(fold), 1, col="green", lty=2)
-			abline(log2(1/fold), 1, col="green", lty=2)
+			abline(log2(fold), 1, col="blue", lty=2)
+			abline(log2(1/fold), 1, col="blue", lty=2)
 		} else {
-			abline(fold, 1, col="green", lty=2)
-			abline(-fold, 1, col="green", lty=2)
+			abline(fold, 1, col="blue", lty=2)
+			abline(-fold, 1, col="blue", lty=2)
 		}
 	}
 

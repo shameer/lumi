@@ -8,7 +8,7 @@
 \description{ Creating \code{\link[graphics]{pairs}} plot of sample intensities in an ExpressionSet object }
 
 \usage{
-\S4method{pairs}{ExpressionSet}(x, ..., smoothScatter = FALSE, logMode = TRUE, subset = 5000, fold=2, main = NULL)
+\S4method{pairs}{ExpressionSet}(x, ..., smoothScatter = FALSE, logMode = TRUE, subset = 5000, fold=2, dotColor=1, main = NULL)
 }
 
 \arguments{
@@ -18,6 +18,7 @@
 	\item{logMode}{ whether plot the data in log2 scale }
 	\item{subset}{subset of rows used to plot. It can be an index vector, or the length of a random subset}
 	\item{fold}{The fold-change threshold used to estimate the number of probes having high fold-changes}
+	\item{dotColor}{color of points in the scatter plot}
 	\item{main}{ title of the plot }	
 }
 

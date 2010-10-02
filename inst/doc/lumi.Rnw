@@ -1,6 +1,6 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 
-%\VignetteIndexEntry{Using lumi, a package processing Illumina Microarray}
+%\VignetteIndexEntry{Using lumi A package processing Illumina Microarray}
 %\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
 %\VignetteDepends{lumi, limma, lumiHumanAll.db, annotate}
 %\VignettePackage{lumi}
@@ -72,7 +72,8 @@ In order to install the lumi package, the user needs to first install R, some re
 For the users want to install the latest developing version of lumi, which can be downloaded from the developing section of Bioconductor website. Some additional packages may be required to be installed because of the update the Bioconductor. These packages can also be found from the developing section of Bioconductor website. You can also directly install the source packages from the Bioconductor website by specify the developing version number, which can be found at the Bioconductor website. Suppose the developing version is 2.3,  to install the latest lumi pakcage in the Bioconductor developing version, you can use the following command:
 
 \begin{Sinput}
-install.packages("lumi",repos="http://www.bioconductor.org/packages/2.3/bioc",type="source")
+## replace "xxx" with the Bioconductor version number.
+install.packages("lumi",repos="http://www.bioconductor.org/packages/xxx/bioc",type="source")
 \end{Sinput}
 
 An Illumina benchmark data package \Rpackage{lumiBarnes} can be downloaded from Bioconductor Experiment data website.

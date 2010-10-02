@@ -1,4 +1,12 @@
 -----------------------------------------------------
+version 2.1.5, 2.1.6
+release data: 10/02/2010
+1. Add a treatment and control example dataset
+2. many updates of vignette 
+3. Add lumiMethyR function to wrap the methylumiR function from methylumi package
+
+
+-----------------------------------------------------
 version 2.1.4
 release data: 09/22/2010
 1. Enable lumiMethyB, lumiMethyC and lumiMethyN to run user defined functions

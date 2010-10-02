@@ -3,13 +3,13 @@
 \docType{data}
 \title{Example Illumina Infinium Methylation data in MethyLumiM class}
 \description{
-An example Illumina Infinium Methylation27k dataset, which includes two sub datasets: a titration dataset, and a control and treatment dataset
+An example Illumina Infinium Methylation27k dataset, which includes a control and treatment dataset with both technique and biological replicates
 }
 \usage{data(example.lumiMethy)}
 \details{
-The example dataset is a titration dataset. It includes 8 samples: "A1", "A2", "B1", "B2", "C1", "C2", "D" and "E". They are mixtures of Sample A (a B-lymphocyte sample) and Sample B (is (a colon cancer sample from a female donor) at five different titration ratios: 100:0 (A), 90:10 (C), 75:25 (D), 50:50 (E) and 0:100 (B). 
+The example dataset includes four control and four treatment samples together with their technique replicates. The original samples and technique replicates were measured in two batches. Here are the names of sixteen samples: Treat1, Treat2, Treat3, Treat4, Ctrl1, Ctrl2, Ctrl3, Ctrl4, Treat1.rep, Treat2.rep, Treat3.rep, Treat4.rep, Ctrl1.rep, Ctrl2.rep, Ctrl3.rep, Ctrl4.rep.
 
-To save storage space, we randomly subset 10000 CpG sites among about 27000 measured CpG sites.
+To save storage space, we randomly subset 5000 CpG sites among about 27000 measured CpG sites.
 
 }
 
