@@ -1,5 +1,5 @@
 lumiMethyR <- function(...) {
-	methyLumiSet <- methyLumiR(...)
+	methyLumiSet <- methylumiR(...)
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
 	return(methyLumiM)
 }
@@ -61,11 +61,11 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separa
 		methyLumiM <- estimateM(methyLumiM)
 	} else {
 		if (method == 'quantile') {
-			methyLumiM <- normalizeMethylation.quantile(methyLumiM, ...)
+			methyLumiM <- normalizeMethylation.quantile(methyLumiM, separateColor=separateColor, ...)
 		} else if (method == 'ssn') {
-			methyLumiM <- normalizeMethylation.ssn(methyLumiM, ...)
+			methyLumiM <- normalizeMethylation.ssn(methyLumiM, separateColor=separateColor, ...)
 		#} else if (method == 'rssn') {
-		#	methyLumiM <- normalizeMethylation.robust.ssn(methyLumiM, ...)
+		#	methyLumiM <- normalizeMethylation.robust.ssn(methyLumiM, separateColor=separateColor, ...)
 		}
 	}
 	history.finished <- as.character(Sys.time())
@@ -515,10 +515,10 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
 		totalIntensity.grn <- colSums(intensity.grn)
 		meanTotalIntensity.grn <- mean(totalIntensity.grn)
 		
-		methy[allRedInd, ] <- (methy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)) * (rep(1, nrow(allRedInd)) %*% t(meanTotalIntensity.red/totalIntensity.red)) + meanBg.red
-		methy[allGrnInd, ] <- (methy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * (rep(1, nrow(allGrnInd)) %*% t(meanTotalIntensity.grn/totalIntensity.grn)) + meanBg.grn
-		unmethy[allRedInd, ] <- (unmethy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)) * (rep(1, nrow(allRedInd)) %*% t(meanTotalIntensity.red/totalIntensity.red)) + meanBg.red
-		unmethy[allGrnInd, ] <- (unmethy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * (rep(1, nrow(allGrnInd)) %*% t(meanTotalIntensity.grn/totalIntensity.grn)) + meanBg.grn
+		methy[allRedInd, ] <- (methy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)) * (rep(1, length(allRedInd)) %*% t(meanTotalIntensity.red/totalIntensity.red)) + meanBg.red
+		methy[allGrnInd, ] <- (methy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * (rep(1, length(allGrnInd)) %*% t(meanTotalIntensity.grn/totalIntensity.grn)) + meanBg.grn
+		unmethy[allRedInd, ] <- (unmethy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)) * (rep(1, length(allRedInd)) %*% t(meanTotalIntensity.red/totalIntensity.red)) + meanBg.red
+		unmethy[allGrnInd, ] <- (unmethy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * (rep(1, length(allGrnInd)) %*% t(meanTotalIntensity.grn/totalIntensity.grn)) + meanBg.grn
 	} else {
 		meanBg <- mean(bg)
 
@@ -569,10 +569,10 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
 		x.matrix.grn <- normalize.quantiles.robust(x.matrix.grn + 0.0, ...)
 		len.red <- length(allRedInd)
 		len.grn <- length(allGrnInd)
-		methy.n[allRedInd,] <- x.matrix[1:len.red,]
-		unmethy.n[allRedInd,] <- x.matrix[(len.red+1):nrow(x.matrix.red),]
-		methy.n[allGrnInd,] <- x.matrix[1:len.grn,]
-		unmethy.n[allGrnInd,] <- x.matrix[(len.grn+1):nrow(x.matrix.grn),]
+		methy.n[allRedInd,] <- x.matrix.red[1:len.red,]
+		unmethy.n[allRedInd,] <- x.matrix.red[(len.red+1):nrow(x.matrix.red),]
+		methy.n[allGrnInd,] <- x.matrix.grn[1:len.grn,]
+		unmethy.n[allGrnInd,] <- x.matrix.grn[(len.grn+1):nrow(x.matrix.grn),]
 	} else {
 		x.matrix <- rbind(methy, unmethy)
 		# Normalize the intensity using robust quantile normalization
