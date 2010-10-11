@@ -53,14 +53,14 @@ library(lumi)
 @
 
 \subsection{Read the methylation microarray data}
-We define a \Rfunction{lumiMethyR} function to read the Illumina methylation data, which is a wrap of the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package.  The \Rfunction{lumiMethyR} function coerces the returned object (in \Rclass{MethyLumiSet} class) as a \Rclass{MethyLumiM} class object.
+We define a \Rfunction{lumiMethyR} function to read the Illumina methylation data, which is a wrap of the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package.  The \Rfunction{lumiMethyR} function coerces the returned object (in \Rclass{MethyLumiSet} class) as a \Rclass{MethyLumiM} class object. The annotation library is not required if the GenomeStudio output data has already included the "COLOR\_CHANNEL" column. 
 
 
 \begin{Sinput}
 > ## specify the file name
 > # fileName <- 'Example_Illumina_Methylation_profile.txt' 
 > ## load the data
-> # example.lumiMethy <- lumiMethyR(fileName)	# Not Run
+> # example.lumiMethy <- lumiMethyR(fileName, lib="IlluminaHumanMethylation27k.db")	# Not Run
 \end{Sinput}
 
 
@@ -528,7 +528,7 @@ For convenience to the users, the user can specify their own preprocessing funct
 
 
 \subsection{Options to separately process each color channel}
-Functions  \Rfunction{lumiMethyB}, \Rfunction{lumiMethyC} and \Rfunction{lumiMethyN} also has the option to separately process in each color channel. The presumption is that the data (\Rclass{MethyLumiM} object) should include the color channel column (with column name "COLOR\_CHANNEL") in the featureData and the green and red colors are represented as "Red" and "Grn". If the GenomeStudio (BeadStudio) output the annotation information together with the data (we recommend it), the \Rfunction{lumiMethyR} function will automatically add the annotation information, including color channel information, to the featureData slot. User can retrieve this information from the Illumina manifest files and manually add it  to the featureData. 
+Functions  \Rfunction{lumiMethyB}, \Rfunction{lumiMethyC} and \Rfunction{lumiMethyN} also has the option to separately process in each color channel. The presumption is that the data (\Rclass{MethyLumiM} object) should include the color channel column (with column name "COLOR\_CHANNEL") in the featureData and the green and red colors are represented as "Red" and "Grn". If the GenomeStudio (BeadStudio) output the annotation information together with the data (we recommend it), the \Rfunction{lumiMethyR} function will automatically add the annotation information, including color channel information, to the featureData slot. If the data does not include color channel information, users can add it use function \Rfunction{addColorChannelInfo}. 
 
 <<Color channel information, eval=T>>=
 ## retrieve the featureData information
@@ -538,7 +538,7 @@ ff <- pData(featureData(example.lumiMethy))
 head(ff)
 
 ## add user provided color channel information if it is not existed in the featureData
-# pData(featureData(example.lumiMethy))[, "COLOR_CHANNEL"] <- colorChannelInfo # not Run
+# example.lumiMethy <- addColorChannelInfo(example.lumiMethy, lib="IlluminaHumanMethylation27k.db")
 
 @
 
@@ -577,7 +577,7 @@ library(lumi)
 ## specify the file name
 # fileName <- 'Example_Illumina_Methylation_profile.txt' 
 ## load the data
-# example.lumiMethy <- lumimethyR(fileName)		# Not Run
+# example.lumiMethy <- lumimethyR(fileName, lib="IlluminaHumanMethylation27k.db")		# Not Run
 ## coerce the returned object as MethyLumiM class
 # example.lumiMethy <- as(example.lumiMethy, "MethyLumiM")
 

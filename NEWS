@@ -1,9 +1,10 @@
 -----------------------------------------------------
-version 2.1.5, 2.1.6
-release data: 10/02/2010
+version 2.1.5-8
+release data: 10/11/2010
 1. Add a treatment and control example dataset
 2. many updates of vignette 
 3. Add lumiMethyR function to wrap the methylumiR function from methylumi package
+4. add the addColorChannelInfo function in case of no color channel information was included in the data.
 
 
 -----------------------------------------------------

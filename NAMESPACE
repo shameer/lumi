@@ -26,6 +26,9 @@ importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)
 importMethodsFrom(RSQLite, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields)
 importFrom(DBI, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields, dbDriver, dbDataType, dbCommit, dbClearResult, SQLKeywords)
 
+importClassesFrom(AnnotationDbi, AnnDbBimap)
+importMethodsFrom(AnnotationDbi, "[", mappedkeys, as.list)
+
 importFrom(graphics, pairs, plot, boxplot, hist, image, lines, matplot, points, abline, axis, par, text)
 importFrom(stats, density, heatmap)
 importFrom(MASS, rlm, psi.bisquare)
@@ -43,7 +46,7 @@ lumiR, lumiR.batch, lumiT, nuID2EntrezID, nuID2IlluminaID, nuID2RefSeqID, nuID2p
 plotCDF, plotControlData, plotDensity, plotHousekeepingGene, plotSampleRelation, plotStringencyGene, plotVST, probeID2nuID,
 produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, rsn, seq2id, ssn, targetID2nuID, vst, rankinvariant,
 # methylation analysis functions
-adjColorBias.quantile, adjColorBias.ssn, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
+adjColorBias.quantile, adjColorBias.ssn, addColorChannelInfo, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
 estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization 
 )

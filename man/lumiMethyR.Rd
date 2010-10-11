@@ -8,11 +8,12 @@ Reading Illumina methylation microarray data
 This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package.
 }
 \usage{
-lumiMethyR(...)
+lumiMethyR(..., lib=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{ parameters of \code{\link[methylumi]{methylumiR}} function in methylumi package }
+  \item{lib}{Annotation library of Illumina methylation microarray}
 }
 \details{
 This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package. It will coerce the returned object as MethyLumiM class.
