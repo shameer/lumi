@@ -27,12 +27,12 @@ return the MethyLumiM object with "COLOR_CHANNEL" column added to the featureDat
 \examples{
 	data(example.lumiMethy)
 	head(pData(featureData(example.lumiMethy)))
-	# removing color channel information
-	testData = example.lumiMethy
-	pData(featureData(testData))$COLOR_CHANNEL = NULL
-	testData = addColorChannelInfo(testData, lib="IlluminaHumanMethylation27k.db")
-	# check whether the color channel information is added
-	head(pData(featureData(testData)))
+	## removing color channel information
+	# testData = example.lumiMethy
+	# pData(featureData(testData))$COLOR_CHANNEL = NULL
+	# testData = addColorChannelInfo(testData, lib="IlluminaHumanMethylation27k.db")
+	## check whether the color channel information is added
+	# head(pData(featureData(testData)))
 	
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

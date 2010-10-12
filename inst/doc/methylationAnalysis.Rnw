@@ -640,6 +640,8 @@ toLatex(sessionInfo())
 
 
 \section{Acknowledgement}
+We appreciate Dr. Sean Davis from NIH developed methylumi package and built IlluminaHumanMethylation27k.db package for us!
+
 This work was supported in part by the NIH award 1RC1ES018461-01 (to Dr. Lifang Hou), P30CA060553 and UL1RR025741. We would like to thank Lifang Hou for supporting this work, Xiao Zhang for preparing  the titration samples, Nadereh Jafari and Vivi Frangidakis for conducting the Illumina BeadChip experiments. 
 
 
