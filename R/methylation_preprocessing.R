@@ -27,8 +27,8 @@ addColorChannelInfo <- function(methyLumiM, lib="IlluminaHumanMethylation27k.db"
 # normalization
 lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
 {
-	# method <- match.arg(method)
-	method <- method[1]
+	if (!is.function(method)) method <- match.arg(method)
+
 	if (!is(methyLumiM, 'MethyLumiM')) {
 		stop('The object should be class "MethyLumiM" inherited!')
 	}
@@ -47,6 +47,8 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separa
 	}
 			
 	if (is.function(method)) {
+		unmethy <- assayDataElement(methyLumiM, 'unmethylated')
+		methy <- assayDataElement(methyLumiM, 'methylated')
 		if (separateColor) {
 			annotation <- pData(featureData(methyLumiM))
 			if (is.null(annotation$COLOR_CHANNEL)) {
@@ -102,8 +104,8 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separa
 # color balance adjustment
 lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbose=TRUE, ...) 
 {
-	# method <- match.arg(method)
-	method <- method[1]
+	if (!is.function(method)) method <- match.arg(method)
+
 	if (!is(methyLumiM, 'MethyLumiM')) {
 		stop('The object should be class "MethyLumiM" inherited!')
 	}
@@ -125,6 +127,8 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 	}
 			
 	if (is.function(method)) {
+		unmethy <- assayDataElement(methyLumiM, 'unmethylated')
+		methy <- assayDataElement(methyLumiM, 'methylated')
 		allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
 		allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
 		allRed <- rbind(methy[allRedInd,], unmethy[allRedInd,])
@@ -160,11 +164,11 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 
 lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
 {
-	# method <- match.arg(method)
-	method <- method[1]
+	if (!is.function(method)) method <- match.arg(method)
+
 	if (is(methyLumiM, 'MethyLumiM')) {
-		methy <- methylated(methyLumiM)
-		unmethy <- unmethylated(methyLumiM)
+		unmethy <- assayDataElement(methyLumiM, 'unmethylated')
+		methy <- assayDataElement(methyLumiM, 'methylated')
 	} else {
 		stop('The object should be class "MethyLumiM" inherited!')
 	}
