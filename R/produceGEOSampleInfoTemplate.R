@@ -4,6 +4,7 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 	link <- "http://www.ncbi.nlm.nih.gov/projects/geo/info/soft2.html"
 	templateTitle <- c("Sample_title", "Sample_channel_count","Sample_source_name_ch1","Sample_organism_ch1", "Sample_characteristics_ch1", "Sample_molecule_ch1","Sample_extract_protocol_ch1","Sample_label_ch1", "Sample_label_protocol_ch1", "Sample_hyb_protocol","Sample_scan_protocol","Sample_description","Sample_data_processing","Sample_platform_id", "Sample_supplementary_file")
 	if (is(lumiNormalized, 'LumiBatch')) {
+		labels <- sampleNames(lumiNormalized)
 		chipInfo <- getChipInfo(lumiNormalized, lib.mapping=lib.mapping)
 		chipVersion <- chipInfo$chipVersion[1]
 		chipVersion <- sub("(_V[0-9.]*)_.*$", "\\1", chipVersion)
@@ -13,15 +14,23 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 			'Mouse'='Mus musculus')
 		templateContent <- c("","1","",organism,"","total RNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"")
 	} else if (is(lumiNormalized, 'MethyLumiM')) {
+		labels <- sampleNames(lumiNormalized)
 		chipVersion <- 'unknown'
 		organism <- 'unknown'
 		templateContent <- c("","1","",organism,"","genomic DNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"none")
+	} else if (is(lumiNormalized, 'matrix')) {
+		labels <- colnames(lumiNormalized)
+		chipVersion <- 'unknown'
+		organism <- 'unknown'
+		templateContent <- c("","1","",organism,"","","","Cy3","","standard as recommended by manufacturer","standard as recommended by manufacturer","","", "","none")
 	}
 	
 	## add code of parsing processing history 
-	hh <- getHistory(lumiNormalized)
-	comm <- hh$command
 	preprocessMethod <- ''
+	if (is(lumiNormalized, 'LumiBatch') || is(lumiNormalized, 'MethyLumiM')) {
+		hh <- getHistory(lumiNormalized)
+		comm <- hh$command
+	}
 	if (is(lumiNormalized, 'LumiBatch')) {
 		# grep lumiT method
 		lumiT.loc <- grep('lumiT', comm)
@@ -53,7 +62,6 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 	} 
 
 	templateContent[templateTitle == "Sample_data_processing"] <- preprocessMethod
-	labels <- sampleNames(lumiNormalized)
 	template <- templateTitle
 	for (i in seq(labels)) {
 		template <- rbind(template, templateContent)

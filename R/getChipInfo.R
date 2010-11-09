@@ -102,7 +102,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 				for (fieldNames.ij in fieldNames.i) {
 					field.ij <- as.character(table.i[,fieldNames.ij])
 					len.ij <- length(which(inputID %in% field.ij))
-					if (fieldNames.ij == 'ProbeId') {
+					if (fieldNames.ij %in% c('ProbeId', 'Array_Address_Id')) {
 						len.ij.2 <- length(which(inputID %in% as.character(as.integer(field.ij))))
 						if (len.ij.2 > len.ij) {
 							cut0.probeId <- TRUE
@@ -140,7 +140,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 					dupInd <- duplicated(bestTable[,fieldName.match[1]])
 					bestTable <- bestTable[!dupInd,]
 					nuID <- bestTable[,'nuID']
-					if (fieldName.match[1] == 'ProbeId' && cut0.probeId) {
+					if (fieldName.match[1] %in% c('ProbeId', 'Array_Address_Id') && cut0.probeId) {
 						allID <- as.character(as.integer(bestTable[,fieldName.match[1]]))
 					} else {
 						allID <- bestTable[,fieldName.match[1]]					
@@ -175,7 +175,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 						dupInd.i <- duplicated(table.i[,fieldName.match[i]])
 						table.i <- table.i[!dupInd.i,]
 						nuID.i <- table.i[,'nuID']
-						if (fieldName.match[1] == 'ProbeId' && cut0.probeId) {
+						if (fieldName.match[1] %in% c('ProbeId', 'Array_Address_Id') && cut0.probeId) {
 							allID.i <- as.character(as.integer(table.i[,fieldName.match[i]]))
 						} else {
 							allID.i <- table.i[,fieldName.match[i]]				

@@ -432,6 +432,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, band
 			profile.i <- log2(profile.i)
 		}
 		if (len != refLen) {
+			# perform linear interpolation when the length of two profiles different
 			x.out.i <- rank(profile.i)/len 
 			y.out.i <- approx(x=x, y=y, xout=x.out.i, method="linear", rule=2)$y		
 		} else {
@@ -782,9 +783,13 @@ boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 
 # plotColorBias1D(methyLumiM)
 ## plot either density or scatter plot of two color channels
-plotColorBias1D <- function(methyLumiM, removeGenderProbes=FALSE, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum'), xlim=NULL, ...) {
+plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 'sum'), colorMode=TRUE, removeGenderProbes=FALSE, logMode=TRUE,  ...) {
 
 	channel <- match.arg(channel)
+	otherPar <- list(...)
+	densityPar <- otherPar[names(otherPar) %in% names(formals(density.default))]
+	otherPar[names(otherPar) %in% names(formals(density.default))] <- NULL
+	
 	if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 		stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
 	}
@@ -822,14 +827,43 @@ plotColorBias1D <- function(methyLumiM, removeGenderProbes=FALSE, logMode=TRUE, 
 			red <- red.a.i + red.b.i
 			grn <- grn.a.i + grn.b.i
 		}
-		if (logMode) {
-			red[red < 1] <- 1
-			grn[grn < 1] <- 1
-			dd.red <- density(log2(red))
-			dd.grn <- density(log2(grn), ...)
+		if (colorMode) {
+			if (logMode) {
+				red[red < 1] <- 1
+				grn[grn < 1] <- 1
+				if (length(densityPar) > 0) {
+					dd.red <- do.call('density', c(list(log2(red)), densityPar))
+					dd.grn <- do.call('density', c(list(log2(grn)), densityPar))
+				} else {
+					dd.red <- density(log2(red))
+					dd.grn <- density(log2(grn))
+				}
+			} else {
+				if (length(densityPar) > 0) {
+					dd.red <- do.call('density', c(list(red), densityPar))
+					dd.grn <- do.call('density', c(list(grn), densityPar))
+				} else {
+					dd.red <- density(red)
+					dd.grn <- density(grn)
+				}
+			}
 		} else {
-			dd.red <- density(red, ...)
-			dd.grn <- density(grn, ...)
+			pool <- c(red, grn)
+			if (logMode) {
+				pool[pool < 1] <- 1
+				if (length(densityPar) > 0) {
+					dd.pool <- do.call('density', c(list(log2(pool)), densityPar))
+				} else {
+					dd.pool <- density(log2(pool))
+				}
+			} else {
+				if (length(densityPar) > 0) {
+					dd.pool <- do.call('density', c(list(pool), densityPar))
+				} else {
+					dd.pool <- density(pool)
+				}
+			}
+			dd.red <- dd.grn <- dd.pool
 		}
 		return(list(red=dd.red, green=dd.grn))
 	})
@@ -849,16 +883,35 @@ plotColorBias1D <- function(methyLumiM, removeGenderProbes=FALSE, logMode=TRUE, 
 		xlab <- info
 	}
 	
+	if (is.null(otherPar$xlab)) otherPar$xlab <- xlab
+	if (is.null(otherPar$ylab)) otherPar$ylab <- "Density"
+	if (is.null(otherPar$xlim)) otherPar$xlim <- xrange
+	if (is.null(otherPar$ylim)) otherPar$ylim <- c(0,mm.density)
+	if (is.null(otherPar$main)) otherPar$main <- ifelse(colorMode, "Compare density distribution of two color channels", "Compare density distribution")
+	if (is.null(otherPar$type)) otherPar$type <- 'l'
+	if (colorMode) {
+		if (is.null(otherPar$col)) otherPar$col <- 2
+	} else {
+		if (is.null(otherPar$col)) {
+			otherPar$col <- 1:nSample
+		} else if (length(otherPar$col) < nSample)
+			otherPar$col <- rep(otherPar$col[1], nSample)
+	}
+	
+	
 	for (i in 1:nSample) {
 		dd.red.i <- density.list[[i]]$red
 		dd.grn.i <- density.list[[i]]$green
-		if (is.null(xlim)) xlim = xrange
 		if (i == 1) {
-			plot(dd.red.i, type='l', col=2, ylim=c(0,mm.density), xlim=xlim, xlab=xlab, ylab='Density', main="Compare density distribution of two color channels")
-			lines(dd.grn.i, col=3)
+			do.call('plot', c(list(dd.red.i), otherPar))
+			if (colorMode) lines(dd.grn.i, col=3)
 		} else {
-			lines(dd.red.i, col=2, lty=i)
-			lines(dd.grn.i, col=3, lty=i)
+			if (colorMode) {
+				lines(dd.red.i, col=otherPar$col, lty=i)
+				lines(dd.grn.i, col=3, lty=i)
+			} else {
+				lines(dd.red.i, col=otherPar$col[i], lty=i)
+			}
 		}
 	}
 	return(invisible(TRUE))

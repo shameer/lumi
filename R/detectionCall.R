@@ -5,9 +5,9 @@ function(x.lumi, Th = 0.01, type=c('probe', 'sample', 'matrix')) {
 	if (is(x.lumi, 'matrix')) {
 		detect <- x.lumi
 	} else {
-		if (!is(x.lumi, 'LumiBatch')) 
-			stop('The object should be class "LumiBatch"!')
-		detect <- detection(x.lumi)
+		if (!assayDataValidMembers(assayData(x.lumi), "detection")) 
+			stop('The object should be class "eSet" inherited classes and include "detection" element in the assayData!')
+		detect <- assayDataElement(x.lumi, 'detection')
 		if (is.null(detect)) {
 			warning('No detection slot found!')
 			return(NULL)

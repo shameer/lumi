@@ -35,7 +35,7 @@ Pan DU
 }
 
 \seealso{
- See Also as \code{\link[graphics]{boxplot}}
+ See Also as \code{\link[graphics]{boxplot}} and \code{\link{plotColorBias1D}} 
 }
 \examples{
 data(example.lumiMethy)

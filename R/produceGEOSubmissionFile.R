@@ -1,11 +1,20 @@
 `produceGEOSubmissionFile` <-
 function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE, ...) {
-	if (missing(lumiNormalized) || missing(lumiRaw)) stop('Please provide all required input parameters!\n')
-	expr.norm <- exprs(lumiNormalized)
-	detect <- detection(lumiRaw)
-	se.expr <- se.exprs(lumiRaw)
-	expr <- exprs(lumiRaw)
-	beadNum <- beadNum(lumiRaw)
+	if (missing(lumiNormalized)) stop('Please provide all required input parameters!\n')
+	if (is.matrix(lumiNormalized)) {
+		expr.norm <- lumiNormalized
+		detect <- NULL
+		se.expr <- NULL
+		expr <- NULL
+		beadNum <- NULL
+		if (!missing(lumiRaw)) expr <- lumiRaw
+	} else {
+		expr.norm <- exprs(lumiNormalized)
+		detect <- detection(lumiRaw)
+		se.expr <- se.exprs(lumiRaw)
+		expr <- exprs(lumiRaw)
+		beadNum <- beadNum(lumiRaw)
+	}
 	if (is.null(sampleInfo)) {
 		sampleInfo <- produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping=lib.mapping, fileName=NULL)
 	} else if (length(sampleInfo) == 1 && is.character(sampleInfo)) {
@@ -16,7 +25,11 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 	sampleInfoTitle <- colnames(sampleInfo)
 	if (any(sapply(sampleInfo[,-1, drop=F], nchar) == 0)) stop('No blank fields are allowed in the sampleInfo table!\nYou can check some example submissions, like GSM296418, at the GEO website.\n')
 	if (supplementaryRdata) sampleInfo[, "Sample_supplementary_file"] <- 'supplementaryData.Rdata'
-	nuID <- featureNames(lumiNormalized)
+	if (is.matrix(lumiNormalized)) {
+		nuID <- rownames(lumiNormalized)
+	} else {
+		nuID <- featureNames(lumiNormalized)
+	}
 	probeId <- nuID
 	if (length(which(is.nuID(sample(nuID, 100)))) < 20) {
 		nuID <- NULL
@@ -52,9 +65,11 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 			tableHead <- c(tableHead, "nuID")
 		}
 		cat("#VALUE = normalized signal intensity\n", file=fileName, append=TRUE)
-		cat("#RAW_VALUE = raw signal intensity\n", file=fileName, append=TRUE)
 		tableHead <- c(tableHead, "VALUE")
-		tableHead <- c(tableHead, "RAW_VALUE")
+		if (!is.null(expr)) {
+			cat("#RAW_VALUE = raw signal intensity\n", file=fileName, append=TRUE)
+			tableHead <- c(tableHead, "RAW_VALUE")			
+		}
 		if (!is.null(se.expr)) {
 			cat("#BEAD_STDERR = the standard error of the probe measurements\n", file=fileName, append=TRUE)
 			tableHead <- c(tableHead, "BEAD_STDERR")
@@ -69,7 +84,8 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 		}
 		sampleTable.i <- probeId
 		if (!is.null(nuID)) sampleTable.i <- cbind(sampleTable.i, nuID)
-		sampleTable.i <- cbind(sampleTable.i, expr.norm[,sampleID[i]], expr[,sampleID[i]])
+		sampleTable.i <- cbind(sampleTable.i, expr.norm[,sampleID[i]])
+		if (!is.null(expr)) sampleTable.i <- cbind(sampleTable.i, expr[,sampleID[i]])
 		if (!is.null(se.expr)) sampleTable.i <- cbind(sampleTable.i, se.expr[,sampleID[i]])
 		if (!is.null(detect)) sampleTable.i <- cbind(sampleTable.i, detect[,sampleID[i]])
 		if (!is.null(beadNum)) sampleTable.i <- cbind(sampleTable.i, beadNum[,sampleID[i]])
@@ -81,8 +97,12 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 	
 	if (supplementaryRdata) {
 		lumiNormalized <- lumiNormalized[,sampleID]
-		lumiRaw <- lumiRaw[,sampleID]
-		save(lumiNormalized, lumiRaw, sampleInfo, file='supplementaryData.Rdata')
+		if (!missing(lumiRaw)) {
+			lumiRaw <- lumiRaw[,sampleID]
+			save(lumiNormalized, lumiRaw, sampleInfo, file='supplementaryData.Rdata')
+		} else {
+			save(lumiNormalized, sampleInfo, file='supplementaryData.Rdata')
+		}
 	}
 }
 

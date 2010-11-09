@@ -124,28 +124,21 @@ Get chip information of the example data in the \Rpackage{lumi} package.
 	getChipInfo(example.lumi, species='Human')
 @
 
-\subsection{Mapping from nuIDs to RefSeq database}
-As nuIDs can be directly converted to probe sequences, the latest probe annotations can be easily retrieved. 
+\subsection{Mapping from nuIDs to RefSeq and Entrez gene IDs based on Illumina manifest files}
+Illumina manifest files are probe annotation files for each Illumina chip. In previous lumi annotation packages ( < 1.8.0), we performed the mapping from nuIDs (probe sequences) to RefSeq sequences by ourselves because the Illumina did not regularly maintain and update their manifest files at that time. Recently, we found Illumina made lots of improvements of the manifest file maintenance and set up a website ( http://www.illumina.com/support/downloads.ilmn\#manifests ) specially for the manifest files. Therefore, we decide directly using the mapping provided by Illumina. We assume the more recent releases of manifest files have more accurate annotation information, and higher versions of chips have better probe design. Therefore when we pool all probe annotations (indexed by nuIDs) together, for the duplicated annotations of the same probe Id (nuID), the most recent release of highest chip version will replace old ones. In this way, even the probes in the old chips can get the most recent annotation information. 
 
-The nuID mapping information is kept in the nuID\_MappingInfo table in the ID Mapping library. The nuID mapping table includes following fields (columns):
+The nuID mapping information is kept in the nuID\_MappingInfo table in the ID Mapping library. All these information was based on Illumina manifest files. The nuID mapping table includes following fields (columns):
 
 1. 	nuID: nuID for the probe sequence
 
-2. 	Refseq: The refseq IDs with perfect matching with probe sequence. If there are more than one refseq IDs, they are separated by ",".
+2. 	Access: The refseq  and other IDs, based on which Illumina designed the probes. 
 
-3. 	EntrezID: The Entrez gene IDs correspond to the refseq IDs. If there are more than one Entrez gene IDs, they are separated by ",". 
+3. 	EntrezID: The Entrez gene IDs correspond to the Access IDs. 
 
-4. 	Total\_hits\_of\_EntrezID: The number of unique Entrez gene IDs matched with the probe sequence.
-
-5.      Refseq\_old: the refseq ID provided by Illumina company when they designed the chip  (included in the chip manifest file).
+4. 	Symbol: The gene symbols correspond to the Entrez gene IDs.
 
 
-Procedures of nuID mappings:
-
-Briefly, we first mapped each probe sequence (converted from nuID) against the corresponding RefSeq sequence. Only perfect mapping will be considered. When one probe maps to multiple Refseq sequences, we will further check whether these Refseq sequences correspond to the same Entrez gene. To make sure the probes have unique mapping, we only consider the probe sequences mapped to a single Entrez Gene when we build the lumi annotation packages (lumiHumanAll.db, lumiMouseAll.db and lumiRatAll.db).
-
-
-The nuID\_MappingInfo table also includes mapping from nuID to EntrezID, which was produced by first mapping nuID to RefSeq and then from RefSeq to EntrezID. Function nuID2RefSeqID and nuID2EntrezID were designed for mapping nuIDs to RefSeq IDs and EntrezIDs, respectively. For comparison purpose, the library also includes the mapping to old Refseq ID  (Refseq\_old column in  the table) provided by Illumina company when they designed the chip. If users want to get all the mapping information, function  \Rfunction{getNuIDMappingInfo} was designed for this purpose.
+ Function \Rfunction{nuID2RefSeqID} and \Rfunction{nuID2EntrezID} were designed for mapping nuIDs to RefSeq IDs and EntrezIDs, respectively. If users want to get all the mapping information, they can use function \Rfunction{getNuIDMappingInfo}. Need to note, the EntrezID and gene symbol in the  nuID\_MappingInfo table were based on Illumina manifest files. They might have slight differences from the \Rpackage{lumiXXXAll.db} annotation library produced by using \Rpackage{AnnotationDbi} because their annotations were based on snapshots of the Entrez database at different time points (the NCBI Entez database keeps updating).
 
 
 Get nuID mapping information in the ID mapping package:
@@ -180,7 +173,9 @@ Return all mapping information related with nuID
 \section{Illumina microarray annotation packages}
 As the identifier inconsistency between different versions or even different releases of Illumina chips, it makes create annotation packages in the  traditional way difficult. In traditional way, we have to create individual annotation packages for different identifiers and different versions and releases of chips. That will result in lots of annotation packages, and make the maintenance difficult. Users will be hard to decide which package to use. By using the nuID universal identifier, we are able to build one annotation database for different versions and releases of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  The recent transition of Bioconductor annotation packages to use SQLite databases  made the package size is no longer a concern. 
 
- The latest version of Illumina annotation packages indexed by nuID are based on SQLite databases. They were build by using functions in \Rpackage{AnnotaionDbi} package. There are three Bioconductor annotation packages: \Rpackage{lumiHumanAll.db}, \Rpackage{lumiMouseAll.db} and \Rpackage{lumiRatAll.db} for three species Human, Mouse and Rat respectively.   These packages include all the previously released Illumina expression chips. The previous versions of packages: \Rpackage{lumiHumanV1}, \Rpackage{lumiHumanV2}, \Rpackage{lumiMouseV1} and \Rpackage{lumiRatV1} will be discontinued. Basically, we converted the probe sequence as nuIDs and pooled them together. Then we mapped nuIDs to different mRNA transcript libraries, which include RefSeq and Unigene. The current mappings (version 1.2.0) were based on on the Illumina Manifest files of the chips.  If there are duplicated nuIDs, then the latest version of mapping were used.  In our next release, the mapping between nuID to RefSeq IDs will be based on BLASTing results (included in the ID Mapping library). Actually, users can easily build their own annotation package using functions, like  \Rfunction{makeHUMANCHIP\_DB}, in \Rpackage{AnnotaionDbi} package by providing the mappings from nuID to RefSeq IDs, which can be retrieved in the Illumina ID Mapping libraries described in the previous section.  The usage of these annotation libraries is exactly the same as other Bioconductor annotation packages, like Affymetrix. 
+ The latest version of Illumina annotation packages indexed by nuID are based on SQLite databases. They were built by using functions in \Rpackage{AnnotationDbi} package. There are three Bioconductor annotation packages: \Rpackage{lumiHumanAll.db}, \Rpackage{lumiMouseAll.db} and \Rpackage{lumiRatAll.db} for three species Human, Mouse and Rat respectively.   These packages include all the previously released Illumina expression chips. The previous versions of packages: \Rpackage{lumiHumanV1}, \Rpackage{lumiHumanV2}, \Rpackage{lumiMouseV1} and \Rpackage{lumiRatV1} will be discontinued. 
+ 
+ Basically, we converted the probe sequence as nuIDs and pooled them together. Then we can map nuIDs to different mRNA transcript libraries, which include RefSeq and Unigene. From version 1.8.0, the mappings were based on on the Illumina manifest files of the corresponding chips.  If there are duplicated nuIDs, then the latest release and higher version of mapping was used. These mapping information has been organized in the nuID\_MappingInfo table in the ID Mapping library (e.g., \Rpackage{lumiHumanIDMapping} for human Illumina chips). We then used \Rfunction{makeHUMANCHIP\_DB} function in \Rpackage{AnnotaionDbi} package to map RefSeq and Unigene IDs to Entrez genes and created the annotation libraries. Users can also build their own annotation package by providing the mappings from nuID to RefSeq or Unigene IDs.  The usage of these annotation libraries is exactly the same as other Bioconductor annotation packages, like Affymetrix. 
  
  Here are some examples using the functions implemented in the \Rpackage{annotate} package:
  
@@ -219,7 +214,7 @@ Check what annotation elements available in the library
 @
 
 
-Need to mention, currently there are two sets of Illumina annotation packages in Bioconductor. The Illumina annotation packages mentioned here are named as "lumixxxx", e.g. "lumiHumanAll.db" and are maintained by us. There are another set of packages, named as "illuminaxxxx". These packages are indexed by Illumina IDs. They can also be used together with \Rpackage{lumi} package when the microarray data are indexed by Illumina IDs. 
+Need to mention, currently there are two sets of Illumina annotation packages in Bioconductor. The Illumina annotation packages mentioned here are named as "lumixxxx", e.g. \Rpackage{lumiHumanAll.db} and are maintained by us. There are another set of packages, named as "illuminaxxxx". These packages are indexed by Illumina IDs. They can also be used together with \Rpackage{lumi} package when the microarray data are indexed by Illumina IDs. 
 
 
 The majority of Bioconductor annotation packages are probe-based annotation package. As a result, these packages are manufacturers and array dependent. These packages include all kinds of mapping from probe to a specific gene annotation. For different packages of the same species, these gene annotations basically are the same. As a result, the majority information of different packages are redundant.  Bioconductor also provides Entrez gene based annotation packages. Each species has one Entrez gene based annotation package. For example, \Rpackage{org.Hs.eg.db}, \Rpackage{org.Mm.eg.db} and \Rpackage{org.Rn.eg.db} are designed for Human, Mouse and Rat respectively. Combining these packages with the Illumina ID mapping package, we can also analyze all kinds of chips of the same species. 
@@ -230,7 +225,7 @@ The majority of Bioconductor annotation packages are probe-based annotation pack
 
 Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
 
-https://prod.bioinformatics.northwestern.edu/nuID/
+http://www.illumina.com/support/downloads.ilmn\#manifests
 
 %\bibliographystyle{plainnat}
 %\bibliography{lumi}

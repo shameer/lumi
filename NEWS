@@ -1,4 +1,12 @@
 -----------------------------------------------------
+version 2.3.1
+release date: 11/08/2010
+1. Multiple updates related with methylation analysis
+2. Update of GEO submission file, make it be able to create GEO submission file based on a data matrix
+3. Update of getChipInfo to make it be able to check based on address IDs
+
+
+-----------------------------------------------------
 version 2.1.5-8
 release data: 10/11/2010
 1. Add a treatment and control example dataset
