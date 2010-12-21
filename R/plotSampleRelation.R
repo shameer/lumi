@@ -1,5 +1,5 @@
 `plotSampleRelation` <-
-function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL, ...) {
+function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL, main=NULL, ...) {
 	if (is(x, 'ExpressionSet')) {
 		dataMatrix <- exprs(x)
 	} else if (is.matrix(x)) {
@@ -13,17 +13,17 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 
 	if (is.null(selProbe)) {
 		## Filter the genes with most of the experiments "Absent"
-		cv.gene <- apply(dataMatrix, 1, function(x) sd(x)/mean(x))
 		probeList <- rownames(dataMatrix)
 		if (cv.Th > 0) {
+			cv.gene <- apply(dataMatrix, 1, function(x) sd(x)/mean(x))
 			selProbe <- probeList[abs(cv.gene) > cv.Th]
-			main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
+			if (is.null(main)) main <- paste('Sample relations based on', length(selProbe), 'genes with sd/mean >', cv.Th)
 		} else {
 			selProbe <- probeList
-			main <- paste('Sample relations based on', length(selProbe), 'genes')
+			if (is.null(main)) main <- paste('Sample relations based on', length(selProbe), 'genes')
 		}
 	} else {
-		main <- paste('Sample relations based on', length(selProbe), 'selected genes')
+		if (is.null(main)) main <- paste('Sample relations based on', length(selProbe), 'selected genes')
 	}
 
 	dd <- dist(t(dataMatrix[selProbe,]))
@@ -31,9 +31,16 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 	if (method == 'cluster') {
 		hc = hclust(dd, 'ave')
 		plot(hc, xlab='Sample', main=main, ...)
+		attr(hc, 'geneNum') <- length(selProbe)
+		attr(hc, 'threshold') <- cv.Th
+		return(invisible(hc))	
 	} else {
 		## Multi-Dimension Scaling
-		a1 <- cmdscale(dd, k=max(dimension))
+		mds.result <- cmdscale(dd, k=max(dimension), eig=TRUE)
+		ppoints <- mds.result$points
+		eig <- mds.result$eig
+		percent <- round(eig/sum(eig) * 100, 1)
+
 		if (is.null(color)) {
 			color <- 1
 		} else {
@@ -44,11 +51,11 @@ function(x, selProbe=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds
 				} 
 			}
 		}
-		plot(a1[,dimension[1]],a1[,dimension[2]], type='n', xlab=paste('Dimension', dimension[1]),ylab=paste('Dimension', dimension[2]), main=main, ...)
-		text(a1[,dimension[1]],a1[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
+		plot(ppoints[,dimension[1]], ppoints[,dimension[2]], type='n', xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), main=main, ...)
+		text(ppoints[,dimension[1]], ppoints[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
+		attr(ppoints, 'geneNum') <- length(selProbe)
+		attr(ppoints, 'threshold') <- cv.Th
+		return(invisible(ppoints))	
 	}
-	attr(dd, 'geneNum') <- length(selProbe)
-	attr(dd, 'threshold') <- cv.Th
-	return(invisible(dd))	
 }
 

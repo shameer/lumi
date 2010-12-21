@@ -6,14 +6,25 @@ function (lumiBatch, bg.correct = TRUE, bgcorrect.param = list(method='bgAdjust'
 	if (verbose) {
 		if (bg.correct) {
 			bgMethod <- ifelse(is.null(bgcorrect.param$method), 'bgAdjust', bgcorrect.param$method)
+			if (!is(lumiBatch, 'LumiBatch')) {
+				bgMethod <- "none"
+				bgcorrect.param$method <- bgMethod
+				cat("Due to the input is not a LumiBatch object, no background adjustment will be performed.\n")
+			} 
 			cat("Background Correction:", bgMethod, "\n")
 		}
 		if (variance.stabilize) {
 			vstMethod <- ifelse(is.null(varianceStabilize.param$method), 'vst', varianceStabilize.param$method)
+			if (is.null(se.exprs(lumiBatch)) && vstMethod == 'vst') {
+				vstMethod <- "log2"
+				varianceStabilize.param$method <- vstMethod
+				cat("Due to the lack of 'se.exprs' information, 'log2' transformation will be used.\n")
+			} 
 			cat("Variance Stabilizing Transform method:", vstMethod, "\n")
 		}
 		if (normalize) {
 			normMethod <- ifelse(is.null(normalize.param$method), 'quantile', normalize.param$method)
+			normalize.param$method <- normMethod
 			cat("Normalization method:", normMethod, "\n")
 		}
 		cat('\n')

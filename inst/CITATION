@@ -9,6 +9,14 @@ citEntry(entry = "Article",
 ) 
 
 citEntry(entry = "Article",
+         "author" = "Du P, Zhang X, Huang CC, Jafari N, Kibbe WA, Hou L, and Lin SM",
+         "title" = "Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis",
+         journal = "BMC Bioinformatics",
+         year = "2010",
+         textVersion = "Du P, Zhang X, Huang CC, Jafari N, Kibbe WA, Hou L, and Lin SM: 'Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis', BMC Bioinformatics 2010, 11:587"
+) 
+
+citEntry(entry = "Article",
          "author" = "Lin, S.M., Du, P., Kibbe, W.A.",
          "title" = "Model-based Variance-stabilizing Transformation for Illumina Microarray Data",
          journal = "Nucleic Acids Res",

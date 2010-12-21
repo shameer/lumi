@@ -1,21 +1,21 @@
 \name{plot-methods}
 \docType{methods}
 \alias{plot-methods}
-\alias{plot.LumiBatch}
-\alias{plot,LumiBatch-method}
-\alias{plot,LumiBatch,missing-method}
+\alias{plot.ExpressionSet}
+\alias{plot,ExpressionSet-method}
+\alias{plot,ExpressionSet,missing-method}
 
-\title{Plot of a LumiBatch object}
+\title{Plot of a ExpressionSet object}
 \description{
-Creating quality control plots of a LumiBatch object
+Creating quality control plots of a ExpressionSet object
 }
 
 \usage{
-\S4method{plot}{LumiBatch,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), main, ...)
+\S4method{plot}{ExpressionSet,missing}(x, what = c("density", "boxplot", "pair", "MAplot", "sampleRelation", "outlier", "cv"), main, ...)
 }
 
 \arguments{
-\item{x}{ a LumiBatch object returned by \code{\link{lumiQ}} }
+\item{x}{ a ExpressionSet object returned by \code{\link{lumiQ}} }
 \item{what}{ one of the six kinds of QC plots }
 \item{main}{ the title of the QC plot }
 \item{\dots}{ additional parameters for the corresponding QC plots }

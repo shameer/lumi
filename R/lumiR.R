@@ -513,8 +513,9 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 
 	## Add nuID if the annotation library is provided
 	if (!convertNuID) lib.mapping <- NULL
-	if (convertNuID)  x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping, verbose=verbose)
-
+	if (convertNuID && !is.null(lib.mapping)) {
+		x.lumi <- addNuID2lumi(x.lumi, lib.mapping=lib.mapping, verbose=verbose)
+	} 
 	## resume the old settings
 	options(stringsAsFactors = oldSetting)
     

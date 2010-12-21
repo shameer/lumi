@@ -523,7 +523,6 @@ For convenience to the users, the user can specify their own preprocessing funct
 
 ## suppose "userN" is a user defined probe level normalization method
  lumiMethy.c.n <- lumiMethyN(lumiMethy.c.adj, method= userN, separateColor=TRUE) # not Run
-
 @
 
 
@@ -539,7 +538,6 @@ head(ff)
 
 ## add user provided color channel information if it is not existed in the featureData
 # example.lumiMethy <- addColorChannelInfo(example.lumiMethy, lib="IlluminaHumanMethylation27k.db")
-
 @
 
 
@@ -554,7 +552,15 @@ Here are examples of separately processing each color channel:
 
 ## suppose "userN" is a user defined probe level normalization method
  lumiMethy.c.n <- lumiMethyN(lumiMethy.c.adj,  separateColor=TRUE) 
+@
 
+
+\subsection{About the detection p-value of a CpG site}
+The detection p-values of methylation arrays reflect the strength of DNA hybridization over the background (comparing the CpG-intensity with the intensities of negative control probes). Because all genomic DNA is expect existing in a normal diploid sample, almost all detection p-values are significant.  Non-significant detection p-values usually means bad probe design, bad hybridization or possible chromosome abnormalities (like mutations, indels) at the probe matching locations.  Given one sample in the titration data set as an example, the 99 percentile of the -log10(detection p-value) is 28.3, which is extraordinarily significant p-value. And there are only 27 probes with detection p-value worse than 0.0001. This is in great contrast to expression microarrays, where up to 40 percent or more of the genes might not be expressed in a given sample, and filtering based on detection p-values can dramatically reduce the false-positive rate for the expression data. However,  removing the bad quality CpG measurements is still an important step during preprocessing of Illumina methylation data.  Same as Illumina Expression data, we can use function \Rfunction{detectionCall} to estimate the detection call. Please check the help of \Rfunction{detectionCall} for more details of its usage.
+
+<<Estimate detection call of a CpG site, eval=F>>=
+## Estimate the detection call of a CpG site
+presentCount <- detectionCall(example.lumiMethy)
 @
 
 
@@ -577,9 +583,7 @@ library(lumi)
 ## specify the file name
 # fileName <- 'Example_Illumina_Methylation_profile.txt' 
 ## load the data
-# example.lumiMethy <- lumimethyR(fileName, lib="IlluminaHumanMethylation27k.db")		# Not Run
-## coerce the returned object as MethyLumiM class
-# example.lumiMethy <- as(example.lumiMethy, "MethyLumiM")
+# example.lumiMethy <- lumiMethyR(fileName, lib="IlluminaHumanMethylation27k.db")		# Not Run
 
 ## Quality and color balance assessment
 data(example.lumiMethy)
@@ -613,7 +617,6 @@ density(example.lumiMethy, main="Density plot of M-value of the raw data")
 
 ## output the normlized M-value as a Tab-separated text file
 write.exprs(lumiMethy.c.ssn, file='processedMethylationExampleData.txt')
-
 @
 
 
@@ -647,9 +650,9 @@ This work was supported in part by the NIH award 1RC1ES018461-01 (to Dr. Lifang 
 
 \section{References}
 
-1. Du, P., Kibbe, W.A. and Lin, S.M., (2008) 'lumi: a pipeline for processing Illumina microarray', Bioinformatics 24(13):1547-1548
+1. Du P, Kibbe WA and Lin SM: "lumi: a Bioconductor package for processing Illumina microarray" Bioinformatics 2008 24(13):1547-1548
 
-2. Du, P., Zhang, X, Huang, C.C., Jafari, N., Kibbe, W.A., Hou, L., and Lin, S.M.,  (2010) 'Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis', (under review)
+2. Du P, Zhang X, Huang CC, Jafari N, Kibbe WA, Hou L, and Lin SM: "Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis", BMC Bioinformatics 2010, 11:587
 
 %\bibliographystyle{plainnat}
 %\bibliography{lumi}

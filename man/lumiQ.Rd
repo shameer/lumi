@@ -25,7 +25,7 @@ a LumiBatch object with QC slot keeping the QC information
 
 \author{ Pan Du }
 
-\seealso{\code{\link{LumiBatch}}, \code{\link{plot,LumiBatch-method}} }
+\seealso{\code{\link{LumiBatch}}, \code{\link{plot,ExpressionSet-method}} }
 \examples{
 ## load example data
 data(example.lumi)
@@ -40,7 +40,7 @@ summary(lumi.Q, 'QC')
 ## plot the pairwise sample correlation
 plot(lumi.Q, what='pair')
 
-## see more examples in "plot,LumiBatch-method" help documents
+## see more examples in "plot,ExpressionSet-method" help documents
 
 }
 \keyword{methods}

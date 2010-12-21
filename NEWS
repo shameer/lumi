@@ -1,4 +1,13 @@
 -----------------------------------------------------
+version 2.3.2
+release date: 12/21/2010
+Multiple minor updates, which includes 
+1. vignettes of methylation analysis
+2. annotation field of example.lumi dataset
+3. detectionCall for methylation data
+4. Auto check of parameter validation of lumiExpresso 
+
+-----------------------------------------------------
 version 2.3.1
 release date: 11/08/2010
 1. Multiple updates related with methylation analysis

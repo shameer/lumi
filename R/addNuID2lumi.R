@@ -179,7 +179,7 @@ function(x.lumi, annotationFile=NULL, sep=NULL, lib.mapping=NULL, annotationColN
 					'Rat'='lumiRatAll.db')
 		}
 	} else {
-		cat('Please provide the annotation file or lumi annotation library!\n')
+		cat('Please provide Illumina ID Mapping library!\n')
 	}
 	if (all(newId == id)) {
 		conversion <- FALSE

@@ -735,11 +735,11 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 
 
 setMethod('plot',
-	signature('LumiBatch', 'missing'),
+	signature('ExpressionSet', 'missing'),
 	function(x, what=c('density', 'boxplot', 'pair', 'MAplot', 'sampleRelation', 'outlier', 'cv'), main, ...)
 {
 	object <- x
-	if (!is(object, 'LumiBatch')) stop('The object should be class "LumiBatch".')
+	if (!is(object, 'ExpressionSet')) stop('The object should be class "ExpressionSet".')
 	what <- match.arg(what)
 
 	if (what == 'density') {

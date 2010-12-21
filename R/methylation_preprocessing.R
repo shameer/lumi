@@ -7,6 +7,7 @@ lumiMethyR <- function(..., lib=NULL) {
 	return(methyLumiM)
 }
 
+
 addColorChannelInfo <- function(methyLumiM, lib="IlluminaHumanMethylation27k.db") {
 	
 	# retrieve feature data
