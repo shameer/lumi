@@ -21,6 +21,7 @@ importFrom(methylumi, methylumiR)
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(KernSmooth, locpoly)
 importFrom(hdrcde, hdr.boxplot)
+# importFrom(nleqslv, nleqslv)
 importFrom(annotate, lookUp, getSYMBOL)
 importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)
 importMethodsFrom(RSQLite, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields)
@@ -48,7 +49,9 @@ produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, 
 # methylation analysis functions
 adjColorBias.quantile, adjColorBias.ssn, addColorChannelInfo, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
 estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
-normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization 
+normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization,
+# methylation status estimation function
+gammaFitEM, initialGammaEstimation, methylationCall, plotGammaFit
 )
 
 

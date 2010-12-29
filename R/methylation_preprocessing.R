@@ -1185,3 +1185,353 @@ produceMethylationGEOSubmissionFile <- function(methyLumiM, methyLumiM.raw=NULL,
 }
 
 
+## ---------------------------------------------------------------------------------
+# Functions related with estimating methylation status
+## EM estimation of the parameters s1, s2 and theta
+## E-step: determine the class of each probe
+## M-step: 
+## 1. estimation the proportion of two classes
+## 2. Estimate of optimized s1 and s2 using optimization method
+## 3. Estimate theta based on equation
+
+# fittedGamma <- gammaFitEM(M[,1], initialFit=NULL, maxIteration=50, tol=0.0001, plotMode=T, verbose=T)
+gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, truncate=FALSE, maxIteration=50, tol=0.0001, plotMode=FALSE, verbose=FALSE) {
+	
+	fix.theta=NULL
+	eps <- 10^-5
+	# if (!require(nleqslv)) 	stop("Please install nleqslv package!\n")
+	if (!is.null(fix.k)) {
+		if (length(fix.k) == 1) fix.k <- c(fix.k, fix.k)
+	}
+	if (!is.null(fix.theta)) {
+		if (length(fix.theta) == 1) fix.theta <- c(fix.theta, fix.theta)
+	}
+		
+	fs1 <- function(s1, mi, zi, theta, k, n) {
+		nonNegativeInd <- which(mi > s1) # this setting will allow to shift the profile without considering the small part of the trailing points
+		sum(zi[nonNegativeInd]/(mi[nonNegativeInd]-s1)) - n /((k-1)*theta)	
+		# mi[mi < s1] <- s1 + eps	
+		# sum(zi/(mi-s1)) - n /((k-1)*theta)	
+		#sum(zi/abs(mi-s1)) - n /((k-1)*theta)		
+	}
+
+	fs2 <- function(s2, mi,  zi, theta, k, n) {
+		nonNegativeInd <- which(mi < s2)  # this setting will allow to shift the profile without considering the small part of the trailing points
+		sum(zi[nonNegativeInd]/(s2-mi[nonNegativeInd])) - n /((k-1)*theta)	
+		#mi[mi > s2] <- s2 - eps
+		#sum(zi/(s2-mi)) - n /((k-1)*theta)	
+		# sum(zi/abs(s2-mi)) - n /((k-1)*theta)	
+	}
+
+	fk1 <- function(k1, mi, zi, s, n) {
+		nonNegativeInd <- which(mi > s) # this setting will allow to shift the profile without considering the small part of the trailing points
+		log(k1) - digamma(k1) - log(sum(zi[nonNegativeInd]*(mi[nonNegativeInd]-s)/n)) + sum(zi[nonNegativeInd]*log(mi[nonNegativeInd]-s)/n)
+		# mi[mi < s] <- s + eps
+		# log(k1) - digamma(k1) - log(sum(zi*(mi-s)/n)) + sum(zi*log(mi-s)/n)
+	}
+
+	fk2 <- function(k2, mi, zi, s, n) {
+		nonNegativeInd <- which(mi < s) # this setting will allow to shift the profile without considering the small part of the trailing points
+		log(k2) - digamma(k2) - log(sum(zi[nonNegativeInd]*(s-mi[nonNegativeInd])/n)) + sum(zi[nonNegativeInd]*log(s-mi[nonNegativeInd])/n)
+		# mi[mi > s] <- s - eps
+		# log(k2) - digamma(k2) - log(sum(zi*(s-mi)/n)) + sum(zi*log(s-mi)/n)
+	}
+			
+	if (is.matrix(M)) {
+		if (ncol(M) > 1) cat("Only the first column of the matrix was processed!\n")
+		x <- M[,1]
+	} else {
+		x <- M
+	}
+
+	# Initial value estimation got from grid search
+	initialFit <- initialGammaEstimation(x, initialFit=initialFit)
+	
+	k <- initialFit$k
+	theta <- initialFit$theta
+	s <- initialFit$shift
+	p <- initialFit$proportion
+	Mode <- initialFit$mode
+	k[k < 2] <- 2
+	theta[theta < 0.2] <- 0.2
+
+	if (!is.null(fix.k)) k[!is.na(fix.k)] <- fix.k[!is.na(fix.k)]
+	if (!is.null(fix.theta)) theta[!is.na(fix.theta)] <- fix.theta[!is.na(fix.theta)]
+	if (!is.null(fix.k) || !is.null(fix.theta)) s <- c(Mode[1] - (k[1]-1)*theta[1], Mode[2] + (k[2]-1)*theta[2])
+
+	if (verbose) {
+		if (plotMode) plotGammaFit(x, k=k, theta=theta, shift=s, proportion=p)
+		cat("\nInitial estimation:\n")
+		cat("k:", k, "\n")
+		cat("s:", s, "\n")
+		cat("theta:", theta, "\n")
+		cat("p:", p, "\n")
+		f1 <- dgamma(x-s[1], shape=k[1], scale=theta[1])
+		f2 <- dgamma(s[2]-x, shape=k[2], scale=theta[2])
+		logLikelihood <- sum(log(p[1] * f1 + p[2]*f2))
+		cat("logLikelihood:", logLikelihood, "\n")
+	}
+	
+	iter <- 1
+	N <- length(x)
+	while (iter < maxIteration) {
+		if (any(theta < eps) || any(k < 2)) {
+			cat('It does not converge based on the current initial values!\n')
+			logLikelihood <- -Inf
+			return(list(logLikelihood=logLikelihood, k=k, theta=theta, shift=s, proportion=p, mode=Mode, probability=NULL))
+		}
+		
+		Mode <- c(s[1] + (k[1]-1)*theta[1], s[2] - (k[2]-1)*theta[2])
+
+		## E-step
+		f1 <- dgamma(x-s[1], shape=k[1], scale=theta[1])
+		f2 <- dgamma(s[2]-x, shape=k[2], scale=theta[2])
+		## TO DO: add weighted function instead of truncate 10/25/2010
+		
+		if (truncate) {
+			# adjust the density values because of the trunction
+			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
+			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)
+			z1[x > Mode[2]] <- 0
+			z1[x < Mode[1]] <- 1
+			f1[x > Mode[2]] <- 0
+			f2[x < Mode[1]] <- 0
+		} else {
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)  # posterior probability of unmethylated
+		}
+		z2 <- 1 - z1
+
+		if (verbose && iter > 1) {
+			# logLikelihood <- sum((z1*log(p[1] * f1))[z1 > 0]) + sum((z2* log(p[2]*f2))[z2 > 0])
+			ll <- p[1] * f1 + p[2]*f2
+			ll[ll < eps] <- eps
+			logLikelihood <- sum(log(ll))		
+			cat("logLikelihood:", logLikelihood, "\n")			
+		}
+		
+		## M-step (estimate parameters: s, theta and k)
+		# update the proportion of each class
+		n1 <- sum(z1); n2 <- N - n1
+		p.new <- n1 / N
+		p.new <- c(p.new, 1 - p.new)
+    	if (abs(p.new[1]-p[1]) < tol) break
+		p <- p.new
+
+		## Estimation of s, theta and k
+		iter.inter <- 1
+		while (iter.inter <= 10) {
+			# set the range of s parameter		fss(s1, mi, zi, theta, k, n)
+			s1.new <- nleqslv(s[1], fs1, mi=x, zi=z1, theta=theta[1], k=k[1], n=n1)$x
+			s2.new <- nleqslv(s[2], fs2, mi=x, zi=z2, theta=theta[2], k=k[2], n=n2)$x
+			s.new <- c(s1.new, s2.new)
+
+			## Estimation of k # fk1(k1, mi, zi, s, n)
+			if (is.null(fix.k)) {
+				k1.new <- nleqslv(k[1], fk1, mi=x, zi=z1, s=s.new[1], n=n1)$x
+				k2.new <- nleqslv(k[2], fk2, mi=x, zi=z2, s=s.new[2], n=n2)$x
+				k.new <- c(k1.new, k2.new)
+			} else {
+				k.new <- fix.k
+				if (any(is.na(k.new))) {
+					if (is.na(fix.k[1])) k.new[1] <- nleqslv(k[1], fk1, mi=x, zi=z1, s=s.new[1], n=n1)$x
+					if (is.na(fix.k[2])) k.new[2] <- nleqslv(k[2], fk2, mi=x, zi=z2, s=s.new[2], n=n2)$x
+				}
+			}
+
+			## Estimation of theta
+			if (is.null(fix.theta)) {
+				theta.new <- c(sum(z1*(x - s.new[1]))/(k.new[1]*n1), sum(z2*(s.new[2] - x))/(k.new[2]*n2))
+			} else {
+				theta.new <- fix.theta
+				if (any(is.na(theta.new))) {
+					if (is.na(fix.theta[1])) theta.new[1] <- sum(z1*(x - s.new[1]))/(k.new[1]*n1)
+					if (is.na(fix.theta[2])) theta.new[2] <- sum(z2*(s.new[2] - x))/(k.new[2]*n2)
+				}
+			}
+
+			if (min(abs(s.new - s)) < tol && min(abs(k.new - k)) < tol && min(abs(theta.new - theta)) < tol)  break
+			# if (verbose) cat("s:", s, " k:", k, " theta:", theta, "\n")
+			s <- s.new; k <- k.new; theta <- theta.new
+			# if (any(theta < 0.2) || any(k < 2)) {
+			if (any(theta < eps) || any(k < 2)) {
+				cat('It does not converge based on the current initial values!\n')
+				logLikelihood <- -Inf
+				return(list(logLikelihood=logLikelihood, k=k, theta=theta, shift=s, proportion=p, mode=Mode, probability=NULL))
+			}
+			iter.inter <- iter.inter + 1
+		}
+ 
+		if (verbose) {
+			cat("\nIteration ", iter, "\n")
+			cat("k:", k, "\n")
+			cat("s:", s, "\n")
+			cat("theta:", theta, "\n")
+			cat("p:", p, "\n")
+			cat("Mode:", Mode, "\n")
+			if (plotMode) plotGammaFit(x, k=k, theta=theta, shift=s, proportion=p)
+		}
+		iter <- iter + 1
+	}
+	if (iter == maxIteration) {
+		Mode <- c(s[1] + (k[1]-1)*theta[1], s[2] - (k[2]-1)*theta[2])
+		f1 <- dgamma(x-s[1], shape=k[1], scale=theta[1])
+		f2 <- dgamma(s[2]-x, shape=k[2], scale=theta[2])
+		if (truncate) {
+			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
+			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps)
+			z1[x > Mode[2]] <- 0
+			z1[x < Mode[1]] <- 1
+			f1[x > Mode[2]] <- 0
+			f2[x < Mode[1]] <- 0
+		} else {
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps)  # posterior probability of unmethylated
+		}
+		z2 <- 1 - z1
+	}
+
+	# estimate log-likelihood 
+	ll <- p[1] * f1 + p[2]*f2
+	ll[ll < eps] <- eps
+	logLikelihood <- sum(log(ll))		
+	if (iter == maxIteration && verbose) cat("logLikelihood:", logLikelihood, "\n")
+
+	# return the methylation/unmethylation estimation of each probe
+	## check class index to make sure those extreme probe belonging to the corresponding group
+	probability <- cbind(z1, z2)
+	colnames(probability) <- c('unmethylated', 'methylated')
+	Mode <- c(s[1] + (k[1]-1)*theta[1], s[2] - (k[2]-1)*theta[2])
+	if (plotMode) plotGammaFit(x, k=k, theta=theta, shift=s, proportion=p)
+
+	fitResult <- list(logLikelihood=logLikelihood, k=k, theta=theta, shift=s, proportion=p, mode=Mode, probability=probability)
+	class(fitResult) <- 'gammaFit'
+
+	return(fitResult)
+}
+
+
+# initial gamma parameters estimation
+initialGammaEstimation <- function(x, initialFit=NULL) {
+
+	k <- theta <- s <- p <- Mode <- NULL
+	if (!is.null(initialFit)) {
+		k <- initialFit$k
+		theta <- initialFit$theta
+		s <- initialFit$shift
+		p <- initialFit$proportion
+		Mode <- initialFit$mode
+	} 
+	
+	if (!is.null(k) && !is.null(theta) &&!is.null(s) && !is.null(p) && !is.null(Mode)) 	return(initialFit)
+	
+	# mode positions
+	if (is.null(Mode)) {
+		dd <- density(x)
+		density.m <- dd$y
+		density.x <- dd$x  # x-axis of density plot (methylation ratio)
+		midpoint <- mean(quantile(x, c(0.01, 0.99)))
+		unmethy.ind <- density.x <= midpoint
+		P1 <- density.x[unmethy.ind][which.max(density.m[unmethy.ind])]
+		if (abs(P1 - midpoint) < 0.1) P1 <- (midpoint + quantile(x, 0.01))/2
+		methy.ind <- density.x >= midpoint
+		P2 <- density.x[methy.ind][which.max(density.m[methy.ind])]		
+		if (abs(P2 - midpoint) < 0.1) P2 <- (midpoint + quantile(x, 0.99))/2
+		Mode <- c(P1, P2)
+	}
+
+	# update the class index
+	unmethy.ind <- which(x < (Mode[1] + Mode[2])/2)
+	methy.ind <- which(x > (Mode[1] + Mode[2])/2)
+
+	# percentage of two classes
+	if (is.null(p)) {
+		p <- c(length(unmethy.ind)/length(x), length(methy.ind)/length(x))
+	}
+
+	mean.unmethy <- mean(x[unmethy.ind])
+	mean.methy <- mean(x[methy.ind])
+	var.unmethy <- var(x[unmethy.ind])
+	var.methy <- var(x[methy.ind])
+	if (is.null(theta)) {
+		theta <- c(mean.unmethy - Mode[1], Mode[2] - mean.methy)
+		theta[theta < 0.2] <- 0.2
+	}
+	if (is.null(k))  {
+		k <- c(round(var.unmethy/theta[1]^2), round(var.methy/theta[2]^2))
+		k[k < 2] <- 2
+	}
+	if (is.null(s))  s <- c(mean.unmethy - k[1]*theta[1], mean.methy + k[2]*theta[2])
+
+	fitResult <- list(k=k, theta=theta, shift=s, proportion=p, mode=Mode)
+	class(fitResult) <- 'gammaFit'
+	return(fitResult)
+}
+
+
+# plot gammFit results
+plotGammaFit <- function(x, gammaFit=NULL, k=NULL, theta=NULL, shift=NULL, proportion=NULL, plotType=c('histogram', 'density'), ...) {
+	plotType <- match.arg(plotType)
+	
+	if (!is.null(gammaFit)) {
+		if (class(gammaFit) != 'gammaFit') stop("gammaFit should be an object of 'gammaFit' class!")
+		k <- gammaFit$k
+		theta <- gammaFit$theta
+		shift <- gammaFit$shift
+		proportion <- gammaFit$proportion
+	}
+	x <- sort(x)
+
+	if (is.null(k) || is.null(theta) || is.null(shift) || is.null(proportion)) stop("Information of parameters k, theta, shift and proportion is required!\n")
+	y1 = dgamma(x-shift[1], shape=k[1], scale=theta[1]) 
+	y2 = dgamma(shift[2]-x, shape=k[2], scale=theta[2])
+	if (plotType == 'histogram') {
+		hist(x, 50, probability=TRUE, main='Compare data histogram and fitted distribution', xlab='M value', ...)
+	} else {
+		plot(density(x), type='l', lwd=1.5, main='Compare data density and fitted distribution', xlab="M value", ...)
+	}
+	lines(x, y1*proportion[1] + y2 * proportion[2], col=2, lty=3, lwd=1.5)
+	lines(x, y1*proportion[1], col=3, lty=2)
+	lines(x, y2*proportion[2], col=4, lty=2)
+	return(invisible(TRUE))
+}
+
+
+# estimate methylation call probability based on gamma fit parameters
+methylationCall <- function(x, k=NULL, theta=NULL, shift=NULL, proportion=NULL, threshold=0.99, truncate=TRUE) {
+	
+	probability <- NULL
+	if (class(x) == 'gammaFit') {
+		k <- x$k
+		theta <- x$theta
+		shift <- x$shift
+		proportion <- x$proportion
+		probability <- x$probability
+	} 
+	
+	if (is.null(probability)) {
+		if (is.null(k) || is.null(theta) || is.null(shift) || is.null(proportion)) stop("Information of a gammaFit object or parameters k, theta, shift and proportion is required!\n")
+		Mode <- c(shift[1] + (k[1]-1)*theta[1], shift[2] - (k[2]-1)*theta[2])
+		f1 <- dgamma(x-shift[1], shape=k[1], scale=theta[1])
+		f2 <- dgamma(shift[2]-x, shape=k[2], scale=theta[2])
+		if (truncate) {
+			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
+			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2)
+			z1[x > Mode[2]] <- 0
+			z1[x < Mode[1]] <- 1
+			f1[x > Mode[2]] <- 0
+			f2[x < Mode[1]] <- 0
+		} else {
+			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2)  # posterior probability of unmethylated
+		}
+		z2 <- 1 - z1
+		probability <- cbind(z1, z2)
+		colnames(probability) <- c('unmethylated', 'methylated')
+	}
+
+	methyCall <- probability > threshold
+	return(list(methylationCall=methyCall, probability=probability))	
+}
+
+
