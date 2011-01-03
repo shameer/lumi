@@ -1,8 +1,18 @@
-lumiMethyR <- function(..., lib=NULL) {
+lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 	methyLumiSet <- methylumiR(...)
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
 	if (!is.null(lib)) {
 		methyLumiM <- addColorChannelInfo(methyLumiM, lib=lib)
+	}
+	if (!is.null(controlData)) {
+		if (is.character(controlData)) {
+			controlData <- methylumiR(controlData)
+		}
+		if (is(controlData, "MethyLumiQC")) {
+			controlData(methyLumiM) <- controlData
+		} else {
+			cat("Provided controlData is not supported!\n")
+		}
 	}
 	return(methyLumiM)
 }
@@ -23,6 +33,34 @@ addColorChannelInfo <- function(methyLumiM, lib="IlluminaHumanMethylation27k.db"
 	
 	return(methyLumiM)
 }
+
+
+addControlData2methyLumiM <- function(controlData, methyLumiM, checkConsistency = TRUE, ...) 
+{
+	if (missing(methyLumiM) || missing(controlData)) stop('Both controlData and methyLumiM are required!')
+	if (is.character(controlData)) {
+		controlData <- methylumiR(controlData, ...)
+	}
+	if (is(controlData, "MethyLumiQC")) {
+		## match the column names of controlData and LumiBatch object
+		if (checkConsistency) {
+			sampleID <- sampleNames(methyLumiM)
+			controlSampleID <- sampleNames(controlData)
+			if (all(sampleID %in% controlSampleID)) {
+				controlData(methyLumiM) <- controlData[, sampleID]
+			} else {
+				stop('SampleNames does not match up between controlData and methyLumiM!')
+			}
+		} else {
+			controlData(methyLumiM) <- controlData[, sampleID]
+		}
+	} else {
+		cat("Provided controlData is not supported!\n")
+	}
+
+	return(methyLumiM)
+}
+
 
 
 # normalization
@@ -254,7 +292,8 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
 	}
 	methy <- methylated(methyLumiM)
 	unmethy <- unmethylated(methyLumiM)
-
+	
+	## check whether control data is available in the MethyLumiM object
 	bglevel <- estimateMethylationBG(methyLumiM, separateColor=separateColor)
 	if (is.null(colnames(bglevel))) separateColor <- FALSE
 	if (separateColor) {
@@ -461,6 +500,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, band
 
 
 estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
+		
 	estimateBG <- function(dataMatrix, nbin=1000) {
 		bg <- apply(dataMatrix, 2, function(x) {
 			hh.x <- hist(x, nbin, plot=FALSE)
@@ -470,6 +510,32 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		})
 		return(bg)
 	}
+	
+	## check whether the control data is available
+	controlData <- NULL
+	if (is(methyLumiM, "MethyLumiM")) {
+		controlData <- controlData(methyLumiM)
+	}
+	if (is(methyLumiM, "MethyLumiSet")) {
+		controlData <- QCdata(methyLumiM)
+	}
+	if (is(controlData, "MethyLumiQC")) {
+		# For control data, methylated data corresponds to green channel
+		# For control data, unmethylated data corresponds to red channel
+		grnData <- assayDataElement(controlData, "methylated") 
+		redData <- assayDataElement(controlData, "unmethylated")
+		allControlType <- sapply(strsplit(featureNames(controlData), "\\."), function(x) x[1])
+		allControlType <- toupper(allControlType)
+		neg.ind <- which(allControlType == "NEGATIVE") 
+		if (length(neg.ind) > 0) {
+			bg.grn <- apply(grnData[neg.ind, ], median)
+			bg.red <- apply(redData[neg.ind, ], median)
+			bg <- cbind(red=bg.red, green=bg.grn)
+			return(bg)
+		}
+	}
+	
+	## In the case the negative control data is not available, the background will be estimated based on the mode positions of unmethylated or methylated distribution (the smaller one)
 	if (is(methyLumiM, "eSet")) {
 		if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 			stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
@@ -1517,13 +1583,13 @@ methylationCall <- function(x, k=NULL, theta=NULL, shift=NULL, proportion=NULL, 
 		if (truncate) {
 			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
 			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
-			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2)
+			z1 <- proportion[1] * f1 / (proportion[1] * f1 + proportion[2] * f2)
 			z1[x > Mode[2]] <- 0
 			z1[x < Mode[1]] <- 1
 			f1[x > Mode[2]] <- 0
 			f2[x < Mode[1]] <- 0
 		} else {
-			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2)  # posterior probability of unmethylated
+			z1 <- proportion[1] * f1 / (proportion[1] * f1 + proportion[2] * f2)  # posterior probability of unmethylated
 		}
 		z2 <- 1 - z1
 		probability <- cbind(z1, z2)

@@ -19,6 +19,9 @@ if (is.null(getGeneric("beadNum<-"))) setGeneric("beadNum<-", function(object, v
 if (is.null(getGeneric("detection"))) setGeneric("detection", function(object) standardGeneric("detection"))
 if (is.null(getGeneric("detection<-"))) setGeneric("detection<-", function(object, value) standardGeneric("detection<-"))
 
+if (is.null(getGeneric("controlData"))) setGeneric("controlData", function(object) standardGeneric("controlData"))
+if (is.null(getGeneric("controlData<-"))) setGeneric("controlData<-", function(object, value) standardGeneric("controlData<-"))
+
 if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))

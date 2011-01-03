@@ -18,6 +18,14 @@
 \alias{methylated<-}
 \alias{unmethylated}
 \alias{unmethylated<-}
+\alias{controlData}
+\alias{controlData<-}
+\alias{controlData,MethyLumiM-method}
+\alias{controlData<-,MethyLumiM-method}
+\alias{controlData<-,MethyLumiM,ANY-method}
+\alias{combine,MethyLumiM,MethyLumiM-method}
+\alias{[,MethyLumiM-method}
+\alias{[,MethyLumiM,ANY,ANY,ANY-method}
 
 \title{Class "MethyLumiM": for Illumina Methylation microarray data}
 \description{
@@ -30,6 +38,7 @@ The "exprs" is a matrix of M-values, which is the log2 ratio of methylated and u
 \section{Slots}{
   \describe{
     \item{\code{history}:}{Object of class \code{"data.frame"} recording the operation history of the LumiBatch object.}
+    \item{\code{controlData}:}{Object of class \code{"MethyLumiQC"} to keep the QC probe measurement information.}
     \item{\code{assayData}:}{Object of class \code{"AssayData"}, which includes "exprs", "methylated", "unmethylated" and "detection" data matrix}
     \item{\code{phenoData}:}{Object of class \code{"AnnotatedDataFrame"}, See \code{\link[Biobase]{eSet-class}} }
     \item{\code{featureData}:}{Object of class \code{"AnnotatedDataFrame"}, See \code{\link[Biobase]{eSet-class}} }
@@ -57,6 +66,8 @@ Class \code{"\link{Versioned}"}, by class "ExpressionSet", distance 4.
     \item{unmethylated<-}{\code{signature(object = "MethyLumiM")}: set the data matrix measured by unmethylated probes }
     \item{detection}{\code{signature(object = "MethyLumiM")}: retrieve \code{detection} data matrix in \code{AssayData-class} }
     \item{detection<-}{\code{signature(object = "MethyLumiM")}: set \code{detection} data matrix in \code{AssayData-class}  }
+    \item{controlData}{\code{signature(object = "MethyLumiM")}: retrieve the \code{controlData} in \code{MethyLumiQC-class} }
+    \item{controlData<-}{\code{signature(object = "MethyLumiM")}: set \code{controlData} in \code{MethyLumiQC-class}  }
 	 }
 }
 \references{

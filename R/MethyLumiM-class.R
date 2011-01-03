@@ -1,13 +1,15 @@
 ## ---------------------------------------------------------------
 ## define a new class lumiMethyM
+setClassUnion("QCDataOrNULL",c('NULL',"MethyLumiQC"))
+
 setClass('MethyLumiM', 
-	representation(history='data.frame'), 
-	prototype=list(history=data.frame(
+	representation(controlData='QCDataOrNULL', history='data.frame'), 
+	prototype=list(controlData = NULL, history=data.frame(
 		submitted   = I(vector()),
 		finished    = I(vector()),
 		command     = I(vector()),
 		lumiVersion = I(vector())
-	)),
+	)), 
 	contains='ExpressionSet')
 
 #
@@ -16,6 +18,7 @@ setMethod('initialize', 'MethyLumiM', function(.Object,
 	methylated = new('matrix'),		
 	unmethylated = new('matrix'),
 	detection = new('matrix'),  # detection pvalues
+	controlData = NULL,
     ...,
     assayData)
 {
@@ -84,6 +87,12 @@ setAs("eSet", "MethyLumiM", function(from) {
 	storageMode(aData) <- "lockedEnvironment"	
 	to <- new("MethyLumiM", assayData=aData, phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from), protocolData=protocolData(from))		
     
+	# check whether there are QC data available
+	if (!is.null(QCdata(from))) {
+		if (is(QCdata(from), "MethyLumiQC"))
+			controlData(to) <- QCdata(from)
+	} 
+
 	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(setAs)))  
 	lumiVersion <- packageDescription('lumi')$Version
@@ -103,20 +112,20 @@ setMethod("methylated", signature(object="MethyLumiM"), function(object) {
 })
 
 setReplaceMethod("methylated", signature(object="MethyLumiM"), function(object, value) {
-		if (is.null(value)) {
-			assay <- assayData(object)
-			if (exists('methylated', envir=assay)) {
-				oldMode <- storageMode(assay)
-				storageMode(assay) <- 'environment'
-				rm(methylated, envir=assay)
-				storageMode(assay) <- oldMode
-				assayData(object) <- assay
-			}
-			return(object)
-		} else {
-			assayDataElementReplace(object, "methylated", value)
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('methylated', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(methylated, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
 		}
-	})	
+		return(object)
+	} else {
+		assayDataElementReplace(object, "methylated", value)
+	}
+})	
 
 
 setMethod("unmethylated", signature(object="MethyLumiM"), function(object) {
@@ -128,20 +137,20 @@ setMethod("unmethylated", signature(object="MethyLumiM"), function(object) {
 })
 
 setReplaceMethod("unmethylated", signature(object="MethyLumiM"), function(object, value) {
-		if (is.null(value)) {
-			assay <- assayData(object)
-			if (exists('methylated', envir=assay)) {
-				oldMode <- storageMode(assay)
-				storageMode(assay) <- 'environment'
-				rm(unmethylated, envir=assay)
-				storageMode(assay) <- oldMode
-				assayData(object) <- assay
-			}
-			return(object)
-		} else {
-			assayDataElementReplace(object, "unmethylated", value)
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('methylated', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(unmethylated, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
 		}
-	})	
+		return(object)
+	} else {
+		assayDataElementReplace(object, "unmethylated", value)
+	}
+})	
 	
 
 
@@ -154,23 +163,100 @@ setMethod("detection", signature(object="MethyLumiM"), function(object) {
 })
 
 setReplaceMethod("detection", signature(object="MethyLumiM"), function(object, value) {
-		if (is.null(value)) {
-			assay <- assayData(object)
-			if (exists('detection', envir=assay)) {
-				oldMode <- storageMode(assay)
-				storageMode(assay) <- 'environment'
-				rm(detection, envir=assay)
-				storageMode(assay) <- oldMode
-				assayData(object) <- assay
-			}
-			return(object)
-		} else {
-			assayDataElementReplace(object, "detection", value)
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('detection', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(detection, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
 		}
-	})	
+		return(object)
+	} else {
+		assayDataElementReplace(object, "detection", value)
+	}
+})	
+
+
+setMethod("controlData", signature(object="MethyLumiM"), function(object) {
+	if (.hasSlot(object, "controlData")) {
+		return(object@controlData)
+	} else {
+		return(NULL)
+	}
+})
+
+
+setReplaceMethod("controlData", signature(object="MethyLumiM"), function(object, value) {
+	if (is(value, "MethyLumiQC")) {
+		object@controlData <- value
+	} else {
+		cat("The control data should be a MethyLumiQC object!\n")
+	}
+})	
 
 
 setMethod("getHistory",signature(object="MethyLumiM"), function(object) object@history)
+
+
+setMethod("combine", signature=c(x="MethyLumiM", y="MethyLumiM"), function(x, y, ...) {
+
+   	history.submitted <- as.character(Sys.time())
+
+	if (missing(y)) return(x)
+	if (length(list(...)) > 0) 
+	        return(combine(x, combine(y, ...)))
+
+  	## do default processing of 'ExpressionSet'
+  	x.comb <- callNextMethod()
+
+	## deal with control data
+	if (!is.null(controlData(x)) && !is.null(controlData(y))) {
+		controlData(x.comb) <- combine(controlData(x), controlData(y))
+	}
+	
+    # history tracking
+    history.finished <- as.character(Sys.time())
+	#history.command <- match.call()
+    history.command <- capture.output(print(match.call(combine)))  
+	x.comb@history<- rbind(x@history, y@history)
+	if (is.null(x.comb@history$lumiVersion) && nrow(x@history) > 0) x.comb@history <- data.frame(x.comb@history, lumiVersion=rep(NA, nrow(x.comb@history)))
+	lumiVersion <- packageDescription('lumi')$Version
+	x.comb@history<- rbind(x.comb@history, data.frame(submitted=history.submitted,finished=history.finished,command=history.command, lumiVersion=lumiVersion))
+	return(x.comb)
+})
+
+
+setMethod("[", "MethyLumiM", function(x, i, j, ..., drop = FALSE)  {
+
+	if (missing(drop)) drop <- FALSE
+	history.submitted <- as.character(Sys.time())
+	
+	## do default processing of 'ExpressionSet'
+	x <- callNextMethod()
+	
+	ddim <- dim(x)
+	if (!missing(i) & !missing(j)) {
+	  	history.command <- paste('Subsetting', ddim[1], 'features and', ddim[2], 'samples.')		
+	} else if (!missing(i)) {
+	  	history.command <- paste('Subsetting', ddim[1], 'features.')
+	} else if (!missing(j)) {
+	  	history.command <- paste('Subsetting', ddim[2], 'samples.')
+	  	if (!is.null(controlData(x)))
+	  		controlData(x) <- controlData(x)[,j]
+	} else {
+	  	return(x)
+	}
+	
+	# history tracking
+	history.finished <- as.character(Sys.time())
+	if (is.null(x@history$lumiVersion) && nrow(x@history) > 0) x@history <- data.frame(x@history, lumiVersion=rep(NA, nrow(x@history)))
+	lumiVersion <- packageDescription('lumi')$Version
+	x@history<- rbind(x@history, data.frame(submitted=history.submitted,finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+	
+	return(x)
+})
 
 
 setMethod("boxplot",signature(x="MethyLumiM"),
@@ -199,4 +285,5 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 	par(mar=old.mar)
 	par(xaxt=old.xaxt)
 })
+
 

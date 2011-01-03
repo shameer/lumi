@@ -8,12 +8,13 @@ Reading Illumina methylation microarray data
 This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package.
 }
 \usage{
-lumiMethyR(..., lib=NULL)
+lumiMethyR(..., lib = NULL, controlData = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{ parameters of \code{\link[methylumi]{methylumiR}} function in methylumi package }
   \item{lib}{Annotation library of Illumina methylation microarray}
+  \item{controlData}{the controlData file name or a MethyLumiQC object to be added to the "controlData" slot of the MethyLumiM object}
 }
 \details{
 This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package. It will coerce the returned object as MethyLumiM class.
@@ -25,7 +26,7 @@ Pan Du
 }
 
 \seealso{
-  See Also \code{\link[methylumi]{methylumiR}}
+  See Also \code{\link[methylumi]{methylumiR}} and \code{\link{addControlData2methyLumiM}}
 }
 \examples{
 
