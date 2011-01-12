@@ -199,6 +199,56 @@ setReplaceMethod("detection", signature(object="MethyLumiM"), function(object, v
 })	
 
 
+setMethod("methylated.N", signature(object="MethyLumiM"), function(object) {
+	if ('methylated.N' %in% assayDataElementNames(object)) {
+		return(assayDataElement(object,"methylated.N"))
+	} else {
+		return(NULL)
+	}
+})
+
+setReplaceMethod("methylated.N", signature(object="MethyLumiM"), function(object, value) {
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('methylated.N', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(methylated.N, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
+		}
+		return(object)
+	} else {
+		assayDataElementReplace(object, "methylated.N", value)
+	}
+})	
+
+
+setMethod("unmethylated.N", signature(object="MethyLumiM"), function(object) {
+	if ('unmethylated.N' %in% assayDataElementNames(object)) {
+		return(assayDataElement(object,"unmethylated.N"))
+	} else {
+		return(NULL)
+	}
+})
+
+setReplaceMethod("unmethylated.N", signature(object="MethyLumiM"), function(object, value) {
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('unmethylated.N', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(unmethylated.N, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
+		}
+		return(object)
+	} else {
+		assayDataElementReplace(object, "unmethylated.N", value)
+	}
+})	
+
+
 setMethod("controlData", signature(object="MethyLumiM"), function(object) {
 	if (.hasSlot(object, "controlData")) {
 		return(object@controlData)

@@ -11,6 +11,12 @@
 \alias{unmethylated,MethyLumiM-method}
 \alias{unmethylated<-,MethyLumiM-method}
 \alias{unmethylated<-,MethyLumiM,ANY-method}
+\alias{methylated.N,MethyLumiM-method}
+\alias{methylated.N<-,MethyLumiM-method}
+\alias{methylated.N<-,MethyLumiM,ANY-method}
+\alias{unmethylated.N,MethyLumiM-method}
+\alias{unmethylated.N<-,MethyLumiM-method}
+\alias{unmethylated.N<-,MethyLumiM,ANY-method}
 \alias{detection,MethyLumiM-method}
 \alias{detection<-,MethyLumiM-method}
 \alias{detection<-,MethyLumiM,ANY-method}
@@ -18,6 +24,10 @@
 \alias{methylated<-}
 \alias{unmethylated}
 \alias{unmethylated<-}
+\alias{methylated.N}
+\alias{methylated.N<-}
+\alias{unmethylated.N}
+\alias{unmethylated.N<-}
 \alias{controlData}
 \alias{controlData<-}
 \alias{controlData,MethyLumiM-method}
@@ -32,14 +42,14 @@
 MethyLumiM is a class inherited from \code{\link[Biobase]{ExpressionSet-class}}. It is designed for Illumina Methylation microarray data. The exprs dataMatrix included in the assayData slot of MethyLumiM object includes a matrix of M-values, which is the log2 ratio of methylated and unmethylated probe intensities. The MethyLumiM class include a boxplot function uniquely designed for two-mode histogram data. It also include a coerce function to map from \code{\link[methylumi]{MethyLumi-class}}, \code{\link[methylumi]{MethyLumiSet-class}} or other \code{\link[Biobase]{eSet-class}} inherited object to MethyLumiM class object. 
 }
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("MethyLumiM", exprs, methylated, unmethylated, detection, ..., assayData)}.
-The "exprs" is a matrix of M-values, which is the log2 ratio of methylated and unmethylated probe intensities; "methylated" and "unmethylated" are intensity matrix measured by methylated and unmethylalted probes of Illumina Infinium methylation microarray; "detection" is the detection p-value outputted by Illumina GenomeStudio software. "exprs", "methylated" and "unmethylated" information are required for MethyLumiM class. When creating a new MethyLumiM object, the information of "exprs", "methylated", "unmethylated" and "detection" can also be provided directly through "assayData".
+Objects can be created by calls of the form \code{new("MethyLumiM", exprs, methylated, unmethylated, detection, methylated.N, unmethylated.N, ..., assayData)}.
+The "exprs" is a matrix of M-values, which is the log2 ratio of methylated and unmethylated probe intensities; "methylated" and "unmethylated" are intensity matrix measured by methylated and unmethylalted probes of Illumina Infinium methylation microarray; "detection" is the detection p-value outputted by Illumina GenomeStudio software; "methylated.N" and "unmethylated.N" are bead numbers for methylated and unmethylalted probes. "exprs", "methylated" and "unmethylated" information are required for MethyLumiM class. When creating a new MethyLumiM object, the information of "exprs", "methylated", "unmethylated" and "detection" can also be provided directly through "assayData".
 }
 \section{Slots}{
   \describe{
     \item{\code{history}:}{Object of class \code{"data.frame"} recording the operation history of the LumiBatch object.}
     \item{\code{controlData}:}{Object of class \code{"MethyLumiQC"} to keep the QC probe measurement information.}
-    \item{\code{assayData}:}{Object of class \code{"AssayData"}, which includes "exprs", "methylated", "unmethylated" and "detection" data matrix}
+    \item{\code{assayData}:}{Object of class \code{"AssayData"}, which includes "exprs", "methylated", "unmethylated", "detection", "methylated.N" and "unmethylated.N" data matrix}
     \item{\code{phenoData}:}{Object of class \code{"AnnotatedDataFrame"}, See \code{\link[Biobase]{eSet-class}} }
     \item{\code{featureData}:}{Object of class \code{"AnnotatedDataFrame"}, See \code{\link[Biobase]{eSet-class}} }
     \item{\code{experimentData}:}{Object of class \code{"MIAME"}, See \code{\link[Biobase]{eSet-class}} }
@@ -64,6 +74,10 @@ Class \code{"\link{Versioned}"}, by class "ExpressionSet", distance 4.
     \item{methylated<-}{\code{signature(object = "MethyLumiM")}: set the data matrix measured by methylated probes }
     \item{unmethylated}{\code{signature(object = "MethyLumiM")}: retrieve the data matrix measured by unmethylated probes }
     \item{unmethylated<-}{\code{signature(object = "MethyLumiM")}: set the data matrix measured by unmethylated probes }
+    \item{methylated.N}{\code{signature(object = "MethyLumiM")}: retrieve the data matrix keeping the number of beads of methylated probes}
+    \item{methylated.N<-}{\code{signature(object = "MethyLumiM")}: set the data matrix keeping the number of beads of methylated probes }
+    \item{unmethylated.N}{\code{signature(object = "MethyLumiM")}: retrieve the data matrix keeping the number of beads of unmethylated probes }
+    \item{unmethylated.N<-}{\code{signature(object = "MethyLumiM")}: set the data matrix keeping the number of beads of unmethylated probes }
     \item{detection}{\code{signature(object = "MethyLumiM")}: retrieve \code{detection} data matrix in \code{AssayData-class} }
     \item{detection<-}{\code{signature(object = "MethyLumiM")}: set \code{detection} data matrix in \code{AssayData-class}  }
     \item{controlData}{\code{signature(object = "MethyLumiM")}: retrieve the \code{controlData} in \code{MethyLumiQC-class} }
