@@ -42,14 +42,15 @@ addControlData2methyLumiM <- function(controlData, methyLumiM, checkConsistency 
 		controlData <- methylumiR(controlData, ...)
 	}
 	if (is(controlData, "MethyLumiQC")) {
-		## match the column names of controlData and LumiBatch object
+		## Match the column names of controlData and LumiBatch object 
+		## Only keep the samples matching methyLumiM
 		if (checkConsistency) {
 			sampleID <- sampleNames(methyLumiM)
 			controlSampleID <- sampleNames(controlData)
 			if (all(sampleID %in% controlSampleID)) {
 				controlData(methyLumiM) <- controlData[, sampleID]
 			} else {
-				stop('SampleNames does not match up between controlData and methyLumiM!')
+				stop('SampleNames do not match up between controlData and methyLumiM!')
 			}
 		} else {
 			controlData(methyLumiM) <- controlData[, sampleID]

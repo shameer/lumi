@@ -18,6 +18,8 @@ setMethod('initialize', 'MethyLumiM', function(.Object,
 	methylated = new('matrix'),		
 	unmethylated = new('matrix'),
 	detection = new('matrix'),  # detection pvalues
+	methylated.N = new('matrix'),  # number of M beads
+	unmethylated.N = new('matrix'),  # number of U beads
 	controlData = NULL,
     ...,
     assayData)
@@ -25,7 +27,17 @@ setMethod('initialize', 'MethyLumiM', function(.Object,
 	if (missing(assayData)) {
 		cmd <- 'assayData <- assayDataNew(exprs=exprs, methylated=methylated, unmethylated=unmethylated'
 		nSample <- ncol(exprs)
-		if (ncol(detection) == nSample) cmd <- paste(cmd, ', detection=detection')
+
+		if (ncol(detection) == nSample) {
+		  cmd <- paste(cmd, ', detection=detection')
+		}
+		if (ncol(methylated.N) == nSample) {
+		  cmd <- paste(cmd, ', methylated.N=methylated.N')
+		}
+		if (ncol(unmethylated.N) == nSample) {
+		  cmd <- paste(cmd, ', unmethylated.N=unmethylated.N')
+		}
+
 		cmd <- paste(cmd, ')')
 		eval(parse(text=cmd))
 	} else if (!missing(exprs)) 
@@ -54,7 +66,7 @@ setAs("eSet", "MethyLumiM", function(from) {
 	if (exists('methylated', assayData(from)) && exists('methylated', assayData(from))) {
 		M <- estimateM(from, returnType="matrix")
 	} else {
-		stop("Cann't convert as MethyLumiM object because methylated and unmethylated slots do not exist!\n")
+		stop("Cannot convert as MethyLumiM object because methylated and unmethylated slots do not exist!\n")
 	}
 	
 	if ("history" %in% slotNames(from)) {
@@ -77,6 +89,13 @@ setAs("eSet", "MethyLumiM", function(from) {
 	
 	methy <- aData[['methylated']]
 	unmethy <- aData[['unmethylated']]
+	methy.N <- unmethy.N <- NULL
+	if (is.element('methylated.N', assayDataElementNames(from)) && is.element('unmethylated.N', assayDataElementNames(from))) {
+		methy.N <- aData[['methylated.N']]
+		dimnames(methy.N) <- dimnames(aData[['methylated']])
+		unmethy.N <- aData[['unmethylated.N']]
+		dimnames(unmethy.N) <- dimnames(aData[['unmethylated']])
+	}
 	storageMode(aData) <- "environment"
 	ts <- ls(envir=aData)
 	rm(list=ts, envir=aData)
@@ -84,13 +103,14 @@ setAs("eSet", "MethyLumiM", function(from) {
 	aData[['methylated']] <- methy
 	aData[['unmethylated']] <- unmethy
 	if (!is.null(detection)) aData[['detection']] <- detection
+	if (!is.null(methy.N)) aData[['methylated.N']] <- methy.N
+	if (!is.null(unmethy.N)) aData[['unmethylated.N']] <- unmethy.N
 	storageMode(aData) <- "lockedEnvironment"	
 	to <- new("MethyLumiM", assayData=aData, phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from), protocolData=protocolData(from))		
     
 	# check whether there are QC data available
-	if (!is.null(QCdata(from))) {
-		if (is(QCdata(from), "MethyLumiQC"))
-			controlData(to) <- QCdata(from)
+	if (!is.null(QCdata(from)) && (is(QCdata(from), "MethyLumiQC"))) {
+		to <- addControlData2methyLumiM(controlData=from@QC, methyLumiM=to)
 	} 
 
 	history.finished <- as.character(Sys.time())
@@ -221,7 +241,9 @@ setMethod("combine", signature=c(x="MethyLumiM", y="MethyLumiM"), function(x, y,
 	#history.command <- match.call()
     history.command <- capture.output(print(match.call(combine)))  
 	x.comb@history<- rbind(x@history, y@history)
-	if (is.null(x.comb@history$lumiVersion) && nrow(x@history) > 0) x.comb@history <- data.frame(x.comb@history, lumiVersion=rep(NA, nrow(x.comb@history)))
+	if (is.null(x.comb@history$lumiVersion) && nrow(x@history) > 0) {
+		x.comb@history <- data.frame(x.comb@history, lumiVersion=rep(NA, nrow(x.comb@history)))
+	} 
 	lumiVersion <- packageDescription('lumi')$Version
 	x.comb@history<- rbind(x.comb@history, data.frame(submitted=history.submitted,finished=history.finished,command=history.command, lumiVersion=lumiVersion))
 	return(x.comb)
@@ -251,7 +273,9 @@ setMethod("[", "MethyLumiM", function(x, i, j, ..., drop = FALSE)  {
 	
 	# history tracking
 	history.finished <- as.character(Sys.time())
-	if (is.null(x@history$lumiVersion) && nrow(x@history) > 0) x@history <- data.frame(x@history, lumiVersion=rep(NA, nrow(x@history)))
+	if (is.null(x@history$lumiVersion) && nrow(x@history) > 0) {
+		x@history <- data.frame(x@history, lumiVersion=rep(NA, nrow(x@history)))
+	}
 	lumiVersion <- packageDescription('lumi')$Version
 	x@history<- rbind(x@history, data.frame(submitted=history.submitted,finished=history.finished, command=history.command, lumiVersion=lumiVersion))
 	
