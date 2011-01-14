@@ -109,9 +109,11 @@ setAs("eSet", "MethyLumiM", function(from) {
 	to <- new("MethyLumiM", assayData=aData, phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from), protocolData=protocolData(from))		
     
 	# check whether there are QC data available
-	if (!is.null(QCdata(from)) && (is(QCdata(from), "MethyLumiQC"))) {
-		to <- addControlData2methyLumiM(controlData=from@QC, methyLumiM=to)
-	} 
+	if (.hasSlot(from, "QC")) {
+		if (is(QCdata(from), "MethyLumiQC")) {
+			to <- addControlData2methyLumiM(controlData=from@QC, methyLumiM=to)
+		} 
+	}
 
 	history.finished <- as.character(Sys.time())
 	history.command <- capture.output(print(match.call(setAs)))  
