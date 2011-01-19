@@ -529,8 +529,8 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		allControlType <- toupper(allControlType)
 		neg.ind <- which(allControlType == "NEGATIVE") 
 		if (length(neg.ind) > 0) {
-			bg.grn <- apply(grnData[neg.ind, ], median)
-			bg.red <- apply(redData[neg.ind, ], median)
+			bg.grn <- apply(grnData[neg.ind, ], 2, median)
+			bg.red <- apply(redData[neg.ind, ], 2, median)
 			bg <- cbind(red=bg.red, green=bg.grn)
 			return(bg)
 		}
