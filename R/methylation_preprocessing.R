@@ -767,6 +767,34 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
 	}
 }
 
+# boxplot unique for MethyLumiM-class
+setMethod("boxplot",signature(x="MethyLumiM"),
+	function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), ...) {
+		
+	# if (!require(hdrcde)) stop("Please install the required hdrcde package./n")  
+
+  	tmp <- description(x)
+  	if (missing(main) && (is(tmp, "MIAME")))
+     	main <- tmp@title
+
+	dataMatrix <- exprs(x)
+	labels <- colnames(dataMatrix)
+	if (is.null(labels)) labels <- as.character(1:ncol(dataMatrix))
+	## set the margin of the plot
+	mar <- c(max(nchar(labels))/2 + 4.5, 5, 5, 3)
+	old.mar <- par('mar')
+	old.xaxt <- par('xaxt')
+	par(xaxt='n')
+	par(mar=mar)
+
+	tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
+	hdr.boxplot(tmp, main=main, xlab='', ylab='M-value', prob=prob, col=col, ...)
+	par(xaxt='s')
+	axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
+	par(mar=old.mar)
+	par(xaxt=old.xaxt)
+})
+
 
 ## boxplotColorBias
 # boxplotColorBias(methyLumiM)
@@ -1262,7 +1290,7 @@ produceMethylationGEOSubmissionFile <- function(methyLumiM, methyLumiM.raw=NULL,
 ## 3. Estimate theta based on equation
 
 # fittedGamma <- gammaFitEM(M[,1], initialFit=NULL, maxIteration=50, tol=0.0001, plotMode=T, verbose=T)
-gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, truncate=FALSE, maxIteration=50, tol=0.0001, plotMode=FALSE, verbose=FALSE) {
+gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIteration=50, tol=0.0001, plotMode=FALSE, verbose=FALSE) {
 	
 	fix.theta=NULL
 	eps <- 10^-5
@@ -1312,7 +1340,7 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, truncate=FALSE, maxIterat
 	}
 
 	# Initial value estimation got from grid search
-	initialFit <- initialGammaEstimation(x, initialFit=initialFit)
+	initialFit <- .initialGammaEstimation(x, initialFit=initialFit)
 	
 	k <- initialFit$k
 	theta <- initialFit$theta
@@ -1355,18 +1383,24 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, truncate=FALSE, maxIterat
 		f2 <- dgamma(s[2]-x, shape=k[2], scale=theta[2])
 		## TO DO: add weighted function instead of truncate 10/25/2010
 		
-		if (truncate) {
+		if (weighted) {
+			# down weight the long tails of two component densities beyond their modes
+			w1 <- rep(1, length(f1)); w2 <- rep(1, length(f2))
+			w1[x > Mode[2]] <- f2[x > Mode[2]] / max(f2)
+			w2[x < Mode[1]] <- f1[x < Mode[1]] / max(f1)
+			f1 <- f1 * w1
+			f2 <- f2 * w2
+			
 			# adjust the density values because of the trunction
-			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
-			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
-			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)
-			z1[x > Mode[2]] <- 0
-			z1[x < Mode[1]] <- 1
-			f1[x > Mode[2]] <- 0
-			f2[x < Mode[1]] <- 0
-		} else {
-			z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)  # posterior probability of unmethylated
-		}
+			# f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
+			# f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
+			# z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)
+			# z1[x > Mode[2]] <- 0
+			# z1[x < Mode[1]] <- 1
+			# f1[x > Mode[2]] <- 0
+			# f2[x < Mode[1]] <- 0
+		} 
+		z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)  # posterior probability of unmethylated
 		z2 <- 1 - z1
 
 		if (verbose && iter > 1) {
@@ -1479,7 +1513,7 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, truncate=FALSE, maxIterat
 
 
 # initial gamma parameters estimation
-initialGammaEstimation <- function(x, initialFit=NULL) {
+.initialGammaEstimation <- function(x, initialFit=NULL) {
 
 	k <- theta <- s <- p <- Mode <- NULL
 	if (!is.null(initialFit)) {
@@ -1565,40 +1599,62 @@ plotGammaFit <- function(x, gammaFit=NULL, k=NULL, theta=NULL, shift=NULL, propo
 
 
 # estimate methylation call probability based on gamma fit parameters
-methylationCall <- function(x, k=NULL, theta=NULL, shift=NULL, proportion=NULL, threshold=0.99, truncate=TRUE) {
-	
+methylationCall <- function(x, threshold=0.95, ...) {
+		
+	if (length(threshold) == 1) threshold <- rep(threshold, 2)
 	probability <- NULL
-	if (class(x) == 'gammaFit') {
-		k <- x$k
-		theta <- x$theta
-		shift <- x$shift
-		proportion <- x$proportion
-		probability <- x$probability
-	} 
-	
-	if (is.null(probability)) {
-		if (is.null(k) || is.null(theta) || is.null(shift) || is.null(proportion)) stop("Information of a gammaFit object or parameters k, theta, shift and proportion is required!\n")
-		Mode <- c(shift[1] + (k[1]-1)*theta[1], shift[2] - (k[2]-1)*theta[2])
-		f1 <- dgamma(x-shift[1], shape=k[1], scale=theta[1])
-		f2 <- dgamma(shift[2]-x, shape=k[2], scale=theta[2])
-		if (truncate) {
-			f1 <- f1 / (pgamma(Mode[2]-s[1], shape=k[1], scale=theta[1], lower.tail = TRUE))
-			f2 <- f2 / (pgamma(s[2]-Mode[1], shape=k[2], scale=theta[2], lower.tail = TRUE))
-			z1 <- proportion[1] * f1 / (proportion[1] * f1 + proportion[2] * f2)
-			z1[x > Mode[2]] <- 0
-			z1[x < Mode[1]] <- 1
-			f1[x > Mode[2]] <- 0
-			f2[x < Mode[1]] <- 0
-		} else {
-			z1 <- proportion[1] * f1 / (proportion[1] * f1 + proportion[2] * f2)  # posterior probability of unmethylated
-		}
-		z2 <- 1 - z1
-		probability <- cbind(z1, z2)
-		colnames(probability) <- c('unmethylated', 'methylated')
+	if (class(x) != 'gammaFit') {
+		fit <- gammaFitEM(x, ...) 
+	} else {
+		fit <- x
 	}
+	probability <- fit$probability
+	
+	# methyCall <- probability > threshold
+	methyCall <- apply(probability, 1, function(x) {
+		cc <- "Margin"
+		if (x[1] > threshold[1]) {
+			cc <- "Unmethy"
+		} else if (x[2] > threshold[2]) {
+			cc <- "Methy"
+		}
+		return(cc)
+	})
 
-	methyCall <- probability > threshold
-	return(list(methylationCall=methyCall, probability=probability))	
+	attr(methyCall, "probability") <- probability[,"methylated"]
+	return(methyCall)	
 }
 
+
+# methylation status
+lumiMethyStatus <- function(methyLumiM, ...) 
+{
+
+	if (!is(methyLumiM, 'MethyLumiM')) {
+		stop('The object should be class "MethyLumiM" inherited!')
+	}
+	
+	history.submitted <- as.character(Sys.time())
+	
+	M <- exprs(methyLumiM)
+	M.status <- M.prob <- NULL
+	for (i in 1:ncol(M)) {
+		status.i <- methylationCall(M[,1], ...)
+		prob.i <- attr(status.i, "probability")
+		M.status <- cbind(M.status, status.i)
+		M.prob <- cbind(M.prob, prob.i)
+	}
+	rownames(M.status) <- rownames(M.prob) <- rownames(M)
+	colnames(M.status) <- colnames(M.prob) <- colnames(M)
+
+	history.finished <- as.character(Sys.time())
+	history.command <- capture.output(print(match.call(lumiMethyStatus)))
+	
+	lumiVersion <- packageDescription('lumi')$Version
+	attr(M.status, "history") <- rbind(methyLumiM@history, data.frame(submitted=history.submitted, 
+			finished=history.finished, command=history.command, lumiVersion=lumiVersion))
+	
+	attr(M.status, "probability") <- M.prob	
+	return(M.status)
+}
 

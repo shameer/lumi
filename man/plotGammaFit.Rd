@@ -34,7 +34,7 @@ Invisibly return TRUE if the plot is successful.
 \author{ Pan DU }
 
 \seealso{
-\code{\link{gammaFitEM}} and \code{\link{initialGammaEstimation}}
+\code{\link{gammaFitEM}}
 }
 
 \examples{

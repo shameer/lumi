@@ -1,4 +1,11 @@
 -----------------------------------------------------
+version 2.3.7
+release date: 01/22/2011
+1. Moved the MethyLumiM class and related methods from lumi to methylumi package
+2. Add some methylation status estimation functions and updated vignette
+
+
+-----------------------------------------------------
 version 2.3.5
 release date: 01/12/2011
 1. Add methylated.N and unmethylated.N matrix to the assayData slot of the MethyLumiM class

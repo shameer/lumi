@@ -4,17 +4,17 @@
 \title{ Estimate the methylation status by fitting a Gamma mixture model using EM algorithm }
 
 \description{
-Estimate the methylation status by fitting a Gamma mixture model using EM algorithm based on the all M-values of a particular sample 
+Estimate the methylation status by fitting a two component Gamma mixture model using EM algorithm based on the all M-values of a particular sample 
 }
 \usage{
-gammaFitEM(M, initialFit = NULL, fix.k = NULL, truncate = FALSE, maxIteration = 50, tol = 1e-04, plotMode = FALSE, verbose = FALSE)
+gammaFitEM(M, initialFit = NULL, fix.k = NULL, weighted = TRUE, maxIteration = 50, tol = 1e-04, plotMode = FALSE, verbose = FALSE)
 }
 
 \arguments{
   \item{M}{ a vector of M-values covering the whole genome }
-  \item{initialFit}{ the initial estimation of the gamma parameters returned by \code{\link{initialGammaEstimation}} }
+  \item{initialFit}{ the initial estimation of the gamma parameters returned by .initialGammaEstimation function }
   \item{fix.k}{ the k parameter of  the gamma function which is fixed during estimation }
-  \item{truncate}{ determine whether truncating the density estimation at the extreme side }
+  \item{weighted}{ determine whether to down-weight the long tails of two component densities beyond their modes }
   \item{maxIteration}{ maximum iterations allowed before converging }
   \item{tol}{ the difference threshold used to determine convergence }
   \item{plotMode}{ determine whether plot the histogram and density plot estimation }
@@ -43,7 +43,7 @@ The return is a list with "gammaFit" class attribute, which includes the followi
 \author{ Pan Du }
 
 \seealso{
- \code{\link{initialGammaEstimation}}, \code{\link{methylationCall}} and \code{\link{plotGammaFit}}
+  \code{\link{methylationCall}} and \code{\link{plotGammaFit}}
 }
 
 \examples{

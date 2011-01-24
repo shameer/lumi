@@ -104,20 +104,29 @@ setMethod("detection", signature(object="ExpressionSet"), function(object) {
 })
 
 setReplaceMethod("detection", signature(object="ExpressionSet"), function(object, value) {
-		if (is.null(value)) {
-			assay <- assayData(object)
-			if (exists('detection', envir=assay)) {
-				oldMode <- storageMode(assay)
-				storageMode(assay) <- 'environment'
-				rm(detection, envir=assay)
-				storageMode(assay) <- oldMode
-				assayData(object) <- assay
-			}
-			return(object)
-		} else {
-			assayDataElementReplace(object, "detection", value)
+	if (is.null(value)) {
+		assay <- assayData(object)
+		if (exists('detection', envir=assay)) {
+			oldMode <- storageMode(assay)
+			storageMode(assay) <- 'environment'
+			rm(detection, envir=assay)
+			storageMode(assay) <- oldMode
+			assayData(object) <- assay
 		}
-	})	
+		return(object)
+	} else {
+		assayDataElementReplace(object, "detection", value)
+	}
+})	
+
+setMethod("controlData", signature(object="LumiBatch"), function(object) {
+	object@controlData
+})
+
+setReplaceMethod("controlData", signature(object="LumiBatch"), function(object, value) {
+		object@controlData <- value
+})	
+
 
 setMethod("getHistory",signature(object="LumiBatch"), function(object) object@history)
 

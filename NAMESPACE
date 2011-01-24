@@ -14,8 +14,9 @@ importMethodsFrom(Biobase,
 				varLabels, varMetadata,
 			    coerce, combine, dim, initialize, notes, storageMode, show, "[", "[[", "$")
 
-importClassesFrom(methylumi, MethyLumi, MethyLumiSet, MethyLumiQC)
-importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethylated<-", "betas", "betas<-", QCdata, combine, "[")
+importClassesFrom(methylumi, MethyLumi, MethyLumiSet, MethyLumiQC, MethyLumiM)
+importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethylated<-", "betas", "betas<-", QCdata, combine, "[", 
+ "controlData", "controlData<-", detection, "detection<-")
 importFrom(methylumi, methylumiR, controlTypes)
 
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
@@ -36,9 +37,8 @@ importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 
-exportClasses(LumiBatch, MethyLumiM)
-exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, sampleNames, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", methylated, "methylated<-", unmethylated, "unmethylated<-", controlData, "controlData<-",
-show, summary, "[", coerce)
+exportClasses(LumiBatch)
+exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, sampleNames, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce)
 
 export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            
 bgAdjust, detectOutlier, detectionCall, estimateLumiCV, getChipInfo, getControlData, getControlProbe,
@@ -51,7 +51,7 @@ addControlData2methyLumiM, adjColorBias.quantile, adjColorBias.ssn, addColorChan
 estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization,
 # methylation status estimation function
-gammaFitEM, initialGammaEstimation, methylationCall, plotGammaFit
+lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit
 )
 
 

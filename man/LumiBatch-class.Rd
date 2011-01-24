@@ -19,6 +19,11 @@
 \alias{detection,ExpressionSet-method}
 \alias{detection<-,ExpressionSet-method}
 
+\alias{controlData}
+\alias{controlData<-}
+\alias{controlData,LumiBatch-method}
+\alias{controlData<-,LumiBatch-method}
+
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}
 \alias{show,LumiBatch-method}
