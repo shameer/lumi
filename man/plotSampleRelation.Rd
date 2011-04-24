@@ -6,12 +6,12 @@
   plot the sample relations based on MDS or hierarchical clustering
 }
 \usage{
-plotSampleRelation(x, selProbe = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL, main = NULL, ...)
+plotSampleRelation(x, subset = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL, main = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{a LumiBatch object, ExpressionSet object or a matrix with each column corresponding to a sample}
-  \item{selProbe}{ the selected probes used to determine the sample relations. If not provide, all the probes will be used. }
+  \item{subset}{ the subset probes used to determine the sample relations. If it is one number, then randomly selected "number" of probes will be used. If not provide, all the probes will be used. }
   \item{cv.Th}{ the threshold of the coefficient of variance of probes used to select probes to estimate sample relations }
   \item{standardize}{ standardize the expression profiles or not }
   \item{method}{ "MDS" or "hierarchical clustering" }

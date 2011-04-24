@@ -173,6 +173,7 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 		allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
 		allRed <- rbind(methy[allRedInd,], unmethy[allRedInd,])
 		allGrn <- rbind(methy[allGrnInd,], unmethy[allGrnInd,])
+
 		processedData <- method(allRed, allGrn, ...)
 		processed.red <- processedData$red
 		if (is.null(processed.red)) stop("The return of user defined method should be a list including 'red' and 'green' matrix!\n")
@@ -304,11 +305,23 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
 		annotation <- pData(featureData(methyLumiM))
 		allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
 		allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
+
+		## For 450K chip, the Infinium II type only has one type of probe for each CpG site. 
+		## The color channel will depend on the methylation status
+		allBothInd <- which(annotation$COLOR_CHANNEL == 'Both' | annotation$COLOR_CHANNEL == '')
+		
 		methy[allRedInd, ] <- methy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)
 		methy[allGrnInd, ] <- methy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)
 		unmethy[allRedInd, ] <- unmethy[allRedInd, ] - rep(1, length(allRedInd)) %*% t(bg.red)
 		unmethy[allGrnInd, ] <- unmethy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)
+		
+		if (length(allBothInd) > 0) {
+			## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
+			unmethy[allBothInd, ] <- unmethy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.red) 
+			methy[allBothInd, ] <- methy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.grn) 
+		}
 	} else {
+		if (is.matrix(bglevel)) bglevel <- rowMeans(bglevel)
 		methy <- methy - rep(1, nrow(methy)) %*% t(bglevel)
 		unmethy <- unmethy - rep(1, nrow(unmethy)) %*% t(bglevel)
 	}
@@ -357,6 +370,10 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 	
 	allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
 	allGrnInd <- which(annotation$COLOR_CHANNEL == 'Grn')
+
+	## For 450K chip, the Infinium II type only has one type of probe for each CpG site. 
+	## The color channel will depend on the methylation status
+	allBothInd <- which(annotation$COLOR_CHANNEL == 'Both' | annotation$COLOR_CHANNEL == '')
 	
 	bg <- estimateMethylationBG(methyLumiM, separateColor=TRUE)
 	bg.red <- bg[,"red"]
@@ -371,7 +388,7 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 		bg.ref <- bg.grn
 	} else if (refChannel == 'red') {
 		m.ref <- m.int.red
-		bg.ref <- m.int.red
+		bg.ref <- bg.red
 	} else {
 		m.ref <- (m.int.grn + m.int.red)/2
 		bg.ref <- (bg.grn + bg.red)/2
@@ -385,6 +402,14 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 		(rep(1, length(allRedInd)) %*% t(m.ref/m.int.red)) + rep(1, length(allRedInd)) %*% t(bg.ref)
 	methy[allGrnInd, ] <- (methy[allGrnInd,] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * 
 		(rep(1, length(allGrnInd)) %*% t(m.ref/m.int.grn)) + rep(1, length(allGrnInd)) %*% t(bg.ref)
+	
+	if (length(allBothInd) > 0) {
+		## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
+		unmethy[allBothInd, ] <- (unmethy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.red)) * 
+			(rep(1, length(allBothInd)) %*% t(m.ref/m.int.red)) + rep(1, length(allBothInd)) %*% t(bg.ref)
+		methy[allBothInd, ] <- (methy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.grn)) * 
+			(rep(1, length(allBothInd)) %*% t(m.ref/m.int.grn)) + rep(1, length(allBothInd)) %*% t(bg.ref)
+	}
 		
 	methy.adj <- methyLumiM
 	assayDataElement(methy.adj, 'unmethylated') <- unmethy
@@ -410,6 +435,11 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 	}
 	redInd <- annotation$COLOR_CHANNEL == 'Red'
 	grnInd <- annotation$COLOR_CHANNEL == 'Grn'
+
+	## For 450K chip, the Infinium II type only has one type of probe for each CpG site. 
+	## The color channel will depend on the methylation status
+	bothInd <- which(annotation$COLOR_CHANNEL == 'Both' | annotation$COLOR_CHANNEL == '')
+
 	bandwidth <- ifelse(logMode, 0.3, 200)
 	for (i in 1:ncol(unmethy)) {
 		red.a.i <- unmethy[redInd, i]
@@ -418,18 +448,33 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 		grn.a.i <- unmethy[grnInd, i]
 		grn.b.i <- methy[grnInd, i]
 		grn.i <- c(grn.a.i, grn.b.i)
-		
-		if (refChannel == 'green') {
-			y.out.i <- smoothQuantileNormalization(red.i, grn.i, logMode=logMode, bandwidth=bandwidth, ...)
-			unmethy[redInd, i] <- y.out.i[1:length(red.a.i)]
-			methy[redInd, i] <- y.out.i[(length(red.a.i)+1):length(y.out.i)]
-		} else {
-			y.out.i <- smoothQuantileNormalization(grn.i, red.i, logMode=logMode, bandwidth=bandwidth, ...)
 
+		if (refChannel == 'green') {
+			## For 450K data
+			if (length(bothInd) > 0) {
+				## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
+				y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, unmethy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+				unmethy[bothInd,i] <- y.out.i[(length(red.i)+1):length(y.out.i)]
+				# y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+				# methy[bothInd,i] <- y.out.i[(length(red.i)+1):length(y.out.i)]
+			} else {
+				y.out.i <- smoothQuantileNormalization(red.i, grn.i, logMode=logMode, bandwidth=bandwidth, ...)
+			}
+			unmethy[redInd, i] <- y.out.i[1:length(red.a.i)]
+			methy[redInd, i] <- y.out.i[(length(red.a.i)+1):length(red.i)]
+		} else {
+			if (length(bothInd) > 0) {
+				## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
+				y.out.i <- smoothQuantileNormalization(grn.i, red.i, adjData=c(grn.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+				methy[bothInd,i] <- y.out.i[(length(grn.i)+1):length(y.out.i)]
+			} else {
+				y.out.i <- smoothQuantileNormalization(grn.i, red.i, logMode=logMode, bandwidth=bandwidth, ...)
+			}
 			unmethy[grnInd, i] <- y.out.i[1:length(grn.a.i)]
-			methy[grnInd, i] <- y.out.i[(length(grn.a.i)+1):length(y.out.i)]
+			methy[grnInd, i] <- y.out.i[(length(grn.a.i)+1):length(grn.i)]
 		}
 	}
+
 	methy.adj <- methyLumiM
 	assayDataElement(methy.adj, 'unmethylated') <- unmethy
 	assayDataElement(methy.adj, 'methylated') <- methy
@@ -438,7 +483,7 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 }
 
 
-smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, bandwidth=NULL, degree=1, ...) {
+smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logMode=TRUE, bandwidth=NULL, degree=1, ...) {
 	
 	# require(KernSmooth)
 	bandwidth <- ifelse(logMode, 0.3, 200)
@@ -448,6 +493,11 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, band
 		normData <- normalize.quantiles(dataMatrix + 0.0)
 		ref <- normData[,1]
 	} 
+	if (!is.null(adjData)) {
+		if (!is.matrix(adjData)) adjData <- matrix(adjData, ncol=1)
+		if (ncol(dataMatrix) != ncol(adjData))
+			stop("The number of columns of adjData should be consistent with dataMatrix!") 
+	}
 	
 	len <- nrow(dataMatrix)
 	refLen <- length(ref)
@@ -465,12 +515,27 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, band
 	}
 	
 	# smoothing the quantile normalization results
-	normData <- dataMatrix
+	if (is.null(adjData)) {
+		normData <- dataMatrix
+	} else {
+		normData <- adjData
+	}
 	for (i in 1:ncol(dataMatrix)) {
 		profile.i <- dataMatrix[,i]
+		if (!is.null(adjData)) {
+			adjData.i <- adjData[,i]
+		} else {
+			adjData.i <- profile.i
+		}
 		if (logMode) {
-			if (min(profile.i) < 1) profile.i <- profile.i - min(profile.i) + 1
-			profile.i <- log2(profile.i)
+			mm.i <- min(c(profile.i, adjData.i))
+			if (mm.i < 1) {
+				adjData.i <- log2(adjData.i - mm.i + 1)
+				profile.i <- log2(profile.i - mm.i + 1)
+			} else {
+				adjData.i <- log2(adjData.i)
+				profile.i <- log2(profile.i)
+			}
 		}
 		if (len != refLen) {
 			# perform linear interpolation when the length of two profiles different
@@ -481,14 +546,20 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, logMode=TRUE, band
 		}
 		
 		# if (smooth) {
-			tt <- locpoly(profile.i, y.out.i, degree=degree,  gridsize=gridsize, bandwidth=bandwidth, range.x=range(profile.i),  ...)
-			norm.i <- approx(x=tt$x, y=tt$y, xout=profile.i, rule=2)$y
+			## remove outliers points
+			rlm.i <- rlm(profile.i, y.out.i)
+			dd.i <- y.out.i - rlm.i$fitted.values
+			outlier.ind.i <- abs(dd.i) > 3 * sd(dd.i)
+			tt <- locpoly(profile.i[!outlier.ind.i], y.out.i[!outlier.ind.i], degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)
+			
+			norm.i <- approx(x=tt$x, y=tt$y, xout=adjData.i, rule=2)$y
+
 			# plot(profile.i, y.out.i, pch='.')
 			# lines(tt, col=2)
 		# } else {
 		# 	norm.i <- y.out.i
 		# }
-
+		if (max(norm.i) > 30) browser()
 		if (logMode) {
 			normData[,i] <- 2^norm.i
 		} else {
@@ -521,8 +592,8 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		controlData <- QCdata(methyLumiM)
 	}
 	if (is(controlData, "MethyLumiQC")) {
-		# For control data, methylated data corresponds to green channel
-		# For control data, unmethylated data corresponds to red channel
+		# For control data, methylated data corresponds to green channel, "Signal_Grn"
+		# For control data, unmethylated data corresponds to red channel, "Signal_Red"
 		grnData <- assayDataElement(controlData, "methylated") 
 		redData <- assayDataElement(controlData, "unmethylated")
 		allControlType <- sapply(strsplit(featureNames(controlData), "\\."), function(x) x[1])
@@ -531,7 +602,11 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		if (length(neg.ind) > 0) {
 			bg.grn <- apply(grnData[neg.ind, ], 2, median)
 			bg.red <- apply(redData[neg.ind, ], 2, median)
-			bg <- cbind(red=bg.red, green=bg.grn)
+			if (separateColor) {
+				bg <- cbind(red=bg.red, green=bg.grn)
+			} else {
+				bg <- pmin(bg.red, bg.grn)
+			}
 			return(bg)
 		}
 	}
@@ -589,6 +664,7 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
 	
 	# estimate the background based on methy
 	bg <- estimateMethylationBG(methyLumiM, separateColor=separateColor)
+	
 	if (is.null(colnames(bg))) separateColor <- FALSE
 	if (separateColor) {
 		bg.red <- bg[,'red']
@@ -722,7 +798,7 @@ m2beta <- function(m) {
 }
 
 # estimate the M-value based on methylated and unmethylated probe intensities
-estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offset=1) {
+estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offset=100) {
 	
 	if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 		stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
@@ -798,12 +874,23 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 
 ## boxplotColorBias
 # boxplotColorBias(methyLumiM)
-boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum'), grid=TRUE, main=NULL, mar=NULL, verbose=F, ...) {
+boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum'), grid=TRUE, main=NULL, mar=NULL, verbose=F, subset=NULL, ...) {
 	
 	channel <- match.arg(channel)
 	if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 		stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
 	}
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric.')
+		if (length(subset) == 1) {
+			index <- sample(1:nrow(methyLumiM), min(subset, nrow(methyLumiM)))
+		} else {
+			index <- subset
+			index <- index[index > 0 & index <= nrow(methyLumiM)]
+		}
+		methyLumiM <- methyLumiM[index,]
+	} 
+
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
 		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
@@ -879,7 +966,7 @@ boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 
 # plotColorBias1D(methyLumiM)
 ## plot either density or scatter plot of two color channels
-plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 'sum'), colorMode=TRUE, removeGenderProbes=FALSE, logMode=TRUE,  ...) {
+plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 'sum'), colorMode=TRUE, removeGenderProbes=FALSE, logMode=TRUE, subset=NULL, ...) {
 
 	channel <- match.arg(channel)
 	otherPar <- list(...)
@@ -889,6 +976,17 @@ plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 's
 	if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 		stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
 	}
+
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric.')
+		if (length(subset) == 1) {
+			index <- sample(1:nrow(methyLumiM), min(subset, nrow(methyLumiM)))
+		} else {
+			index <- subset
+			index <- index[index > 0 & index <= nrow(methyLumiM)]
+		}
+		methyLumiM <- methyLumiM[index,]
+	} 
 	unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
 	methy <- assayDataElement(methyLumiM, 'methylated') 
 	annotation <- pData(featureData(methyLumiM))
@@ -1014,12 +1112,26 @@ plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 's
 }
 
 
-# plotColorBias(methyLumiM, selSample=1)
-plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioWidth=c(0.75,0.25), layoutRatioHeight=c(0.25, 0.75), margins = c(5, 5, 2, 2), cex=1.25, logMode=TRUE, main='') {
+## plotColorBias2D(methyLumiM, selSample=1)
+plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioWidth=c(0.75,0.25), layoutRatioHeight=c(0.25, 0.75), 
+			margins = c(5, 5, 2, 2), cex=1.25, logMode=TRUE, subset=NULL, ...) {
 
 	if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
 		stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
 	}
+	otherPar <- list(...)
+	
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric.')
+		if (length(subset) == 1) {
+			index <- sample(1:nrow(methyLumiM), min(subset, nrow(methyLumiM)))
+		} else {
+			index <- subset
+			index <- index[index > 0 & index <= nrow(methyLumiM)]
+		}
+		methyLumiM <- methyLumiM[index,]
+	} 
+
 	ff <- pData(featureData(methyLumiM))
 	color.channel <- ff[,"COLOR_CHANNEL"]
 	if (is.null(color.channel) && !combineMode) stop("No color channel information included in the data!\n Please add it using addColorChannelInfo function.\n")
@@ -1040,25 +1152,36 @@ plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioW
 		grn.b <- methy[color.channel == "Grn"]
 		red.b <- methy[color.channel == "Red"]
 	}
+
 	oldpar <- par(no.readonly = TRUE)
     layout(matrix(c(2,1,0,3), nrow=2), widths = layoutRatioWidth, heights = layoutRatioHeight, respect = FALSE)
 	# layout.show(3)
 	## plot the scatter plot 
 	par(mar = c(margins[1], margins[2], 0, 0))
 	plottype <- ifelse(combineMode, "p", "n")
+
+	if (is.null(otherPar$pch)) otherPar$pch <- '.'
+	if (is.null(otherPar$type)) otherPar$type <- plottype
+	if (is.null(otherPar$xlim)) otherPar$xlim <- range(unmethy)
+	if (is.null(otherPar$ylim)) otherPar$ylim <- range(methy)
+	if (is.null(otherPar$xlab)) otherPar$xlab <- 'Unmethylated Probe Intensity'
+	if (is.null(otherPar$ylab)) otherPar$ylab <- 'Methylated Probe Intensity'
+	if (is.null(otherPar$main)) otherPar$main <- ''
+
 	if (logMode) {
-		plot(unmethy, methy, xlim=range(unmethy), ylim=range(methy), type=plottype, pch='.', xlab='Unmethylated Probe Intensity (log2)', ylab='Methylated Probe Intensity (log2)')
-	} else {
-		plot(unmethy, methy, xlim=range(unmethy), ylim=range(methy), type=plottype, pch='.', xlab='Unmethylated Probe Intensity', ylab='Methylated Probe Intensity')
-	}
+		if (is.null(otherPar$xlab)) otherPar$xlab <- 'Unmethylated Probe Intensity (log2)'
+		if (is.null(otherPar$ylab)) otherPar$ylab <- 'Methylated Probe Intensity (log2)'
+	} 
+	do.call('plot', c(list(unmethy), list(methy), otherPar))
+
 	if (combineMode) {
 		dd.a <- density(unmethy)
 		dd.b <- density(methy)
 		par(mar = c(1, margins[2], margins[3], 0))
-		plot(dd.a, xlab='', ylab='Density', xlim=range(unmethy), xaxt='n', col='black', type='l', main='')
+		plot(dd.a, xlab='', ylab='Density', xlim=otherPar$xlim, xaxt='n', col='black', type='l', main='')
 		## plot the density plot of methylated probes
 		par(mar = c(margins[1], 1, 0, margins[4]))
-		plot(dd.b$y, dd.b$x, xlab='Density', ylab='', ylim=range(methy), yaxt='n', col='black', type='l', main='')
+		plot(dd.b$y, dd.b$x, xlab='Density', ylab='', ylim=otherPar$ylim, yaxt='n', col='black', type='l', main='')
 	} else {
 		points(red.a, red.b, pch='.', cex=cex, col='red')
 		points(grn.a, grn.b, pch='.', cex=cex, col='green')		
@@ -1069,11 +1192,11 @@ plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioW
 		dd.red.b <- density(red.b)
 		## plot the density plot of unmethylated probes
 		par(mar = c(1, margins[2], margins[3], 0))
-		plot(dd.red.a, xlab='', ylab='Density', xlim=range(unmethy), ylim=range(c(dd.grn.a$y, dd.red.a$y)), xaxt='n', col='red', type='l', main='')
+		plot(dd.red.a, xlab='', ylab='Density', xlim=otherPar$xlim, ylim=range(c(dd.grn.a$y, dd.red.a$y)), xaxt='n', col='red', type='l', main='')
 		lines(dd.grn.a, col='green')
 		## plot the density plot of methylated probes
 		par(mar = c(margins[1], 1, 0, margins[4]))
-		plot(dd.red.b$y, dd.red.b$x, xlab='Density', ylab='', xlim=range(c(dd.grn.b$y, dd.red.b$y)), ylim=range(methy), yaxt='n', col='red', type='l', main='')
+		plot(dd.red.b$y, dd.red.b$x, xlab='Density', ylab='', xlim=range(c(dd.grn.b$y, dd.red.b$y)), ylim=otherPar$ylim, yaxt='n', col='red', type='l', main='')
 		lines(dd.grn.b$y, dd.grn.b$x, col='green')
 	}
 
@@ -1135,8 +1258,10 @@ colorBiasSummary <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 }
 
 
-plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="topright", xlab="Intensity", ylab='Density', main="Density plot", ...) {
-	otherArgs <- list(...)
+plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="topright", subset=NULL, ...) {
+	otherPar <- list(...)
+	if (is(dataMatrix, 'MethyLumiM')) logMode <- FALSE
+
 	if (is(dataMatrix, 'ExpressionSet')) {
 	    dataMatrix <- exprs(dataMatrix)
 	} else if (is.numeric(dataMatrix)) {
@@ -1144,6 +1269,18 @@ plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="top
 	} else {
 		stop('Un-supported class of dataMatrix.')
 	}
+
+	if (!is.null(subset)) {
+		if (!is.numeric(subset)) stop('subset should be numeric.')
+		if (length(subset) == 1) {
+			index <- sample(1:nrow(dataMatrix), min(subset, nrow(dataMatrix)))
+		} else {
+			index <- subset
+			index <- index[index > 0 & index <= nrow(dataMatrix)]
+		}
+		dataMatrix <- dataMatrix[index,,drop=FALSE]
+	} 
+	
 	if (logMode) {
 		if (any(dataMatrix <= 0)) dataMatrix[dataMatrix <= 0.1] <- 0.1 
 		tmp <- apply(log2(dataMatrix), 2, density)
@@ -1152,9 +1289,18 @@ plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="top
 	}
 	xx <- sapply(tmp, function(x) x$x)
 	yy <- sapply(tmp, function(x) x$y)
-	if (logMode)  xlab <- paste(xlab, " (log2)", sep="")
 
-	matplot(xx, yy, type='l', main=main, xlab=xlab, ylab=ylab, ...)
+	if (is.null(otherPar$type)) otherPar$type <- 'l'
+	if (is.null(otherPar$xlab)) otherPar$xlab <- "Intensity"
+	if (is.null(otherPar$ylab)) otherPar$ylab <- 'Density'
+	if (is.null(otherPar$lty)) otherPar$lty <-  1:ncol(dataMatrix)
+	if (is.null(otherPar$col)) otherPar$col <-  1:ncol(dataMatrix)
+	if (is.null(otherPar$lwd)) otherPar$lwd <-  1
+	if (is.null(otherPar$main)) otherPar$main <- "Density plot"
+	if (logMode)  otherPar$xlab <- paste(otherPar$xlab, " (log2)", sep="")
+
+	do.call('matplot', c(list(xx), list(yy), otherPar))
+
 	## add legend
 	if (addLegend) {
 		labels <- colnames(dataMatrix)
@@ -1167,17 +1313,7 @@ plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="top
 			x.pos <- legendPos[1]
 			y.pos <- NULL
 		}
-		if (is.null(otherArgs$col)){
-			col <- seq(labels) 
-		} else {
-			col <- otherArgs$col
-		}
-		if (is.null(otherArgs$lty)){
-			lty <- seq(labels) 
-		} else {
-			lty <- otherArgs$lty
-		}
-		legend(x.pos, y.pos, legend=labels, box.lwd=0, col=col, lty=lty)
+		legend(x.pos, y.pos, legend=labels, box.lwd=0, col=otherPar$col, lty=otherPar$lty, lwd=otherPar$lwd)
 	}
 	return(invisible(TRUE))
 }

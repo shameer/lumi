@@ -8,7 +8,7 @@ Plot the color bias density plot of Illumina Infinium Methylation data
 Plot the color bias density plot of Illumina Infinium Methylation data in one dimension (comparing with 2D scatter plot)
 }
 \usage{
-plotColorBias1D(methyLumiM, channel = c("both", "unmethy", "methy", "sum"), colorMode=TRUE, removeGenderProbes = FALSE, logMode = TRUE, ...)
+plotColorBias1D(methyLumiM, channel = c("both", "unmethy", "methy", "sum"), colorMode=TRUE, removeGenderProbes = FALSE, logMode = TRUE, subset = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,7 @@ plotColorBias1D(methyLumiM, channel = c("both", "unmethy", "methy", "sum"), colo
   \item{colorMode}{ whether separate two color channels or not }
   \item{removeGenderProbes}{ determine whether exclude probes on X and Y chromosomes if the chromosome information is provided in the methyLumiM object.}
   \item{logMode}{Whether plot the intensities in log-scale }
+  \item{subset}{plot subset of randomly selected rows. All data will be plotted if it is NULL. }
   \item{\dots}{ other parameters used by \code{\link[stats]{density}} and  \code{\link[graphics]{plot}}}
 }
 \details{

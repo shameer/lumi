@@ -470,7 +470,8 @@ setMethod("boxplot",signature(x="ExpressionSet"),
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
      	main <- tmp@title
-
+	
+	if (class(x) == 'MethyLumiM') logMode <- FALSE
 	expr <- exprs(x)
   	if (logMode && max(exprs(x), na.rm=TRUE) > 50) {
 		## force the expression value as positive in the logMode
@@ -527,6 +528,8 @@ setMethod('density', signature(x='ExpressionSet'),
 	} else {
 		stop('Un-supported class of x.')
 	}
+
+	if (class(x) == 'MethyLumiM') logMode <- FALSE
 		
     if (logMode && (max(expr, na.rm=TRUE) > 50)) {
 		## force the expression value as positive in the logMode
@@ -550,10 +553,8 @@ setMethod('density', signature(x='ExpressionSet'),
 			index <- subset
 			index <- index[index > 0 & index <= nrow(expr)]
 		}
-	} else {
-		index <- 1:nrow(expr)
-	}
-	expr <- expr[index,,drop=FALSE]
+		expr <- expr[index,,drop=FALSE]
+	} 
 
 	if (!is.null(symmetry)) {
 		x.range <- range(expr)
@@ -666,6 +667,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 
 	if (smoothScatter) subset <- NULL
 	expr <- exprs(x)
+	if (class(x) == 'MethyLumiM') logMode <- FALSE
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
 			## force the expression value as positive in the logMode
@@ -690,11 +692,11 @@ setMethod("pairs", signature(x="ExpressionSet"),
 		} else {
 			subset <- subset[subset > 0 & subset <= nrow(expr)]
 		}
+		if (is.null(main)) 
+			main <- paste('Pair plot based on', length(subset), 'random sampling.')
 	} else {
 		subset <- 1:nrow(expr)
 	}
-	if (length(subset) < nrow(expr) && is.null(main)) 
-		main <- paste('Pair plot based on', length(subset), 'random sampling.')
 	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
 			lower.panel=lowerPanel, main=main, ...)
 })
@@ -705,6 +707,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 {
 	if (smoothScatter) subset <- NULL
 	expr <- exprs(object)
+	if (class(object) == 'MethyLumiM') logMode <- FALSE
 	if(logMode) {
 		if (max(expr, na.rm=TRUE) > 50) {
 			## force the expression value as positive in the logMode

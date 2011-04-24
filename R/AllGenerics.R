@@ -1,11 +1,9 @@
-
-# if (is.null(getGeneric("methylated"))) setGeneric("methylated", function(object) standardGeneric("methylated"))
-# if (is.null(getGeneric("methylated<-"))) setGeneric("methylated<-", function(object, value) standardGeneric("methylated<-"))
-# if (is.null(getGeneric("unmethylated"))) setGeneric("unmethylated", function(object) standardGeneric("unmethylated"))
-# if (is.null(getGeneric("unmethylated<-"))) setGeneric("unmethylated<-", function(object, value) standardGeneric("unmethylated<-"))
-# if (is.null(getGeneric("getHistory"))) setGeneric("getHistory", function(object) standardGeneric("getHistory"))
-# if (is.null(getGeneric("MAplot"))) setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
-# if (is.null(getGeneric("plotCDF"))) setGeneric("plotCDF", function(x, ...) standardGeneric("plotCDF"))
+setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
+setGeneric("pairs", function(x, ...) standardGeneric("pairs"))
+setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
+setGeneric("density", function(x, ...) standardGeneric("density"))
+setGeneric("hist", function(x, ...) standardGeneric("hist"))
+setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
 
 setGeneric("beadNum", function(object) standardGeneric("beadNum"))
 setGeneric("beadNum<-", function(object, value) standardGeneric("beadNum<-"))
@@ -17,7 +15,6 @@ setGeneric("detection", function(object) standardGeneric("detection"))
 setGeneric("detection<-", function(object, value) standardGeneric("detection<-"))
 
 setGeneric("getHistory", function(object) standardGeneric("getHistory"))
-setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
 
 
 if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))

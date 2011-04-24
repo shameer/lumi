@@ -284,6 +284,11 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		} 
 		colnames(beadNum) <- header[ind]
 	}
+
+    ## check the STD column is STDERR or STDEV. If it is STDERR, then convert it as STDEV.
+    if (!is.null(beadNum) && length(grep("BEAD_STDERR", colnames(se.exprs), ignore.case=T)) == ncol(se.exprs)) {
+    	se.exprs <- se.exprs * sqrt(beadNum)    
+    }
     
 	## identify the annotation columns
 	annotationInfo <- NULL

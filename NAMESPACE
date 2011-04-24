@@ -49,7 +49,7 @@ produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, 
 # methylation analysis functions
 addControlData2methyLumiM, adjColorBias.quantile, adjColorBias.ssn, addColorChannelInfo, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
 estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
-normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, smoothQuantileNormalization,
+normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
 # methylation status estimation function
 lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit
 )

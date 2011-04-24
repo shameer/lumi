@@ -7,7 +7,7 @@
 \description{ plot the density distribution of a dataMatrix or ExpressionSet object }
 
 \usage{
- plotDensity(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="topright", xlab="Intensity", ylab='Density', main="Density plot",	...)
+ plotDensity(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="topright", subset = NULL, ...)
 }
 
 \arguments{
@@ -15,9 +15,7 @@
 	\item{logMode}{ determine whether the CDF plot is based on a log2 scale }
 	\item{addLegend}{ whether add legend to the plot or not }
 	\item{legendPos}{ the position of the legend. If its length is two, then it specifies the x and y location of legend. }
-	\item{xlab}{ xlab of the plotCDF plot }
-	\item{ylab}{ ylab of the plotCDF plot }
-    \item{main}{ title for the plot}
+	\item{subset}{plot subset of randomly selected rows. All data will be plotted if it is NULL. }
 	\item{\dots}{ additional parameters for \code{\link[graphics]{matplot}} function }
 }
 

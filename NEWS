@@ -1,4 +1,15 @@
 -----------------------------------------------------
+version 2.5.1
+release date: 04/23/2011
+1. Adding supports for Infinium 450K methylation microarrays, which includes updating the color bias correction and other related functions.
+
+
+-----------------------------------------------------
+version 2.3.8
+release date: 01/31/2011
+1. Bug fix related with Methylation File GEO submission
+
+-----------------------------------------------------
 version 2.3.7
 release date: 01/22/2011
 1. Moved the MethyLumiM class and related methods from lumi to methylumi package

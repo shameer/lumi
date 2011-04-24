@@ -1,5 +1,5 @@
 `lumiT` <-
-function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrection = TRUE, simpleOutput = TRUE, verbose = TRUE, ...) {
+function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutput = TRUE, verbose = TRUE, ...) {
 	# if (!is(x.lumi, 'LumiBatch')) stop('The object should be class "LumiBatch"!')
 	method <- match.arg(method)
 	if (is(x.lumi, 'eSet')) {
@@ -11,7 +11,8 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 	} else {
 		stop('The object should be class "eSet" inherited!')
 	}
-	if (!is(x.lumi, 'LumiBatch')) stdCorrection <- FALSE
+	## the stdCorrection was moved to lumiR function on April 15, 2011.
+	# if (!is(x.lumi, 'LumiBatch')) stdCorrection <- FALSE
 
 	## check the negative values
 	if (method == 'log2') {
@@ -24,20 +25,24 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, stdCorrecti
 
     new.lumi <- x.lumi 
 	exprs <- exprs(x.lumi) 
+	if (max(exprs, na.rm=TRUE) < 50) {
+		warning("Looks like the data has been log transformed! \n It should be in the raw scale! \n Please double check!\n")
+	}
 	if (method == 'log2') {
 		exprs(new.lumi) <- log2(exprs)
 	} else if (method == 'cubicRoot') {
 		exprs(new.lumi) <- sign(exprs) * (abs(exprs))^1/3
 	} else {
 		se.exprs <- se.exprs(x.lumi)
-		if (stdCorrection & is(x.lumi, 'LumiBatch')) {
-			bn <- beadNum(x.lumi)
-			if (is.null(bn)) {
-				cat('No Standard Deviation correction was applied becasue of missing bead number information.\n')
-			} else {
-				se.exprs <- se.exprs * sqrt(bn)
-			}
-		}
+		## the stdCorrection was moved to lumiR function on April 15, 2011.
+#		if (stdCorrection & is(x.lumi, 'LumiBatch')) {
+#			bn <- beadNum(x.lumi)
+#			if (is.null(bn)) {
+#				cat('No Standard Deviation correction was applied because of missing bead number information.\n')
+#			} else {
+#				se.exprs <- se.exprs * sqrt(bn)
+#			}
+#		}
 		nArray <- ncol(exprs)
 		if (is(x.lumi, 'LumiBatch')) {
 			detectCall <- detectionCall(x.lumi, Th=0.01, type='matrix')			

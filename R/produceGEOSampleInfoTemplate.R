@@ -12,17 +12,20 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 			'Rat'='Rattus norvegicus',
 			'Human'="Homo sapiens",
 			'Mouse'='Mus musculus')
-		templateContent <- c("","1","",organism,"","total RNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"")
+		templateContent <- c("","1","",organism,"","total RNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion, "none")
 	} else if (is(lumiNormalized, 'MethyLumiM')) {
 		labels <- sampleNames(lumiNormalized)
 		chipVersion <- 'unknown'
 		organism <- 'unknown'
 		templateContent <- c("","1","",organism,"","genomic DNA","standard as recommended by illumina","Cy3","standard as recommended by illumina","standard as recommended by illumina","standard as recommended by illumina","","",chipVersion,"none")
-	} else if (is(lumiNormalized, 'matrix')) {
+	} else if (is(lumiNormalized, 'matrix') || is(lumiNormalized, 'ExpressionSet')) {
+		if (is(lumiNormalized, 'ExpressionSet'))  lumiNormalized <- exprs(lumiNormalized)
 		labels <- colnames(lumiNormalized)
 		chipVersion <- 'unknown'
 		organism <- 'unknown'
 		templateContent <- c("","1","",organism,"","","","Cy3","","standard as recommended by manufacturer","standard as recommended by manufacturer","","", "","none")
+	} else {
+		cat("The input object should be an object of LumiBatch, MethyLumiM, matrix or other ExpressionSet inherited class!\n")
 	}
 	
 	## add code of parsing processing history 

@@ -8,7 +8,7 @@ Plot the Illumina Infinium methylation color bias in terms of boxplot
 Plot the Illumina Infinium methylation color bias in terms of boxplot. boxplot of red and green color channel will be plotted side by side
 }
 \usage{
-boxplotColorBias(methyLumiM, logMode = TRUE, channel = c("both", "unmethy", "methy", "sum"), grid = TRUE, main = NULL, mar = NULL, verbose = F, ...)
+boxplotColorBias(methyLumiM, logMode = TRUE, channel = c("both", "unmethy", "methy", "sum"), grid = TRUE, main = NULL, mar = NULL, verbose = F, subset = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,6 +19,7 @@ boxplotColorBias(methyLumiM, logMode = TRUE, channel = c("both", "unmethy", "met
   \item{main}{ title of the plot }
   \item{mar}{ margin of the plot }
   \item{verbose}{ whether print verbose information during plot }
+  \item{subset}{plot subset of randomly selected rows. All data will be plotted if it is NULL. }
   \item{\dots}{ other parameters of \code{\link[graphics]{boxplot}} }
 }
 \details{
