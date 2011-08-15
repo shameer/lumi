@@ -2,7 +2,8 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 	methyLumiSet <- methylumiR(...)
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
 	if (!is.null(lib)) {
-		methyLumiM <- addColorChannelInfo(methyLumiM, lib=lib)
+		# methyLumiM <- addColorChannelInfo(methyLumiM, lib=lib)
+		methyLumiM <- .addAnnotationInfo(methyLumiM, lib=lib)
 	}
 	if (!is.null(controlData)) {
 		if (is.character(controlData)) {
@@ -18,7 +19,7 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 }
 
 
-addColorChannelInfo <- function(methyLumiM, lib="IlluminaHumanMethylation27k.db") {
+.addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
 	
 	# retrieve feature data
 	ff <- pData(featureData(methyLumiM))
@@ -439,7 +440,6 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 	## For 450K chip, the Infinium II type only has one type of probe for each CpG site. 
 	## The color channel will depend on the methylation status
 	bothInd <- which(annotation$COLOR_CHANNEL == 'Both' | annotation$COLOR_CHANNEL == '')
-
 	bandwidth <- ifelse(logMode, 0.3, 200)
 	for (i in 1:ncol(unmethy)) {
 		red.a.i <- unmethy[redInd, i]
@@ -498,16 +498,20 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 		if (ncol(dataMatrix) != ncol(adjData))
 			stop("The number of columns of adjData should be consistent with dataMatrix!") 
 	}
+	interpolationMode <- ifelse(length(ref) != nrow(dataMatrix), TRUE, FALSE) 
 	
-	len <- nrow(dataMatrix)
-	refLen <- length(ref)
-	gridsize <- min(min(len, refLen)/2, 1000)
 	if (logMode) {
+		## remove those equal or less than 0, which are unreliable values
+		if (interpolationMode) ref <- ref[ref > 0]
 		if (min(ref) < 1) ref <- ref - min(ref) + 1
 		ref <- log2(ref)
 	}
+	len <- nrow(dataMatrix)
+	refLen <- length(ref)
+	gridsize <- min(min(len, refLen)/2, 1000)
+
 	# In the case of different lengthes between reference and data, interpolation will be performed.
-	if (len != refLen) {
+	if (interpolationMode) {
 		x <- (1:refLen)/refLen
 		y <- sort(ref, decreasing=F)
 	} else {
@@ -537,29 +541,45 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 				profile.i <- log2(profile.i)
 			}
 		}
-		if (len != refLen) {
+
+		if (interpolationMode) {
+			## remove those equal or less than 0, which are unreliable values
+			selProfile.i <- profile.i[profile.i > 0]
+			len <- length(selProfile.i)
+			
 			# perform linear interpolation when the length of two profiles different
-			x.out.i <- rank(profile.i)/len 
+			x.out.i <- rank(selProfile.i)/len 
 			y.out.i <- approx(x=x, y=y, xout=x.out.i, method="linear", rule=2)$y		
 		} else {
-			y.out.i <- y[rank(profile.i)]
+			selProfile.i <- profile.i
+			y.out.i <- y[rank(selProfile.i)]
 		}
 		
-		# if (smooth) {
-			## remove outliers points
-			rlm.i <- rlm(profile.i, y.out.i)
-			dd.i <- y.out.i - rlm.i$fitted.values
-			outlier.ind.i <- abs(dd.i) > 3 * sd(dd.i)
-			tt <- locpoly(profile.i[!outlier.ind.i], y.out.i[!outlier.ind.i], degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)
-			
-			norm.i <- approx(x=tt$x, y=tt$y, xout=adjData.i, rule=2)$y
+		## remove outliers points at two ends
+		boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
+		lowInd.i <- selProfile.i < boundary.i[1]
+		highInd.i <- selProfile.i > boundary.i[2]
+		## fit the low segment
+		rlm.i <- rlm(selProfile.i[lowInd.i], y.out.i[lowInd.i])
+		dd.i <- y.out.i[lowInd.i] - rlm.i$fitted.values
+		outlier.ind.low.i <- which(lowInd.i)[which(abs(dd.i) > 5 * sd(dd.i))]
+		## fit the high segment
+		rlm.i <- rlm(selProfile.i[highInd.i], y.out.i[highInd.i])
+		dd.i <- y.out.i[highInd.i] - rlm.i$fitted.values
+		outlier.ind.high.i <- which(highInd.i)[which(abs(dd.i) > 5 * sd(dd.i))]
+		outlier.ind.i <- c(outlier.ind.low.i, outlier.ind.high.i)
+		if (length(outlier.ind.i) > 0) {
+			tt <- locpoly(selProfile.i[-outlier.ind.i], y.out.i[-outlier.ind.i], degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)
+		} else {
+			tt <- locpoly(selProfile.i, y.out.i, degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)		
+		}
 
-			# plot(profile.i, y.out.i, pch='.')
-			# lines(tt, col=2)
-		# } else {
-		# 	norm.i <- y.out.i
-		# }
-		if (max(norm.i) > 30) browser()
+		norm.i <- approx(x=tt$x, y=tt$y, xout=adjData.i, rule=2)$y
+
+		# plot(selProfile.i, y.out.i, pch='.')
+		# lines(tt, col=2)
+		# if (max(norm.i) > 30) browser()
+
 		if (logMode) {
 			normData[,i] <- 2^norm.i
 		} else {

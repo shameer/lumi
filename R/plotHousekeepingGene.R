@@ -45,7 +45,8 @@ function(controlData, lib=NULL, slideIndex=NULL, addLegend=TRUE, logMode=TRUE, .
 	
 	if (logMode) {
 		if (max(selControlData) > 50) {
-			selControlData <- selControlData - min(selControlData) + 1
+			selControlData[controlData < 1] <- 1
+			# if (min(selControlData) < 0) selControlData <- selControlData - min(selControlData) + 1
 			selControlData <- log2(selControlData)
 		}
 		ylab <- 'Expression Amplitude (log2)'
