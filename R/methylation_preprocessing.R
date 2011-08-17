@@ -22,16 +22,58 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 .addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
 	
 	# retrieve feature data
-	ff <- pData(featureData(methyLumiM))
-	if (is.null(ff$COLOR_CHANNEL)) {
+	ff <- fData(methyLumiM)
+	if (is.null(ff$COLORCHANNEL)) {
+		if (is.null(lib)) stop("Please provide the annotation library!\n")
 		if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+		
 		obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
 		colorInfo <- as.list(obj[mappedkeys(obj)])
 		colorInfo <- colorInfo[rownames(ff)]
 		ff$COLOR_CHANNEL <- sapply(colorInfo, function(x) x[1])
-		pData(featureData(methyLumiM)) <- ff
+		
 	} 
 	
+	if (hgVersion == 'hg18') {
+		if (all(c('CHROMOSOME_36', 'COORDINATE_36') %in% names(ff))) {
+			ff$CHROMOSOME <- ff$CHROMOSOME_36
+			ff$POSITION <- as.numeric(ff$COORDINATE_36)
+		} else {
+			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
+			chr <- as.list(obj[mappedkeys(obj)])
+			chr <- chr[rownames(ff)]
+			## only retrieve the first element
+			ff$CHROMOSOME <- sapply(chr, function(x) x[1])
+
+			obj <- get(paste(sub("\\.db$", "", lib), "CPG36", sep=""))
+			loc <- as.list(obj[mappedkeys(obj)])
+			loc <- loc[rownames(ff)]
+			ff$POSITION <- sapply(loc, function(x) x[1])
+		}
+	} else {
+		if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
+			ff$CHROMOSOME <- ff$CHR
+			ff$POSITION <- as.numeric(ff$MAPINFO)
+		} else {
+			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
+			chr <- as.list(obj[mappedkeys(obj)])
+			chr <- chr[rownames(ff)]
+			ff$CHROMOSOME <- sapply(chr, function(x) x[1])
+
+			obj <- get(paste(sub("\\.db$", "", lib), "CPG37", sep=""))
+			loc <- as.list(obj[mappedkeys(obj)])
+			loc <- loc[rownames(ff)]
+			ff$POSITION <- sapply(loc, function(x) x[1])
+		}
+	}
+	
+	fData(methyLumiM) <- ff	
 	return(methyLumiM)
 }
 

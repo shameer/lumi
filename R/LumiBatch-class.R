@@ -206,7 +206,14 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 		cat(note[[i]], sep='\n\t\t')		
 	}
 	cat('\nMajor Operation History:\n')
-	print(getHistory(object)) 
+	hh <- getHistory(object)
+	if (nrow(hh) > 5) {
+		print(head(hh, 2))
+		cat("...\n")
+		print(tail(hh, 2))
+	} else {
+		print(hh)
+	}	
 	cat('\nObject Information:\n')
 	callNextMethod()
 	if (!is.null(object@controlData)) {
