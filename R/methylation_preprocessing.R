@@ -3,7 +3,7 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
 	if (!is.null(lib)) {
 		# methyLumiM <- addColorChannelInfo(methyLumiM, lib=lib)
-		methyLumiM <- .addAnnotationInfo(methyLumiM, lib=lib)
+		methyLumiM <- addAnnotationInfo(methyLumiM, lib=lib)
 	}
 	if (!is.null(controlData)) {
 		if (is.character(controlData)) {
@@ -19,8 +19,9 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 }
 
 
-.addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
+addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'), annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
 	
+	hgVersion <- match.arg(hgVersion)
 	# retrieve feature data
 	ff <- fData(methyLumiM)
 	if (is.null(ff$COLORCHANNEL)) {
@@ -34,12 +35,20 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 		
 	} 
 	
+	if (length(grep('27k', lib, ignore.case=T)) > 0) {
+		fData(methyLumiM) <- ff	
+		return(methyLumiM)
+	}
+	## Only for 450K data, chromosome information will be added.
 	if (hgVersion == 'hg18') {
 		if (all(c('CHROMOSOME_36', 'COORDINATE_36') %in% names(ff))) {
 			ff$CHROMOSOME <- ff$CHROMOSOME_36
 			ff$POSITION <- as.numeric(ff$COORDINATE_36)
 		} else {
-			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (is.null(lib)) {
+				warning("Please provide the annotation library!\n")
+				return(methyLumiM)
+			}
 			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
 		
 			obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
@@ -58,7 +67,10 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 			ff$CHROMOSOME <- ff$CHR
 			ff$POSITION <- as.numeric(ff$MAPINFO)
 		} else {
-			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (is.null(lib)) {
+				warning("Please provide the annotation library!\n")
+				return(methyLumiM)
+			}
 			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
 		
 			obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
@@ -135,7 +147,7 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separa
 		if (separateColor) {
 			annotation <- pData(featureData(methyLumiM))
 			if (is.null(annotation$COLOR_CHANNEL)) {
-				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 				combData <- rbind(methy, unmethy)
 				processed.comb <- method(combData, ...)
 				if (!is(processed.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
@@ -194,7 +206,7 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 	}
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL))
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 	
 	history.submitted <- as.character(Sys.time())
 	if (!(is.function(method))) {
@@ -277,7 +289,7 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
 		if (separateColor) {
 			annotation <- pData(featureData(methyLumiM))
 			if (is.null(annotation$COLOR_CHANNEL)) {
-				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 				combData <- rbind(methy, unmethy)
 				bgAdj.comb <- method(combData, ...)
 				if (!is(bgAdj.comb, 'matrix')) stop("The return of user defined method should be a matrix!\n")
@@ -407,7 +419,7 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 	if (is.null(unmethy) || is.null(methy)) stop("methylated or unmethylated data is not included in the dataset!\n")
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 		return(methyLumiM)
 	}
 	
@@ -473,7 +485,7 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 	methy <- assayDataElement(methyLumiM, 'methylated') 
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 		return(methyLumiM)
 	}
 	redInd <- annotation$COLOR_CHANNEL == 'Red'
@@ -683,7 +695,7 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		if (separateColor) {
 			annotation <- pData(featureData(methyLumiM))
 			if (is.null(annotation$COLOR_CHANNEL)) {
-				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+				cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 				bg.methy <- estimateBG(methy, nbin=nbin)
 				bg.unmethy <- estimateBG(unmethy, nbin=nbin)
 				bg <- pmin(bg.methy, bg.unmethy)
@@ -779,7 +791,7 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
 	if (separateColor) {
 		annotation <- pData(featureData(methyLumiM))
 		if (is.null(annotation$COLOR_CHANNEL)) {
-			cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+			cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 			separateColor <- FALSE
 		} else {
 			allRedInd <- which(annotation$COLOR_CHANNEL == 'Red')
@@ -955,7 +967,7 @@ boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 		return(invisible(FALSE))
 	}
 	redInd <- annotation$COLOR_CHANNEL == 'Red'
@@ -1053,7 +1065,7 @@ plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 's
 	methy <- assayDataElement(methyLumiM, 'methylated') 
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 		return(methyLumiM)
 	}
 	if (removeGenderProbes && !is.null(annotation$CHR)) {
@@ -1196,7 +1208,7 @@ plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioW
 
 	ff <- pData(featureData(methyLumiM))
 	color.channel <- ff[,"COLOR_CHANNEL"]
-	if (is.null(color.channel) && !combineMode) stop("No color channel information included in the data!\n Please add it using addColorChannelInfo function.\n")
+	if (is.null(color.channel) && !combineMode) stop("No color channel information included in the data!\n Please add it using addAnnotationInfo function.\n")
 	
 	unmethy <- assayDataElement(methyLumiM, 'unmethylated')[, selSample[1]]
 	methy <- assayDataElement(methyLumiM, 'methylated')[, selSample[1]]
@@ -1278,7 +1290,7 @@ colorBiasSummary <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 	methy <- assayDataElement(methyLumiM, 'methylated') 
 	annotation <- pData(featureData(methyLumiM))
 	if (is.null(annotation$COLOR_CHANNEL)) {
-		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addColorChannelInfo function.\n")
+		cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
 		return(methyLumiM)
 	}
 	redInd <- annotation$COLOR_CHANNEL == 'Red'
