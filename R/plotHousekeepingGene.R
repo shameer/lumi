@@ -11,7 +11,7 @@ function(controlData, lib=NULL, slideIndex=NULL, addLegend=TRUE, logMode=TRUE, .
 	allControlType <- controlData$controlType
 	allControlProbe <- controlData$ProbeID
 	uniControlType <- getControlType(controlData)
-	controlData <- controlData[, -c(1,2)]
+	controlData <- as.matrix(controlData[, -c(1,2)])
 
 	if (is.null(slideIndex)) {
 		if (is.null(sampleID)) sampleID <- colnames(controlData)
@@ -45,7 +45,7 @@ function(controlData, lib=NULL, slideIndex=NULL, addLegend=TRUE, logMode=TRUE, .
 	
 	if (logMode) {
 		if (max(selControlData) > 50) {
-			selControlData[controlData < 1] <- 1
+			selControlData[selControlData < 1] <- 1
 			# if (min(selControlData) < 0) selControlData <- selControlData - min(selControlData) + 1
 			selControlData <- log2(selControlData)
 		}
