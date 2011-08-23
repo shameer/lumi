@@ -562,7 +562,7 @@ For convenience to the users, the user can specify their own preprocessing funct
 
 
 \subsection{Options to separately process each color channel}
-Functions  \Rfunction{lumiMethyB}, \Rfunction{lumiMethyC} and \Rfunction{lumiMethyN} also has the option to separately process in each color channel. The presumption is that the data (\Rclass{MethyLumiM} object) should include the color channel column (with column name "COLOR\_CHANNEL") in the featureData and the green and red colors are represented as "Red" and "Grn". If the GenomeStudio (BeadStudio) output the annotation information together with the data (we recommend it), the \Rfunction{lumiMethyR} function will automatically add the annotation information, including color channel information, to the featureData slot. If the data does not include color channel information, users can add it use function \Rfunction{addColorChannelInfo}. 
+Functions  \Rfunction{lumiMethyB}, \Rfunction{lumiMethyC} and \Rfunction{lumiMethyN} also has the option to separately process in each color channel. The presumption is that the data (\Rclass{MethyLumiM} object) should include the color channel column (with column name "COLOR\_CHANNEL") in the featureData and the green and red colors are represented as "Red" and "Grn". If the GenomeStudio (BeadStudio) output the annotation information together with the data (we recommend it), the \Rfunction{lumiMethyR} function will automatically add the annotation information, including color channel information, to the featureData slot. If the data does not include color channel information, users can add it use function \Rfunction{addAnnotationInfo}. 
 
 <<Color channel information, eval=T>>=
 ## retrieve the featureData information
@@ -572,7 +572,7 @@ ff <- pData(featureData(example.lumiMethy))
 head(ff)
 
 ## add user provided color channel information if it is not existed in the featureData
-# example.lumiMethy <- addColorChannelInfo(example.lumiMethy, lib="IlluminaHumanMethylation27k.db")
+# example.lumiMethy <- addAnnotationInfo(example.lumiMethy, lib="IlluminaHumanMethylation27k.db")
 @
 
 

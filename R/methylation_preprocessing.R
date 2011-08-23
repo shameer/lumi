@@ -277,7 +277,7 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
 		} else if (method == 'none') {
 			return(methyLumiM)
 		} else if (method == 'forcePositive') {
-			mm <- min(c(min(methy), min(unmethy)))
+			mm <- min(c(min(methy, na.rm=TRUE), min(unmethy, na.rm=TRUE)))
 			if (mm > 0)	return(methyLumiM)
 		}		
 		if (verbose) cat(paste('Perform', method, 'background correction ...\n'))
@@ -557,7 +557,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 	if (logMode) {
 		## remove those equal or less than 0, which are unreliable values
 		if (interpolationMode) ref <- ref[ref > 0]
-		if (min(ref) < 1) ref <- ref - min(ref) + 1
+		if (min(ref, na.rm=TRUE) < 1) ref <- ref - min(ref, na.rm=TRUE) + 1
 		ref <- log2(ref)
 	}
 	len <- nrow(dataMatrix)
@@ -586,7 +586,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 			adjData.i <- profile.i
 		}
 		if (logMode) {
-			mm.i <- min(c(profile.i, adjData.i))
+			mm.i <- min(c(profile.i, adjData.i), na.rm=TRUE)
 			if (mm.i < 1) {
 				adjData.i <- log2(adjData.i - mm.i + 1)
 				profile.i <- log2(profile.i - mm.i + 1)
@@ -674,8 +674,8 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 		allControlType <- toupper(allControlType)
 		neg.ind <- which(allControlType == "NEGATIVE") 
 		if (length(neg.ind) > 0) {
-			bg.grn <- apply(grnData[neg.ind, ], 2, median)
-			bg.red <- apply(redData[neg.ind, ], 2, median)
+			bg.grn <- apply(grnData[neg.ind, ,drop=F], 2, median)
+			bg.red <- apply(redData[neg.ind, ,drop=F], 2, median)
 			if (separateColor) {
 				bg <- cbind(red=bg.red, green=bg.grn)
 			} else {
@@ -881,7 +881,7 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
 	
 	unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
 	methy <- assayDataElement(methyLumiM, 'methylated') 
-	mm <- min(c(unmethy, methy))
+	mm <- min(c(unmethy, methy), na.rm=TRUE)
 	if (mm < 0.01) {
 		unmethy[unmethy < 0.01] <- 0.01 
 		methy[methy < 0.01] <- 0.01 
@@ -1661,7 +1661,7 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIterati
 				}
 			}
 
-			if (min(abs(s.new - s)) < tol && min(abs(k.new - k)) < tol && min(abs(theta.new - theta)) < tol)  break
+			if (min(abs(s.new - s), na.rm=TRUE) < tol && min(abs(k.new - k), na.rm=TRUE) < tol && min(abs(theta.new - theta), na.rm=TRUE) < tol)  break
 			# if (verbose) cat("s:", s, " k:", k, " theta:", theta, "\n")
 			s <- s.new; k <- k.new; theta <- theta.new
 			# if (any(theta < 0.2) || any(k < 2)) {
