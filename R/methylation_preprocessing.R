@@ -1397,7 +1397,7 @@ plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="top
 produceMethylationGEOSubmissionFile <- function(methyLumiM, methyLumiM.raw=NULL, lib.mapping=NULL, idType='Probe', sampleInfo=NULL, fileName='GEOSubmissionFile.txt', supplementaryRdata=TRUE, ...) {
 	
 	if (missing(methyLumiM)) stop('Please provide all required input parameters!\n')
-	if (is(methyLumiM, "MethyLumiM")) expr.norm <- estimateBeta(methyLumiM)
+	if (is(methyLumiM, "MethyLumiM")) expr.norm <- estimateBeta(methyLumiM, returnType='matrix')
 	if (is.null(methyLumiM.raw)) {
 		detect <- detection(methyLumiM)
 		methyData <- methylated(methyLumiM)
@@ -1849,7 +1849,7 @@ lumiMethyStatus <- function(methyLumiM, ...)
 	M <- exprs(methyLumiM)
 	M.status <- M.prob <- NULL
 	for (i in 1:ncol(M)) {
-		status.i <- methylationCall(M[,1], ...)
+		status.i <- methylationCall(M[,i], ...)
 		prob.i <- attr(status.i, "probability")
 		M.status <- cbind(M.status, status.i)
 		M.prob <- cbind(M.prob, prob.i)
