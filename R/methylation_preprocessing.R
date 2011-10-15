@@ -1610,7 +1610,7 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIterati
 			# f1[x > Mode[2]] <- 0
 			# f2[x < Mode[1]] <- 0
 		} 
-		z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2) # + eps * 10)  # posterior probability of unmethylated
+		z1 <- p[1] * f1 / (p[1] * f1 + p[2] * f2 + eps * 10)  # posterior probability of unmethylated
 		z2 <- 1 - z1
 
 		if (verbose && iter > 1) {
@@ -1623,7 +1623,7 @@ gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIterati
 		
 		## M-step (estimate parameters: s, theta and k)
 		# update the proportion of each class
-		n1 <- sum(z1); n2 <- N - n1
+		n1 <- sum(z1, na.rm=TRUE); n2 <- N - n1
 		p.new <- n1 / N
 		p.new <- c(p.new, 1 - p.new)
     	if (abs(p.new[1]-p[1]) < tol) break

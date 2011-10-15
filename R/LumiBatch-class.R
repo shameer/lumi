@@ -455,7 +455,9 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 		if (nrow(x@controlData) == nrow(y@controlData)) {
 			controlData <- cbind(x@controlData, y@controlData)
 			x@controlData <- as.data.frame(controlData)
-		}
+		} else {
+           warning("controlData slot not combined: different numbers of rows found") 
+       }
 	}
 
 	# history tracking
