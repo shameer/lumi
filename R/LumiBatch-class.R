@@ -486,7 +486,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 		## force the expression value as positive in the logMode
 		# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 		# remove the negative values
-		if (min(expr) < 0) {
+		if (min(expr, na.rm=TRUE) < 0) {
 			rMin <- rowMin(expr)
 			expr <- expr[rMin > 0, , drop=FALSE]
 		}
@@ -544,7 +544,7 @@ setMethod('density', signature(x='ExpressionSet'),
 		## force the expression value as positive in the logMode
 		# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 		# remove the negative values
-		if (min(expr) < 0) {
+		if (min(expr, na.rm=TRUE) < 0) {
 			rMin <- rowMin(expr)
 			expr <- expr[rMin > 0, , drop=FALSE]
 		}
@@ -682,7 +682,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 			## force the expression value as positive in the logMode
 			# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 			# remove the negative values
-			if (min(expr) < 0) {
+			if (min(expr, na.rm=TRUE) < 0) {
 				rMin <- rowMin(expr)
 				expr <- expr[rMin > 0, , drop=FALSE]
 			}
@@ -722,7 +722,7 @@ setMethod("MAplot", signature(object="ExpressionSet"),
 			## force the expression value as positive in the logMode
 			# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
 			# remove the negative values
-			if (min(expr) < 0) {
+			if (min(expr, na.rm=TRUE) < 0) {
 				rMin <- rowMin(expr)
 				expr <- expr[rMin > 0, ,drop=FALSE]
 			}

@@ -7,7 +7,7 @@
 Estimate the methylation status by fitting a two component Gamma mixture model using EM algorithm based on the all M-values of a particular sample 
 }
 \usage{
-gammaFitEM(M, initialFit = NULL, fix.k = NULL, weighted = TRUE, maxIteration = 50, tol = 1e-04, plotMode = FALSE, verbose = FALSE)
+gammaFitEM(M, initialFit = NULL, fix.k = NULL, weighted = TRUE, maxIteration = 50, tol = 1e-04, plotMode = FALSE, truncate=FALSE, verbose = FALSE)
 }
 
 \arguments{
@@ -18,6 +18,7 @@ gammaFitEM(M, initialFit = NULL, fix.k = NULL, weighted = TRUE, maxIteration = 5
   \item{maxIteration}{ maximum iterations allowed before converging }
   \item{tol}{ the difference threshold used to determine convergence }
   \item{plotMode}{ determine whether plot the histogram and density plot estimation }
+  \item{truncate}{ determine whether to truncate the tails beyond the modes during parameter estimation}
   \item{verbose}{ determine whether plot intermediate messages during iterations }
 }
 \details{

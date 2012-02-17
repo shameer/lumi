@@ -6,9 +6,16 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 	fitMethod <- match.arg(fitMethod)
 	## Estimate the background variance c3
 	c3 <- ifelse (is.null(backgroundStd), 0, backgroundStd)
-	
+		
 	ord <- order(u); u.bak <- u
 	u <- u[ord]; std <- std[ord]
+
+	## remove NAs if exists
+	na.ind <- which(is.na(u) | is.na(std))
+	if (length(na.ind) > 0) {
+		u <- u[-na.ind]
+		std <- std[-na.ind]
+	}
 	
 	if (any(std < 0)) {
 		stop('Negative expression standard deviation is not allowed!')
