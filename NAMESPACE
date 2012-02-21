@@ -19,6 +19,9 @@ importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethyl
  "controlData", "controlData<-", detection, "detection<-")
 importFrom(methylumi, methylumiR, controlTypes)
 
+importClassesFrom(genoset, GenoSet)
+
+
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(KernSmooth, locpoly)
 importFrom(hdrcde, hdr.boxplot)
@@ -37,7 +40,7 @@ importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 
-exportClasses(LumiBatch)
+exportClasses(LumiBatch, MethyGenoSet)
 exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, sampleNames, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce)
 
 export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            

@@ -1,0 +1,95 @@
+\name{MethyGenoSet-class}
+\docType{class}
+\alias{class:MethyGenoSet}
+\alias{MethyGenoSet-class}
+\alias{MethyGenoSet}
+
+\alias{exprs,MethyGenoSet-method}
+\alias{exprs<-,MethyGenoSet-method}
+
+\alias{methylated,MethyGenoSet-method}
+\alias{methylated<-,MethyGenoSet-method}
+
+\alias{unmethylated,MethyGenoSet-method}
+\alias{unmethylated<-,MethyGenoSet-method}
+
+\alias{detection,MethyGenoSet-method}
+\alias{detection<-,MethyGenoSet-method}
+
+\alias{initialize,MethyGenoSet-method}
+\alias{combine,MethyGenoSet,MethyGenoSet-method}
+\alias{[,MethyGenoSet-method}
+\alias{[,MethyGenoSet,ANY,ANY,ANY-method}
+\alias{getHistory,MethyGenoSet-method}
+
+\title{Class MethyGenoSet: contain and describe Illumina Infinium methylation data in GenoSet-class}
+\description{This is a class representation for Illumina Infinium methylation microarray data. It directly extends \code{\link[genoset]{GenoSet}}. The purpose of this class is to make the high-density methylation microarray data \code{\link[methylumi]{MethyLumiM}} compatible with the Biocoductor infrastructure packages designed for sequencing analysis.}
+\section{Extends}{
+   Directly extends class \code{\link[genoset]{GenoSet}}.
+}
+
+\section{Creating Objects}{
+
+  We recommend creating \code{\link{MethyGenoSet}} object by converting from \code{\link[methylumi]{MethyLumiM}} objects using as method. 
+}
+\section{Slots}{
+   \describe{
+   	  \item{\code{locData}:}{a RangedData object, inherited from \code{\link[genoset]{GenoSet}}}
+      \item{\code{assayData}:}{ contains equal dimensional matrices:
+ 		\code{exprs} (contains the methylation M-value, same as \code{\link[methylumi]{MethyLumiM}}),
+ 		\code{methylated} (contains the methylated probe intensities. Same as \code{\link[methylumi]{MethyLumiM}}), 
+ 		\code{unmethylated} (contains the unmethylated probe intensities. Same as \code{\link[methylumi]{MethyLumiM}}),
+ 		\code{detection} (records the detection p-value of the probe. Same as \code{\link[methylumi]{MethyLumiM}}). 
+		For more details of \code{assayData}, please see \code{\link[Biobase]{ExpressionSet}} } 
+      \item{\code{featureData}:}{See \code{\link[Biobase]{eSet}}}
+      \item{\code{phenoData}:}{See \code{\link[Biobase]{eSet}}}
+      \item{\code{experimentData}:}{See \code{\link[Biobase]{eSet}}}
+      \item{\code{protocolData}:}{See \code{\link[Biobase]{eSet}}}
+      \item{\code{annotation}:}{See \code{\link[Biobase]{eSet}}}
+      \item{\code{.__classVersion__}:}{See \code{\link[Biobase]{eSet}}}
+   	  \item{\code{history}:}{ a data.frame recording the operation history of the MethyGenoSet object.}
+   }
+}
+
+\section{Methods}{
+
+  \bold{Class-specific methods:}
+  \describe{
+     \item{\code{exprs(MethyGenoSet)}, \code{exprs(MethyGenoSet,matrix)<-}:}{Access and
+       set elements named \code{exprs} in the \code{AssayData-class} slot.}
+     \item{\code{methylated(MethyGenoSet)}, \code{methylated(MethyGenoSet)<-}:}{Access and
+       set elements named \code{methylated} in the \code{AssayData-class} slot.}
+     \item{\code{unmethylated(MethyGenoSet)}, \code{unjmethylated(MethyGenoSet)<-}:}{Access and
+       set elements named \code{unmethylated} in the \code{AssayData-class} slot.}
+     \item{\code{detection(MethyGenoSet)}, \code{detection(MethyGenoSet)<-}:}{Access and
+       set elements named \code{detection} in the \code{AssayData-class} slot.}
+     \item{\code{getHistory(MethyGenoSet)}:}{Access the operation history of \code{MethyGenoSet} object.}
+  }
+
+   \bold{Derived from \code{\link[genoset]{GenoSet}}}:
+   \describe{
+     \item{\code{locData(MethyGenoSet)}:}{return a RangedData object, which contains the chromosome location information}
+   }
+   
+   \bold{Derived from \code{\link[Biobase]{ExpressionSet}}} (For the directly inherited methods, 
+	 please see \code{\link[Biobase]{ExpressionSet}} and \code{\link[Biobase]{eSet}}):
+   \describe{
+     \item{\code{combine(MethyGenoSet,missing)}:}{Combine two MethyGenoSet objects, including \code{history} slot. See \code{\link[Biobase]{eSet}}}
+	 \item{\code{exprs(MethyGenoSet)}, \code{exprs(MethyGenoSet,matrix)<-}:}{Access and
+	    set elements named \code{exprs} in the \code{AssayData-class} slot.}
+	 \item{\code{object[(i,j)}:}{Conduct subsetting of the data in a MethyGenoSet object }
+   }
+
+   \bold{Standard generic methods} Please check \code{\link[Biobase]{ExpressionSet}} and \code{\link[Biobase]{eSet}} for other inherited methods, 
+
+}
+
+\author{ Pan Du }
+\seealso{\code{\link{boxplot-methods}}, \code{\link{pairs-methods}}, \code{\link{MAplot-methods}}
+}
+\examples{
+## load example data
+
+}
+
+\keyword{classes}

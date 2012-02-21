@@ -24,7 +24,7 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'),
 	hgVersion <- match.arg(hgVersion)
 	# retrieve feature data
 	ff <- fData(methyLumiM)
-	if (is.null(ff$COLORCHANNEL)) {
+	if (is.null(ff$COLOR_CHANNEL)) {
 		if (is.null(lib)) stop("Please provide the annotation library!\n")
 		if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
 		
@@ -544,7 +544,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 	if (!is.matrix(dataMatrix)) dataMatrix <- matrix(dataMatrix, ncol=1)
 	if (is.null(ref)) {
 		# normData <- normalize.quantiles.robust(dataMatrix + 0.0)
-		normData <- normalize.quantiles(dataMatrix + 0.0)
+		normData <- limma::normalizeQuantiles(dataMatrix)
 		ref <- normData[,1]
 	} 
 	if (!is.null(adjData)) {
@@ -585,6 +585,10 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 		} else {
 			adjData.i <- profile.i
 		}
+		## remove possible NAs
+		naInd.i <- is.na(adjData.i)
+		adjData.i <- adjData.i[!naInd.i]
+
 		if (logMode) {
 			mm.i <- min(c(profile.i, adjData.i), na.rm=TRUE)
 			if (mm.i < 1) {
@@ -610,34 +614,55 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 		}
 		
 		## remove outliers points at two ends
-		boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
-		lowInd.i <- selProfile.i < boundary.i[1]
-		highInd.i <- selProfile.i > boundary.i[2]
+		rank.i <- rank(selProfile.i, ties='min')
+		lowInd.i <- rank.i <= 500
+		highInd.i <- rank.i > length(selProfile.i) - 500
+		#boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
+		#lowInd.i <- selProfile.i < boundary.i[1]
+		#highInd.i <- selProfile.i > boundary.i[2]
 		## fit the low segment
 		rlm.i <- rlm(selProfile.i[lowInd.i], y.out.i[lowInd.i])
 		dd.i <- y.out.i[lowInd.i] - rlm.i$fitted.values
-		outlier.ind.low.i <- which(lowInd.i)[which(abs(dd.i) > 5 * sd(dd.i))]
+		outlier.ind.low.i <- which(lowInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
 		## fit the high segment
 		rlm.i <- rlm(selProfile.i[highInd.i], y.out.i[highInd.i])
 		dd.i <- y.out.i[highInd.i] - rlm.i$fitted.values
-		outlier.ind.high.i <- which(highInd.i)[which(abs(dd.i) > 5 * sd(dd.i))]
+		outlier.ind.high.i <- which(highInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
 		outlier.ind.i <- c(outlier.ind.low.i, outlier.ind.high.i)
 		if (length(outlier.ind.i) > 0) {
 			tt <- locpoly(selProfile.i[-outlier.ind.i], y.out.i[-outlier.ind.i], degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)
+			# test <- monoSpline(x=selProfile.i[-outlier.ind.i], y=y.out.i[-outlier.ind.i], newX=adjData.i, nKnots=50, ifPlot=FALSE)
 		} else {
 			tt <- locpoly(selProfile.i, y.out.i, degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)		
 		}
 
 		norm.i <- approx(x=tt$x, y=tt$y, xout=adjData.i, rule=2)$y
-
+		## check the rank difference before and after fitting
+		rank.old.i <- rank(adjData.i, ties='min')
+		rank.new.i <- rank(norm.i, ties='min')
+		rank.fit.i <- rlm(new~old, data.frame(new=rank.new.i, old=rank.old.i))
+		rank.diff.ind.i <- which(abs(rank.fit.i$residuals) > 1)
+		## Add na and infinite indexes
+		rank.diff.ind.i <- unique(c(rank.diff.ind.i, which(is.na(norm.i)), which(is.infinite(norm.i))))
+		if (length(rank.diff.ind.i) > 0) {
+		  rank.na.i <- rank.old.i[rank.diff.ind.i]
+		  replaceVal.i <- NULL
+		  for (rank.na.ij in rank.na.i) {
+		    down.ij <- sort(norm.i[rank.old.i < rank.na.ij & !(rank.old.i %in% rank.na.i)], decreasing=TRUE)[1]
+		    up.ij <- sort(norm.i[rank.old.i > rank.na.ij & !(rank.old.i %in% rank.na.i)], decreasing=FALSE)[1]
+		    replaceVal.i <- c(replaceVal.i, mean(c(up.ij, down.ij), na.rm=TRUE))
+		  }
+		  norm.i[rank.diff.ind.i] <- replaceVal.i
+		}
+		
 		# plot(selProfile.i, y.out.i, pch='.')
 		# lines(tt, col=2)
 		# if (max(norm.i) > 30) browser()
 
 		if (logMode) {
-			normData[,i] <- 2^norm.i
+			normData[!naInd.i,i] <- 2^norm.i
 		} else {
-			normData[,i] <- norm.i
+			normData[!naInd.i,i] <- norm.i
 		}
 	}
 
@@ -807,9 +832,11 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
 		unmethy.grn <- unmethy[allGrnInd, ]
 		x.matrix.red <- rbind(methy.red, unmethy.red)
 		x.matrix.grn <- rbind(methy.grn, unmethy.grn)
-		# Normalize the intensity using robust quantile normalization
-		x.matrix.red <- normalize.quantiles.robust(x.matrix.red + 0.0, ...)
-		x.matrix.grn <- normalize.quantiles.robust(x.matrix.grn + 0.0, ...)
+		# Normalize the intensity using quantile normalization
+		x.matrix.red <- limma::normalizeQuantiles(x.matrix.red, ...)
+		x.matrix.grn <- limma::normalizeQuantiles(x.matrix.grn, ...)
+		# x.matrix.red <- normalize.quantiles.robust(x.matrix.red + 0.0, ...)
+		# x.matrix.grn <- normalize.quantiles.robust(x.matrix.grn + 0.0, ...)
 		len.red <- length(allRedInd)
 		len.grn <- length(allGrnInd)
 		methy.n[allRedInd,] <- x.matrix.red[1:len.red,]
@@ -818,8 +845,9 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
 		unmethy.n[allGrnInd,] <- x.matrix.grn[(len.grn+1):nrow(x.matrix.grn),]
 	} else {
 		x.matrix <- rbind(methy, unmethy)
-		# Normalize the intensity using robust quantile normalization
-		x.matrix <- normalize.quantiles.robust(x.matrix + 0.0, ...)
+		# Normalize the intensity using quantile normalization
+		x.matrix <- limma::normalizeQuantiles(x.matrix, ...)
+		#x.matrix <- normalize.quantiles.robust(x.matrix + 0.0, ...)
 		methy.n <- x.matrix[1:nrow(methy),]
 		unmethy.n <- x.matrix[(nrow(unmethy)+1):nrow(x.matrix),]		
 	}
@@ -1500,7 +1528,7 @@ produceMethylationGEOSubmissionFile <- function(methyLumiM, methyLumiM.raw=NULL,
 ## 3. Estimate theta based on equation
 
 # fittedGamma <- gammaFitEM(M[,1], initialFit=NULL, maxIteration=50, tol=0.0001, plotMode=T, verbose=T)
-gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIteration=50, tol=0.0001, plotMode=FALSE, verbose=FALSE) {
+gammaFitEM <- function(M, initialFit=NULL, fix.k=NULL, weighted=TRUE, maxIteration=50, tol=0.0001, plotMode=FALSE, truncate=FALSE, verbose=FALSE) {
 	
 	fix.theta=NULL
 	eps <- 10^-5
