@@ -28,9 +28,7 @@ Pan Du
 \seealso{
   See Also \code{\link[methylumi]{methylumiR}} and \code{\link{addControlData2methyLumiM}}
 }
-\examples{
 
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{methods}

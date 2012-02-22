@@ -24,9 +24,6 @@ produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping = NULL, fileName = "GEO
 \author{ Pan Du }
 
 \seealso{ \code{\link{produceGEOSubmissionFile}} }
-\examples{
-
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{utilities}

@@ -14,13 +14,9 @@ getControlData(x, type = c('data.frame', 'LumiBatch'), ...)
   \item{type}{ determine the return data type }
   \item{\dots}{ other parameters used by \code{\link{lumiR}} function }
 }
-\details{
-  
-}
 \value{
    By default, it returns a data.frame with first two columns as "controlType" and "ProbeID". The rest columns are the expression amplitudes for individual samples. When type is 'LumiBatch', it returns a LumiBatch object, which basically is the return of lumiR without combining duplicated TargetIDs. As the return is a LumiBatch object, it includes more information, like probe number, detection p-value and standard error of the measurement.
 }
-\references{  }
 \author{ Pan Du }
 \seealso{ \code{\link{addControlData2lumi}} }
 \examples{

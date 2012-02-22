@@ -12,13 +12,9 @@ getControlType(controlData)
 \arguments{
   \item{controlData}{ a LumiBatch object including control data, a control data data.frame, or a MethyLumiQC object for methylation data }
 }
-\details{
-  
-}
 \value{
 	return the unique type of control probe type.
 }
-\references{ }
 \author{ Pan Du }
 
 \seealso{  \code{\link{addControlData2lumi}}, \code{\link[methylumi]{controlTypes}} for methylation data }

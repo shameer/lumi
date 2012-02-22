@@ -27,9 +27,6 @@ Return the methyLumiM object with the controlData added
 \seealso{
 \code{\link{lumiMethyR}}
 }
-\examples{
-
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{methods}

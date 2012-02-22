@@ -36,9 +36,6 @@ Pan Du
 \seealso{
  See Also as \code{\link{m2beta}}
 }
-\examples{
-
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{methods}

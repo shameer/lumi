@@ -13,9 +13,6 @@ To save storage space, we randomly subset 10000 CpG sites among about 27000 meas
 
 }
 
-\references{
-
-}
 \examples{
 data(example.methyTitration)
 sampleNames(example.methyTitration)

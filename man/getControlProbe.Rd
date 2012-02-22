@@ -13,13 +13,9 @@ getControlProbe(controlData, type = NULL)
   \item{controlData}{ a LumiBatch object including control data or a control data data.frame }
   \item{type}{ the type of control probe (case insensitive), which can be get by using \code{\link{getControlType}} function }
 }
-\details{
-  
-}
 \value{
 returns the corresponding probe Ids for the control type.
 }
-\references{  }
 \author{ Pan Du }
 \seealso{  \code{\link{addControlData2lumi}} }
 \examples{

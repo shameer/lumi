@@ -28,9 +28,6 @@ Plot the Illumina Infinium methylation color bias in terms of boxplot. boxplot o
 \value{
 Invisibly return TRUE if plot successfully.
 }
-\references{
-
-}
 \author{
 Pan DU
 }

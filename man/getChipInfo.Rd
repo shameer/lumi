@@ -31,7 +31,6 @@ getChipInfo(x, lib.mapping = NULL, species = c("Human", "Mouse", "Rat", "Unknown
   \item{idMapping}{id mapping information between Illumina ID and nuID}
   When parameter "returnAllMatches" is TRUE, the items of "chipVersion", "IDType", "chipProbeNumber", "inputProbeNumber", "matchedProbeNumber" will be a vector corresponding to the matched manifest files, whose "matchedProbeNumber" is larger than zero, and the "idMapping" will be a matrix with each column corresponding to one matched manifest file. All of the items are sorted from the best match to worst (The higher "matchedProbeNumber" is claimed as better. When the "matchedProbeNumber" is the same, the manifest file with fewer probes is claimed as better.). 
 }
-\references{  }
 \author{Pan Du}
 \seealso{ \code{\link{nuID2IlluminaID}}, \code{\link{IlluminaID2nuID}} }
 \examples{

@@ -18,14 +18,8 @@ lumiMethyB(methyLumiM, method = c("bgAdjust2C", "forcePositive", "none"), separa
   \item{verbose}{a boolean to decide whether to print out some messages }
   \item{\dots}{ other parameters used by corresponding method }
 }
-\details{
-
-}
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after background level adjustment.
-}
-\references{
-
 }
 \author{
 Pan DU

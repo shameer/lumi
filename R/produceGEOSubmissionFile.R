@@ -18,7 +18,7 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 	if (is.null(sampleInfo)) {
 		sampleInfo <- produceGEOSampleInfoTemplate(lumiNormalized, lib.mapping=lib.mapping, fileName=NULL)
 	} else if (length(sampleInfo) == 1 && is.character(sampleInfo)) {
-		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, head=TRUE, strip.white=TRUE, quote='')
+		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, header=TRUE, strip.white=TRUE, quote='')
 	} else if (is.null(nrow(sampleInfo))) {
 		stop('Please provide correct sample information (a data.frame, matrix, or sampleInfo file)!\n')
 	}
@@ -35,7 +35,7 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 		nuID <- NULL
 	} else {
 		if (!is.null(lib.mapping)) {
-			probeId <- nuID2IlluminaID(nuID, lib=lib.mapping, idType=idType, ...)
+			probeId <- nuID2IlluminaID(nuID, lib.mapping=lib.mapping, idType=idType, ...)
 		} else {
 			nuID <- NULL
 		}

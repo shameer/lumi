@@ -16,14 +16,8 @@ normalizeMethylation.quantile(methyLumiM, separateColor = FALSE, ...)
   \item{separateColor}{determine whether separately normalize two color channels}
   \item{\dots}{ other parameters used by normalize.quantiles.robust method }
 }
-\details{
-
-}
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after background level adjustment.
-}
-\references{
-
 }
 \author{
 Pan DU

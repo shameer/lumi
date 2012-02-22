@@ -1,4 +1,5 @@
 import(methods)
+importFrom(BiocGenerics, plot, summary)
 importClassesFrom(Biobase, AnnotatedDataFrame, phenoData, AssayData, eSet, ExpressionSet, Versioned, VersionedBiobase, Versions)
 importMethodsFrom(Biobase, 
 			    annotation, "annotation<-", 
@@ -31,10 +32,11 @@ importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)
 importMethodsFrom(RSQLite, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields)
 importFrom(DBI, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields, dbDriver, dbDataType, dbCommit, dbClearResult, SQLKeywords)
 
+importFrom(AnnotationDbi, as.list)
 importClassesFrom(AnnotationDbi, AnnDbBimap)
-importMethodsFrom(AnnotationDbi, "[", mappedkeys, as.list)
+importMethodsFrom(AnnotationDbi, "[", mappedkeys)
 
-importFrom(graphics, pairs, plot, boxplot, hist, image, lines, matplot, points, abline, axis, par, text)
+importFrom(graphics, pairs, boxplot, hist, image, lines, matplot, points, abline, axis, par, text)
 importFrom(stats, density, heatmap)
 importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)

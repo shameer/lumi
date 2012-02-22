@@ -26,7 +26,4 @@ A data.frame summarizing the intensities of individual samples
 Pan DU
 }
 
-\examples{
-
-}
 \keyword{methods}

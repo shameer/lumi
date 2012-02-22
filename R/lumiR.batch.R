@@ -44,7 +44,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 
 		if (is.character(sampleInfoFile) || class(sampleInfoFile)[1] == 'file') {
 			if (file.exists(sampleInfoFile)) {
-				sampleInfo <- read.table(sampleInfoFile, head=TRUE, sep='\t', colClasses='character', comment='', check.names=FALSE)
+				sampleInfo <- read.table(sampleInfoFile, header=TRUE, sep='\t', colClasses='character', comment.char='', check.names=FALSE)
 			} else {
 				warning('The provided sampleInfoFile does not exist\n!')
 				setwd(oldDir)

@@ -26,15 +26,6 @@ The targetArray can be a column index, a vector or a LumiBatch object with one s
 Return an object with expression values normalized. The class of the return object is the same as the input object x.lumi.
 If it is a LumiBatch object, it also includes the VST transform function and its parameters as attributes: "transformFun", "parameter". See \code{\link{inverseVST}} for details.
 }
-\references{ 
-
-}
 \author{Pan Du, Simon Lin}
-\note{ 
-
-}
 \seealso{ \code{\link{lumiN}}, \code{\link{monoSmu}} }
-\examples{
-
-}
 \keyword{ methods }

@@ -25,8 +25,6 @@ The mapping information from Illumina ID to nuID. It will be a matrix with each 
 }
 \author{Pan Du}
 \seealso{ \code{\link{getChipInfo}}, \code{\link{nuID2IlluminaID}} }
-\examples{
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{methods}

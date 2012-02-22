@@ -24,9 +24,6 @@ Beta-value is ratio between Illumina methylated probe intensity and total probe 
 \value{
 An ExpressionSet or matrix object of methylation Beta-value
 }
-\references{
-
-}
 \author{
 Pan DU
 }

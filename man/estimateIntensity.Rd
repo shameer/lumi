@@ -21,9 +21,6 @@ estimateIntensity(methyLumiM, returnType=c("ExpressionSet", "matrix"))
 \value{
 An ExpressionSet or matrix object of methylation Intensity-value
 }
-\references{
-
-}
 \author{
 Pan DU
 }

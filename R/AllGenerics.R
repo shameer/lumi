@@ -17,6 +17,5 @@ setGeneric("detection<-", function(object, value) standardGeneric("detection<-")
 setGeneric("getHistory", function(object) standardGeneric("getHistory"))
 
 
-if (is.null(getGeneric("summary"))) setGeneric("summary", function(object, ...) standardGeneric("summary"))
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))

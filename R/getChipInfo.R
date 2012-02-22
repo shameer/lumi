@@ -64,7 +64,7 @@ function(x, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), chi
 				'Human'='lumiHumanIDMapping',
 				'Mouse'='lumiMouseIDMapping')			
 		}		
-		if(!require(lib.mapping, character=TRUE)) stop(paste(lib.mapping, 'is required!'))
+		if(!require(lib.mapping, character.only=TRUE)) stop(paste(lib.mapping, 'is required!'))
 		# dbconn <- sub("\\.db", "_dbconn", lib.mapping)
 		dbconn <- paste(lib.mapping, "_dbconn", sep="")
 		conn <- do.call(dbconn, list())

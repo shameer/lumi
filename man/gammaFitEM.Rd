@@ -38,9 +38,7 @@ The return is a list with "gammaFit" class attribute, which includes the followi
  \item{mode}{the mode positions of the gamma distributions}
  \item{probability}{the estimated methylation status posterior probability of each CpG site}
 }
-\references{
 
-}
 \author{ Pan Du }
 
 \seealso{

@@ -22,11 +22,8 @@ Function internally called by monoSmu
 \value{
 return the transformed "newX" based on the smoothed curve
 }
-\references{ }
 \author{ Simon Lin, Pan Du }
 
 \seealso{ \code{\link{monoSmu}}  }
-\examples{
 
-}
 \keyword{ methods }

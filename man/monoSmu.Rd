@@ -33,7 +33,5 @@ Lin, S.M., Du, P., Kibbe, W.A., (2008) 'Model-based  Variance-stabilizing Transf
 \author{ Simon Lin, Pan Du }
 
 \seealso{ \code{\link{monoSpline}}  }
-\examples{
 
-}
 \keyword{ methods }

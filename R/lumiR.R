@@ -118,7 +118,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			if (length(ind) > 0) {
 				if (version == 2) {
 					normalization <- strsplit(info, split='=')[[ind]][2]
-					normalization <- gsub(pattern=" |,", replace="", normalization) # remove space or ","
+					normalization <- gsub(pattern=" |,", replacement="", normalization) # remove space or ","
 				} else {
 					normalization <- strsplit(info, split=sep)[[ind]][2]
 				}

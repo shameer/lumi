@@ -26,10 +26,6 @@ The default settings of this function are the same as used Genomstudio (Illumina
 \value{
 Return an object with expression values normalized. The class of the return object is the same as the input object x.lumi.
 }
-\references{ }
 \author{ Arno Velds (contact: a.velds (at) nki.nl) }
 \seealso{ \code{\link{lumiN}} }
-\examples{
-
-}
 \keyword{ methods }

@@ -31,10 +31,3 @@ Maintainer: Pan Du <dupan@northwestern.edu>
 
 }
 \keyword{ package }
-
-\seealso{
-
-}
-\examples{
-
-}

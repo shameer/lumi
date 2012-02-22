@@ -24,8 +24,6 @@ In the case the negative control data is not available, the background will be e
 \value{
 a vector of estimated background levels for individual samples.
 }
-\references{
-}
 \author{
 Pan DU
 }

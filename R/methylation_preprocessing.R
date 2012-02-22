@@ -26,7 +26,7 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'),
 	ff <- fData(methyLumiM)
 	if (is.null(ff$COLOR_CHANNEL)) {
 		if (is.null(lib)) stop("Please provide the annotation library!\n")
-		if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+		if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
 		
 		obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
 		colorInfo <- as.list(obj[mappedkeys(obj)])
@@ -49,7 +49,7 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'),
 				warning("Please provide the annotation library!\n")
 				return(methyLumiM)
 			}
-			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+			if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
 		
 			obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
 			chr <- as.list(obj[mappedkeys(obj)])
@@ -71,7 +71,7 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'),
 				warning("Please provide the annotation library!\n")
 				return(methyLumiM)
 			}
-			if (!require(lib, character=TRUE)) stop(paste(lib, "is not available!\n"))
+			if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
 		
 			obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
 			chr <- as.list(obj[mappedkeys(obj)])
@@ -614,7 +614,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 		}
 		
 		## remove outliers points at two ends
-		rank.i <- rank(selProfile.i, ties='min')
+		rank.i <- rank(selProfile.i, ties.method='min')
 		lowInd.i <- rank.i <= 500
 		highInd.i <- rank.i > length(selProfile.i) - 500
 		#boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
@@ -638,8 +638,8 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 
 		norm.i <- approx(x=tt$x, y=tt$y, xout=adjData.i, rule=2)$y
 		## check the rank difference before and after fitting
-		rank.old.i <- rank(adjData.i, ties='min')
-		rank.new.i <- rank(norm.i, ties='min')
+		rank.old.i <- rank(adjData.i, ties.method='min')
+		rank.new.i <- rank(norm.i, ties.method='min')
 		rank.fit.i <- rlm(new~old, data.frame(new=rank.new.i, old=rank.old.i))
 		rank.diff.ind.i <- which(abs(rank.fit.i$residuals) > 1)
 		## Add na and infinite indexes
@@ -1441,7 +1441,7 @@ produceMethylationGEOSubmissionFile <- function(methyLumiM, methyLumiM.raw=NULL,
 	if (is.null(sampleInfo)) {
 		sampleInfo <- produceGEOSampleInfoTemplate(methyLumiM, lib.mapping=lib.mapping, fileName=NULL)
 	} else if (length(sampleInfo) == 1 && is.character(sampleInfo)) {
-		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, head=TRUE, strip.white=TRUE, quote='')
+		sampleInfo <- read.table(sampleInfo, sep='\t', colClasses='character', skip=1, header=TRUE, strip.white=TRUE, quote='')
 	} else if (is.null(nrow(sampleInfo))) {
 		stop('Please provide correct sample information (a data.frame, matrix, or sampleInfo file)!\n')
 	}

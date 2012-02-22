@@ -23,9 +23,6 @@ The estimation of background level of Infinium methylaton microarray is based on
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after background level adjustment. The estimated background level was kept in the attribute, "EstimatedBG", of the returned methyLumiM object.
 }
-\references{
-
-}
 \author{
 Pan DU
 }

@@ -15,15 +15,11 @@ normalizeMethylation.ssn(methyLumiM, separateColor = FALSE)
   \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
   \item{separateColor}{determine whether separately normalize two color channels}
 }
-\details{
 
-}
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after background level adjustment.
 }
-\references{
 
-}
 \author{
 Pan DU
 }

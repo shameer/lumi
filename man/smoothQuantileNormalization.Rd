@@ -20,14 +20,8 @@ smoothQuantileNormalization(dataMatrix, ref = NULL, adjData=NULL, logMode = TRUE
   \item{degree}{ a parameter used by \code{\link[KernSmooth]{locpoly}} }
   \item{\dots}{other parameters used by \code{\link[KernSmooth]{locpoly}} }
 }
-\details{
-
-}
 \value{
 a data matrix with intensity normalized.
-}
-\references{
-
 }
 \author{
 Pan DU
@@ -35,9 +29,6 @@ Pan DU
 
 \seealso{
  See Also \code{\link{adjColorBias.quantile}}
-}
-\examples{
-
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

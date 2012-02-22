@@ -16,10 +16,6 @@ plotVST(x, transFun = NULL, plotRange = NULL, addLegend = TRUE, ...)
   \item{addLegend}{ add legend or not }
   \item{\dots}{ other parameter used by \code{\link[graphics]{plot}} function  }
 }
-\details{
-  
-
-}
 \value{
 invisibly return the untransformed and transformed values.
 }

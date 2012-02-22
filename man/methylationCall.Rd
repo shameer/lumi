@@ -22,9 +22,7 @@ methylationCall(x, threshold = 0.95, ...)
 \value{
 A vector of three methylation status: "Unmethy" (unmethylation posterior probability > unmethylation threshold), "Methy" (methylation posterior probability > methylation threshold), or "Margin". The sum of unmethylation posterior probability and methylation posterior probability equals one. The methylation probability is returned as an attribute of "probability".
 }
-\references{
 
-}
 \author{ Pan DU }
 
 \seealso{

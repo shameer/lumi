@@ -13,9 +13,6 @@ To save storage space, we randomly subset 5000 CpG sites among about 27000 measu
 
 }
 
-\references{
-
-}
 \examples{
 data(example.lumiMethy)
 sampleNames(example.lumiMethy)

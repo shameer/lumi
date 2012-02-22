@@ -29,9 +29,6 @@ The function basically plots the probe intensities in 2-dimension (methylated vs
 \value{
 Invisibly return TRUE if plot successfully.
 }
-\references{
-
-}
 \author{
 Pan DU
 }

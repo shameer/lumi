@@ -25,9 +25,6 @@ The basic idea of color bias adjustment is to treat it as the normalization betw
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after color bias adjustment.
 }
-\references{
-
-}
 \author{
 Pan DU
 }

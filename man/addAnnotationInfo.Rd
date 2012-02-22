@@ -14,10 +14,6 @@ addAnnotationInfo(methyLumiM, lib = NULL, hgVersion=c('hg19', 'hg18'), annotatio
   \item{hgVersion}{version of human genome}
   \item{annotationColumn}{only include 'COLOR_CHANNEL', 'CHROMOSOME' and 'POSITION' information}
 }
-\details{
-
-
-}
 \value{
 return the MethyLumiM object with COLOR_CHANNEL, CHROMOSOME and chromome POSITION information added to the featureData.
 }

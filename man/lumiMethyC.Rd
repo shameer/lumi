@@ -23,9 +23,7 @@ lumiMethyC(methyLumiM, method = c("quantile", "ssn", "none"), verbose = TRUE, ..
 \value{
 Return an object (same class as input methyLumiM) with updated "methylated" and "unmethylated" data matrix after background level adjustment.
 }
-\references{
 
-}
 \author{
 Pan DU
 }

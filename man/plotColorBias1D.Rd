@@ -26,9 +26,6 @@ Plot the color bias density plot of Illumina Infinium Methylation data. There ar
 \value{
 Invisibly return TRUE if plot successfully.
 }
-\references{
-
-}
 \author{
 Pan DU
 }

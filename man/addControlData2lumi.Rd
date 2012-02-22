@@ -19,7 +19,6 @@ addControlData2lumi(controlData, x.lumi)
 \value{
 Return the LumiBatch object with controlData slot filled.
 }
-\references{  }
 \author{ Pan Du }
 
 \seealso{  \code{\link{getControlData}}, \code{\link{plotControlData}} }

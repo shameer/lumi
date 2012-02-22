@@ -25,10 +25,6 @@ ssn(x.lumi, targetArray = NULL, scaling = TRUE, bgMethod=c('density', 'mean', 'm
 \value{
 Return an object with expression values normalized. The class of the return object is the same as the input object x.lumi.
 }
-\references{ }
 \author{ Pan Du, Simon Lin }
 \seealso{ \code{\link{lumiN}} }
-\examples{
-
-}
 \keyword{ methods }

@@ -17,13 +17,9 @@ plotHousekeepingGene(controlData, lib = NULL, slideIndex = NULL, addLegend = TRU
   \item{logMode}{ whether show the data in log2 scale  }
   \item{\dots}{ other parameters used by default matplot function }
 }
-\details{
-  
-}
 \value{
 	plot the picture and return TRUE if everything is OK
 }
-\references{  }
 \author{ Pan Du }
 \seealso{ \code{\link{addControlData2lumi}}, \code{\link{plotControlData}} }
 

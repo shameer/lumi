@@ -28,9 +28,6 @@ plotGammaFit(x, gammaFit = NULL, k = NULL, theta = NULL, shift = NULL, proportio
 \value{
 Invisibly return TRUE if the plot is successful.
 }
-\references{
-
-}
 \author{ Pan DU }
 
 \seealso{

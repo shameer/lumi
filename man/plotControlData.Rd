@@ -24,7 +24,6 @@ For methylation data, the red and green channels will be plotted respectively in
 \value{
 	plot the picture and invisibly return TRUE if everything is OK
 }
-\references{  }
 \author{ Pan Du }
 \seealso{ \code{\link{addControlData2lumi}} and \code{\link{addControlData2methyLumiM}}  }
 \examples{
