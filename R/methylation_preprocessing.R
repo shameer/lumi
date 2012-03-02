@@ -1,3 +1,5 @@
+setMethod("getHistory",signature(object="MethyLumiM"), function(object) object@history)
+
 lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 	methyLumiSet <- methylumiR(...)
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
