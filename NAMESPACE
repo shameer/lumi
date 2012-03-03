@@ -1,5 +1,5 @@
 import(methods)
-importFrom(BiocGenerics, plot, summary)
+importFrom(stats4, plot, summary)
 importClassesFrom(Biobase, AnnotatedDataFrame, phenoData, AssayData, eSet, ExpressionSet, Versioned, VersionedBiobase, Versions)
 importMethodsFrom(Biobase, 
 			    annotation, "annotation<-", 
