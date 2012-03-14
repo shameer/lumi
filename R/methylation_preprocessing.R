@@ -1,5 +1,3 @@
-setMethod("getHistory",signature(object="MethyLumiM"), function(object) object@history)
-
 lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 	methyLumiSet <- methylumiR(...)
 	methyLumiM <- as(methyLumiSet, "MethyLumiM")
@@ -1896,5 +1894,276 @@ lumiMethyStatus <- function(methyLumiM, ...)
 	
 	attr(M.status, "probability") <- M.prob	
 	return(M.status)
+}
+
+
+## Get chromosome information of a MethyLumiM or MethyGenoSet object
+# chrInfo <- getChrInfo(methyLumiM, lib=lib)
+getChrInfo <- function(methyData, lib='IlluminaHumanMethylation450k.db', chrInfoColumn=c('CHROMOSOME', 'POSITION'), hgVersion=c('hg18', 'hg19'), as.GRanges=FALSE) {
+	
+	hgVersion <- match.arg(hgVersion)
+	ff <- data.frame()
+	if (class(methyData) == 'MethyLumiM') {
+		# retrieve feature data
+		ff <- fData(methyData)
+		if (hgVersion == 'hg18') {
+			if (all(c('CHROMOSOME_36', 'COORDINATE_36') %in% names(ff))) {
+				ff$CHROMOSOME <- as.character(ff$CHROMOSOME_36)
+				ff$POSITION <- as.numeric(as.character(ff$COORDINATE_36))
+			}
+		} else {
+			if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
+				ff$CHROMOSOME <- as.character(ff$CHR)
+				ff$POSITION <- as.numeric(as.character(ff$MAPINFO))
+			}
+		}
+		probeList <- featureNames(methyData)
+	} else if (class(methyData) == 'MethyGenoSet') {
+	  ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData))
+	  probeList <- featureNames(methyData)
+	} else {
+		if (is.character(methyData)) {
+			probeList <- methyData
+		} else {
+			stop('methyData should be a MethyLumiM object or a character vector')
+		}
+	}
+	if (is.null(ff$CHROMOSOME)) { 
+		if (nrow(ff) == 0) ff <- data.frame(CHROMOSOME=rep('', length(probeList)), POSITION=rep(0, length(probeList)))
+		
+		if (hgVersion == 'hg18') {
+			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
+			chr <- mget(probeList, obj)
+			#chr <- as.list(obj[mappedkeys(obj)])
+			#chr <- chr[probeList]
+			ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CPG36", sep=""))
+			loc <- mget(probeList, obj)
+			#loc <- as.list(obj[mappedkeys(obj)])
+			#loc <- loc[probeList]
+			ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+		} else {
+			if (is.null(lib)) stop("Please provide the annotation library!\n")
+			if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
+			chr <- mget(probeList, obj)
+			#chr <- as.list(obj[mappedkeys(obj)])
+			#chr <- chr[probeList]
+			ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+		
+			obj <- get(paste(sub("\\.db$", "", lib), "CPG37", sep=""))
+			loc <- mget(probeList, obj)
+			#loc <- as.list(obj[mappedkeys(obj)])
+			#loc <- loc[probeList]
+			ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+		}
+	}
+	if (as.GRanges) {
+	  chr <- ff$CHROMOSOME
+	  if (length(grep('^chr', chr[1])) == 0) chr <- paste('chr', chr, sep='')
+      chrInfo = GRanges(seqnames=chr,   
+         ranges=IRanges(start=ff$POSITION, 
+         end=ff$POSITION), strand='*', PROBEID=probeList)	
+	} else {
+		chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])	
+	}
+
+	return(chrInfo)
+}
+
+
+## convert MethyLumiM class object to GenoSet class object
+MethyLumiM2GenoSet <- function(methyLumiM, lib=NULL, hgVersion='hg19') {
+  methyLumiM <- addAnnotationInfo(methyLumiM, lib=lib, hgVersion=hgVersion)
+  ff <- fData(methyLumiM)
+  ## remove those without chromosome location
+  rmInd <- which(is.na(ff$CHROMOSOME) | ff$CHROMOSOME == '')
+  if (length(rmInd) > 0) {
+    ff <- ff[-rmInd,]
+    methyLumiM <- methyLumiM[-rmInd,]
+  }
+  if (length(grep('^chr', ff$CHROMOSOME)) == 0) {
+    ff$CHROMOSOME <- paste('chr', ff$CHROMOSOME, sep='')
+  }
+  
+  ## create RangedData for location information
+  locData <- RangedData(ranges=IRanges(start=ff$POSITION, width=1, names=featureNames(methyLumiM)), space=ff$CHROMOSOME, universe=hgVersion)
+  genoset <- GenoSet(
+    locData=locData,
+    exprs=exprs(methyLumiM),
+    methylated=methylated(methyLumiM),
+    unmethylated=unmethylated(methyLumiM),
+    pData=pData(methyLumiM),
+    annotation=as.character(lib))
+  
+  return(genoset)
+}
+
+
+##
+smoothMethyData <- function(methyData, winSize=250, lib='IlluminaHumanMethylation450k.db', asDataFrame=FALSE, ...) {
+
+  if (class(methyData) == 'MethyLumiM' || class(methyData) == 'MethyGenoSet') {
+    chrInfo <- getChrInfo(methyData, lib=lib)
+    ratioData <- as.data.frame(exprs(methyData))
+  } else if (is.data.frame(methyData)) {
+    if (!all(c("PROBEID","CHROMOSOME","POSITION") %in% names(methyData)))
+      stop(" PROBEID, CHROMOSOME and POSITION are required columns in the methyData data.frame!")
+  
+    chrInfo <- methyData[, c("PROBEID","CHROMOSOME","POSITION")]
+    ratioData <- methyData[, -c(1:3)]
+  } else 
+    stop("methyData should be a MethyLumiM, MethyGenoSet or data.frame object!")
+
+  if (is.character(chrInfo$POSITION)) chrInfo$POSITION = as.numeric(chrInfo$POSITION)
+  # remove those probes lack of position information
+  rmInd <- which(is.na(chrInfo$POSITION) | chrInfo$CHROMOSOME == '')
+  if (length(rmInd) > 0)  {
+  	ratioData <- ratioData[-rmInd,]
+  	chrInfo <- chrInfo[-rmInd,]
+  }
+  
+  # Sort the ratioData by chromosome and location
+  ord <- order(chrInfo$CHROMOSOME, chrInfo$POSITION, decreasing=FALSE)
+  ratioData <- ratioData[ord,]
+  chrInfo <- chrInfo[ord,]
+  
+  # split data by Chromosome 
+  ratioData.chrList <- split(ratioData, chrInfo$CHROMOSOME)
+  chrInfoList <- split(chrInfo, chrInfo$CHROMOSOME)
+  windowIndex <- vector(mode='list', length=length(chrInfoList))
+  windowRange <- vector(mode='list', length=length(chrInfoList))
+  smooth.ratioData <- lapply(seq(ratioData.chrList), function(i) {
+ 
+    ratioData.i <- as.matrix(ratioData.chrList[[i]])
+    chrInfo.i <- chrInfoList[[i]]
+    chr.i <- chrInfo.i$CHROMOSOME[1]
+    cat(paste("Smoothing Chromosome", chr.i, "...\n"))
+
+    # return the index of sorted probes in each slide window
+    windowIndex.i <- eval(call(".setupSlidingTests", pos_data=chrInfo.i$POSITION, winSize=winSize))
+    names(windowIndex.i) <- chrInfoList[[i]]$PROBEID
+    smooth.ratio.i <- sapply(windowIndex.i, function(ind) {
+      # average the values in slide window and perform test
+      smooth.ij <- colMeans(ratioData.i[ind,,drop=FALSE])
+      return(smooth.ij)
+    })
+    smooth.ratio.i <- t(smooth.ratio.i) 
+    windowIndex[[i]] <<- windowIndex.i
+    windowRange.i <- sapply(windowIndex.i, function(ind) {
+      # average the values in slide window and perform test
+      range.ij <- range(chrInfo.i$POSITION[ind])
+      return(range.ij)
+    })
+    windowRange[[i]] <<- t(windowRange.i)
+    cat("\n")
+    return(smooth.ratio.i)  
+  })
+  smooth.ratioData <- do.call('rbind', smooth.ratioData)
+  windowRange <- do.call('rbind', windowRange)
+  colnames(windowRange) <- c('startLocation', 'endLocation')
+  
+  if (asDataFrame) {
+    methyData <- data.frame(chrInfo, smooth.ratioData)
+  } else {
+    if (class(methyData) == 'MethyLumiM') {
+      methyData <- methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)]
+	  exprs(methyData) <- smooth.ratioData
+    } else {
+	  methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)] <- smooth.ratioData
+    }
+  }
+  attr(methyData, 'windowIndex') <- windowIndex
+  attr(methyData, 'windowRange') <- windowRange
+  return(methyData)
+}
+
+
+export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), exportValue=c('beta', 'M'), savePrefix=NULL) {
+  
+  exportValue <- match.arg(exportValue)
+  file.format <- match.arg(file.format)
+  ## get the annotation version
+  hgVersion <- universe(methyGenoSet)
+  
+  chr <- space(methyGenoSet)
+  start <- start(methyGenoSet)
+  ## Sort the rows of ratios.obj
+  methyGenoSet <- methyGenoSet[order(chr, start),]
+    
+  ## check overlap probes and average them
+  locationID <- paste(chr, start, sep='_')
+  dupInd <- which(duplicated(locationID))
+  if (length(dupInd) > 0) {
+    dupID <- unique(locationID[dupInd])
+    for (dupID.i in dupID) {
+      selInd.i <- which(locationID == dupID.i)
+      exprs(methyGenoSet)[selInd.i[1],] <- colMeans(exprs(methyGenoSet)[selInd.i,], na.rm=T)
+    }
+    methyGenoSet <- methyGenoSet[-dupInd,]
+  }
+  ## attach chr prefix in the chromosome names if it does not include it
+  if (length(grep('^chr', chr)) == 0) {
+    names(locData(methyGenoSet)) <- paste('chr', names(locData(methyGenoSet)), sep='')
+  } 
+  
+  methyData <- assayDataElement(methyGenoSet, 'exprs')
+  if (exportValue == 'beta') {
+    methyData <- m2beta(methyData) # - 0.5
+  } 
+  
+  if (file.format == 'gct') {
+    chrInfo <- data.frame(PROBEID=featureNames(methyGenoSet), CHROMOSOME=space(methyGenoSet), START=start(methyGenoSet), END=end(methyGenoSet),  stringsAsFactors=FALSE)
+
+    # remove those probes lack of position information
+    rmInd <- which(is.na(chrInfo$POSITION))
+    if (length(rmInd) > 0)  {
+      chrInfo <- chrInfo[-rmInd,]
+      methyData <- methyData[-rmInd,]
+    }
+    
+    description <- with(chrInfo, paste("|@", CHROMOSOME, ":", START, "-", END, "|", sep=""))
+    gct <- cbind(Name=chrInfo[,'PROBEID'], Description=description, methyData)
+    
+    ## check version hgVersion is included in the filename
+   	filename <- paste(savePrefix, "_", exportValue, "_", hgVersion, ".gct", sep='')
+    
+    cat("#1.2\n", file=filename)
+    cat(paste(dim(gct), collapse='\t', sep=''), "\n", file=filename, append=TRUE)
+    write.table(gct, sep="\t", file=filename, row.names=FALSE, append=TRUE)
+    return(invisible(filename))
+  } else if (file.format == 'bw') {
+    samplenames <- sampleNames(methyGenoSet)
+    pdata <- pData(methyGenoSet)
+    if ('SAMID' %in% names(pdata)) {
+      samid <- pdata[,'samid']
+    } else {
+      samid <- NULL
+    }
+    chr.info <- chrInfo(methyGenoSet)
+    seq.lengths <- chr.info[,"stop"] - chr.info[,"offset"]
+    for (i in 1:ncol(methyData)) {    
+      score.i <- methyData[,i]
+      cn.data.i <- RangedData(ranges=IRanges(start=start(methyGenoSet),end=end(methyGenoSet)), space=space(methyGenoSet), score=score.i, universe=universe(methyGenoSet))
+      cn.data.i <- cn.data.i[!is.na(score.i), ]
+      if (savePrefix == '' || is.null(savePrefix)) {
+        savePrefix.i <- samplenames[i]
+      } else {
+        savePrefix.i <- paste(savePrefix, samplenames[i], sep='_')
+      }
+      if (!is.null(samid)) savePrefix.i <- paste(savePrefix.i, samid[i], sep='_')
+      
+      filename.i <- paste(savePrefix.i, "_", exportValue, "_", hgVersion, ".bw", sep='')
+      # export.bw(cn.data.i, filename.i, dataFormat="auto", seqlengths=seq.lengths)
+      export.bw(cn.data.i, filename.i, dataFormat="auto")
+    }
+    return(invisible(TRUE))
+  }
+  
 }
 

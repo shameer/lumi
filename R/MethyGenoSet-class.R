@@ -1,5 +1,5 @@
 ## ---------------------------------------------------------------
-## define a new class lumiMethyM
+## define a new class MethyGenoSet
 setClass('MethyGenoSet', 
 	representation(history='data.frame'), 
 	prototype=list(history=data.frame(

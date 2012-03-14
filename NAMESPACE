@@ -20,8 +20,13 @@ importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethyl
  "controlData", "controlData<-", detection, "detection<-")
 importFrom(methylumi, methylumiR, controlTypes)
 
+# GenoSet related classes and functions
 importClassesFrom(genoset, GenoSet)
-
+importClassesFrom(IRanges, IRanges, RangedData)
+importClassesFrom(GenomicRanges, GRanges)
+importMethodsFrom(IRanges, space, start, end, width, universe)
+importMethodsFrom(genoset, locData, "locData<-")
+importFrom(rtracklayer, export.bw)
 
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(KernSmooth, locpoly)
@@ -57,6 +62,8 @@ estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lu
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
 # methylation status estimation function
 lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit
+# MethyGenoSet related functions
+# MethyLumiM2GenoSet, export.methyGenoSet, getChrInfo
 )
 
 

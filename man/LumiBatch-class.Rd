@@ -8,16 +8,19 @@
 \alias{se.exprs<-}
 \alias{se.exprs,ExpressionSet-method}
 \alias{se.exprs<-,ExpressionSet-method}
+\alias{se.exprs<-,ExpressionSet,ANY-method}
 
 \alias{beadNum}
 \alias{beadNum<-}
 \alias{beadNum,ExpressionSet-method}
 \alias{beadNum<-,ExpressionSet-method}
+\alias{beadNum<-,ExpressionSet,ANY-method}
 
 \alias{detection}
 \alias{detection<-}
 \alias{detection,ExpressionSet-method}
 \alias{detection<-,ExpressionSet-method}
+\alias{detection<-,ExpressionSet,ANY-method}
 
 \alias{controlData}
 \alias{controlData<-}

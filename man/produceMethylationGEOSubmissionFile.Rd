@@ -6,7 +6,7 @@
 Produce GEO Sample Submission File in the SOFT format based on the provided MethyLumiM object and sample information
 }
 \usage{
-produceMethylationGEOSubmissionFile(methyLumiM, methyLumiM.raw = NULL, lib.mapping = NULL, idType = "Probe", sampleInfo = NULL, fileName = "GEOSubmissionFile.txt", supplementaryRdata = TRUE, ...)
+produceMethylationGEOSubmissionFile(methyLumiM, methyLumiM.raw = NULL, lib.mapping = NULL, idType = "Probe", sampleInfo = NULL, fileName = "GEOSubmissionFile.txt", supplementaryRdata = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

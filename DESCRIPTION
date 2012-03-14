@@ -4,7 +4,7 @@ Title: BeadArray Specific Methods for Illumina Methylation and Expression Microa
 Version: 2.7.6
 Date: 2012-03-02
 Depends: R (>= 2.10), methylumi (>= 1.7.4), Biobase (>= 2.5.5), nleqslv
-Imports: affy (>= 1.23.4), methylumi, genoset, annotate, Biobase (>= 2.5.5), mgcv (>= 1.4-0), hdrcde,  KernSmooth, preprocessCore, RSQLite, DBI, AnnotationDbi, MASS, graphics, stats, stats4, methods
+Imports: affy (>= 1.23.4), methylumi, genoset, GenomicRanges, IRanges, rtracklayer, annotate, Biobase (>= 2.5.5), mgcv (>= 1.4-0), hdrcde,  KernSmooth, preprocessCore, RSQLite, DBI, AnnotationDbi, MASS, graphics, stats, stats4, methods
 Suggests: beadarray, limma, vsn, lumiBarnes, lumiHumanAll.db, lumiHumanIDMapping, genefilter, RColorBrewer
 Author: Pan Du, Gang Feng, Warren Kibbe, Simon Lin
 Maintainer: Pan Du <dupan.mail@gmail.com>
