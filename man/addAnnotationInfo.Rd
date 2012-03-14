@@ -5,13 +5,12 @@
 Add probe color channel and basic annotation information based on the annotation library of Illumina methylation microarray
 }
 \usage{
-addAnnotationInfo(methyLumiM, lib = NULL, hgVersion=c('hg19', 'hg18'), annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'))
+addAnnotationInfo(methyLumiM, lib = NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
-  \item{lib}{Annotation library of Illumina methylation microarray}
-  \item{hgVersion}{version of human genome}
+  \item{lib}{Annotation library of Illumina methylation microarray. For example, "IlluminaHumanMethylation27k.db" for 27k array, "IlluminaHumanMethylation450k.db" for 450k infinium array }
   \item{annotationColumn}{only include 'COLOR_CHANNEL', 'CHROMOSOME' and 'POSITION' information}
 }
 \value{

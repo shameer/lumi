@@ -64,8 +64,9 @@ addAnnotationInfo, addControlData2methyLumiM, adjColorBias.quantile, adjColorBia
 estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
 # methylation status estimation function
-lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit
+lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit,
 # MethyGenoSet related functions
+MethyGenoSet
 # MethyLumiM2GenoSet, export.methyGenoSet, getChrInfo
 )
 

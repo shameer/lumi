@@ -33,8 +33,14 @@
 }
 
 \section{Creating Objects}{
-
-  We recommend creating \code{\link{MethyGenoSet}} object by converting from \code{\link[methylumi]{MethyLumiM-class}} objects using as method. 
+  MethyGenoSet(locData, exprs, methylated, unmethylated, detection = NULL, 
+    pData = NULL, annotation = "", universe = NULL, ...) 
+    
+  \code{MethyGenoSet} instances are usually created through converting from MethyLumiM object 
+  using MethyLumiM2GenoSet function or calling \code{MethyGenoSet} function as shown above. The arguments, 
+  locData, exprs, methylated and unmethylated, are required; others can be 
+  missing. Please check \code{\link[genoset]{GenoSet}} for more details of other parameters.
+    
 }
 \section{Slots}{
    \describe{

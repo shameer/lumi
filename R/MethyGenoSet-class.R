@@ -11,30 +11,35 @@ setClass('MethyGenoSet',
 	contains='GenoSet')
 
 #
-setMethod('initialize', 'MethyGenoSet', function(.Object, 
-	locData = new('RangedData'),
-	exprs = new('matrix'),
-	methylated = new('matrix'),		
-	unmethylated = new('matrix'),
-	detection = new('matrix'),  # detection pvalues
-    ...,
-    assayData)
-{
-	if (missing(assayData)) {
-		cmd <- 'assayData <- assayDataNew(exprs=exprs, methylated=methylated, unmethylated=unmethylated'
-		nSample <- ncol(exprs)
-
-		if (ncol(detection) == nSample) {
-		  cmd <- paste(cmd, ', detection=detection')
-		}
-
-		cmd <- paste(cmd, ')')
-		eval(parse(text=cmd))
-	} else if (!missing(exprs)) 
-		stop("only one of 'assayData' or ('exprs', 'methylated' and 'unmethylated') allowed")
-
-	# callNextMethod(.Object, locData=locData, assayData=assayData, ...)
-})
+# setMethod('initialize', 'MethyGenoSet', function(.Object, 
+# 	locData = new('RangedData'),
+# 	exprs = new('matrix'),
+# 	methylated = new('matrix'),		
+# 	unmethylated = new('matrix'),
+# 	detection = new('matrix'),  # detection pvalues
+#     ..., assayData)
+# {
+# 	if (missing(assayData)) {
+# 		cmd <- 'assayData <- assayDataNew(exprs=exprs, methylated=methylated, unmethylated=unmethylated'
+# 		nSample <- ncol(exprs)
+# 
+# 		if (ncol(detection) == nSample) {
+# 		  cmd <- paste(cmd, ', detection=detection')
+# 		}
+# 
+# 		cmd <- paste(cmd, ')')
+# 		eval(parse(text=cmd))
+# 	} else if (!missing(exprs)) 
+# 		stop("only one of 'assayData' or ('exprs', 'methylated' and 'unmethylated') allowed")
+#   
+#    methyGenoSet <- genoset:::initGenoSet('MethyGenoSet', locData=locData, exprs=exprs, methylated=methylated, 
+#   	  unmethylated=unmethylated, detection=detection, ...)
+#   
+#   # callNextMethod(.Object, assayData=assayData, ...)
+#   # validObject(methyGenoSet)
+#   
+#   return(methyGenoSet)
+# })
 
 
 setValidity("MethyGenoSet", function(object) 
@@ -46,6 +51,15 @@ setValidity("MethyGenoSet", function(object)
     if (is.null(msg)) TRUE else msg
 })
 
+
+MethyGenoSet <- function(locData, exprs, methylated, unmethylated, detection=NULL, pData=NULL, annotation="", universe=NULL, ...) {
+  if (is.null(detection)) {
+    object <- genoset:::initGenoSet(type="MethyGenoSet", locData=locData, pData=pData, annotation=annotation, universe=universe, exprs=exprs, methylated=methylated, unmethylated=unmethylated, ...)
+  } else {
+    object <- genoset:::initGenoSet(type="MethyGenoSet", locData=locData, pData=pData, annotation=annotation, universe=universe, exprs=exprs, methylated=methylated, unmethylated=unmethylated, detection=detection, ...)
+  }
+  return(object)
+}
 
 # setAs("eSet", "MethyGenoSet", function(from) {
 # 
