@@ -20,6 +20,10 @@
 \alias{detection<-,MethyGenoSet-method}
 \alias{detection<-,MethyGenoSet,ANY-method}
 
+\alias{coerce,MethyLumiM,MethyGenoSet-method}
+\alias{coerce,MethyGenoSet,MethyLumiM-method}
+\alias{coerce,GenoSet,MethyGenoSet-method}
+
 \alias{initialize,MethyGenoSet-method}
 \alias{combine,MethyGenoSet,MethyGenoSet-method}
 \alias{[,MethyGenoSet-method}
@@ -73,8 +77,15 @@
        set elements named \code{unmethylated} in the \code{AssayData-class} slot.}
      \item{\code{detection(MethyGenoSet)}, \code{detection(MethyGenoSet)<-}:}{Access and
        set elements named \code{detection} in the \code{AssayData-class} slot.}
+
+    \item{\code{as(methyGenoSet,"MethyLumiM")}}{Coerce objects of
+      \code{\link{MethyGenoSet-class}} to \code{MethyLumiM}}
+    \item{\code{as(genoSet,"MethyGenoSet")}}{Coerce objects of
+      \code{\link{GenoSet-class}} to \code{MethyGenoSet}}
+
      \item{\code{getHistory(MethyGenoSet)}:}{Access the operation history of \code{MethyGenoSet} object.}
   }
+
 
    \bold{Derived from \code{\link[genoset]{GenoSet}}}:
    \describe{

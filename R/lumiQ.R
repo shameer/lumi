@@ -10,14 +10,14 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01, verbose=TRUE) {
 	expr <- exprs(x.lumi)
 	if (any(is.na(expr))) {
 		naInd <- apply(expr, 1, function(x) any(is.na(x)))
-		expr <- expr[!naInd,]
+		expr <- expr[!naInd,, drop=FALSE]
 	}
 
 	if (logMode && (max(expr, na.rm=TRUE) > 50)) {
 		# remove the negative values
 		if (min(expr) < 0) {
 			rMin <- rowMin(expr)
-			expr <- expr[rMin > 0, ]
+			expr <- expr[rMin > 0, , drop=FALSE]
 		}
 		expr <- log2(expr + 1)
 	} 

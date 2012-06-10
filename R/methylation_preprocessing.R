@@ -880,9 +880,10 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
   if (returnType == "matrix") {
     return(intensity)
   } else {
-    methyLumiIntensity <- as(methyLumiM, "ExpressionSet")
-    exprs(methyLumiIntensity) <- intensity
-    return(methyLumiIntensity)
+    # methyLumiM <- as(methyLumiM, "ExpressionSet")
+    # exprs(methyLumiM) <- intensity
+		assayDataElement(methyLumiM, 'exprs') <- intensity
+    return(methyLumiM)
   }
 }
 
@@ -917,7 +918,7 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
   if (returnType == "matrix") {
     return(M)
   } else {
-    exprs(methyLumiM) <- M
+		assayDataElement(methyLumiM, 'exprs') <- M
     return(methyLumiM)
   }
 }
@@ -938,9 +939,10 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
   if (returnType == "matrix") {
     return(beta)
   } else {
-    methyLumiBeta <- as(methyLumiM, "ExpressionSet")
-    exprs(methyLumiBeta) <- beta
-    return(methyLumiBeta)
+    # methyLumiBeta <- as(methyLumiM, "ExpressionSet")
+		assayDataElement(methyLumiM, 'exprs') <- beta
+    # exprs(methyLumiBeta) <- beta
+    return(methyLumiM)
   }
 }
 
@@ -1903,9 +1905,9 @@ getChrInfo <- function(methyData, lib='IlluminaHumanMethylation450k.db', as.GRan
   if (class(methyData) == 'MethyLumiM') {
     methyData <- addAnnotationInfo(methyData, lib=lib)
     ff <- fData(methyData)
-      probeList <- featureNames(methyData)
-    } else if (class(methyData) == 'MethyGenoSet') {
-    ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData))
+    probeList <- featureNames(methyData)
+  } else if (is(methyData, 'GenoSet')) {
+    ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
     probeList <- featureNames(methyData)
   } else {
     if (is.character(methyData)) {
@@ -1930,20 +1932,28 @@ getChrInfo <- function(methyData, lib='IlluminaHumanMethylation450k.db', as.GRan
   }
   if (as.GRanges) {
     chr <- ff$CHROMOSOME
-    if (length(grep('^chr', chr[1])) == 0) chr <- paste('chr', chr, sep='')
-      chrInfo = GRanges(seqnames=chr,   
+    if (length(grep('^chr', chr[1])) == 0) 
+      chr <- paste('chr', chr, sep='')
+    if (!is.null(ff$END)) {
+      END <- ff$END
+    } else {
+      END <- ff$POSITION
+    }
+    chrInfo = GRanges(seqnames=chr,   
          ranges=IRanges(start=ff$POSITION, 
-         end=ff$POSITION), strand='*', PROBEID=probeList)  
+         end=END), strand='*', PROBEID=probeList)  
   } else {
     chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
+    if (!is.null(ff$END))
+      chrInfo <- data.frame(chrInfo, END=ff$END)
   }
 
   return(chrInfo)
 }
 
-
 ## convert MethyLumiM class object to GenoSet class object
 MethyLumiM2GenoSet <- function(methyLumiM, lib=NULL) {
+	oldFeatureData <- fData(methyLumiM)
   methyLumiM <- addAnnotationInfo(methyLumiM, lib=lib)
   ff <- fData(methyLumiM)
   if (is.null(ff$CHROMOSOME))
@@ -1968,14 +1978,24 @@ MethyLumiM2GenoSet <- function(methyLumiM, lib=NULL) {
     hgVersion <- hgVersion[length(hgVersion)]
   }
   ## create RangedData for location information
-  locData <- RangedData(ranges=IRanges(start=ff$POSITION, width=1, names=featureNames(methyLumiM)), space=ff$CHROMOSOME, universe=hgVersion)
+  locdata <- RangedData(ranges=IRanges(start=ff$POSITION, width=1, names=featureNames(methyLumiM)), space=ff$CHROMOSOME, universe=hgVersion)
 
-  methyGenoSet <- MethyGenoSet(locData=locData, pData=pData(methyLumiM), annotation=as.character(lib), exprs=exprs(methyLumiM), methylated=methylated(methyLumiM), 
+  methyGenoSet <- MethyGenoSet(locData=locdata, pData=pData(methyLumiM), annotation=as.character(lib), exprs=exprs(methyLumiM), methylated=methylated(methyLumiM), 
 	  unmethylated=unmethylated(methyLumiM), detection=detection(methyLumiM))
-  
+  fData(methyGenoSet) <- oldFeatureData
   methyGenoSet@history <- methyLumiM@history
+  
+  ## set smoothing attributes if exists
+  if (!is.null(attr(methyLumiM, 'windowIndex')))
+    attr(methyGenoSet, 'windowIndex') <- attr(methyLumiM, 'windowIndex')
+  if (!is.null(attr(methyLumiM, 'windowRange')))
+    attr(methyGenoSet, 'windowRange') <- attr(methyLumiM, 'windowRange')
+  if (!is.null(attr(methyLumiM, 'windowSize')))
+    attr(methyGenoSet, 'windowSize') <- attr(methyLumiM, 'windowSize')
+
   return(methyGenoSet)
 }
+
 
 
 ##
