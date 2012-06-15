@@ -241,9 +241,9 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
     methyLumiM <- estimateM(methyLumiM)
   } else {
     if (method == 'quantile') {
-      methyLumiM <- adjColorBias.quantile(methyLumiM, ...)
+      methyLumiM <- adjColorBias.quantile(methyLumiM, verbose=verbose, ...)
     } else if (method == 'ssn') {
-      methyLumiM <- adjColorBias.ssn(methyLumiM, ...)
+      methyLumiM <- adjColorBias.ssn(methyLumiM, verbose=verbose, ...)
     } 
   }
   history.finished <- as.character(Sys.time())
@@ -536,7 +536,7 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
 }
 
 
-smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logMode=TRUE, bandwidth=NULL, degree=1, ...) {
+smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logMode=TRUE, bandwidth=NULL, degree=1, verbose=FALSE, ...) {
   
   # require(KernSmooth)
   bandwidth <- ifelse(logMode, 0.3, 200)
@@ -578,6 +578,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     normData <- adjData
   }
   for (i in 1:ncol(dataMatrix)) {
+	  if (verbose)  cat('Processing sample', colnames(dataMatrix)[i], '...\n')
     profile.i <- dataMatrix[,i]
     if (!is.null(adjData)) {
       adjData.i <- adjData[,i]
@@ -620,11 +621,11 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     #lowInd.i <- selProfile.i < boundary.i[1]
     #highInd.i <- selProfile.i > boundary.i[2]
     ## fit the low segment
-    rlm.i <- rlm(selProfile.i[lowInd.i], y.out.i[lowInd.i])
+    suppressWarnings(rlm.i <- rlm(selProfile.i[lowInd.i], y.out.i[lowInd.i]))
     dd.i <- y.out.i[lowInd.i] - rlm.i$fitted.values
     outlier.ind.low.i <- which(lowInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
     ## fit the high segment
-    rlm.i <- rlm(selProfile.i[highInd.i], y.out.i[highInd.i])
+    suppressWarnings(rlm.i <- rlm(selProfile.i[highInd.i], y.out.i[highInd.i]))
     dd.i <- y.out.i[highInd.i] - rlm.i$fitted.values
     outlier.ind.high.i <- which(highInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
     outlier.ind.i <- c(outlier.ind.low.i, outlier.ind.high.i)
@@ -639,7 +640,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     ## check the rank difference before and after fitting
     rank.old.i <- rank(adjData.i, ties.method='min')
     rank.new.i <- rank(norm.i, ties.method='min')
-    rank.fit.i <- rlm(new~old, data.frame(new=rank.new.i, old=rank.old.i))
+    suppressWarnings(rank.fit.i <- rlm(new~old, data.frame(new=rank.new.i, old=rank.old.i)))
     rank.diff.ind.i <- which(abs(rank.fit.i$residuals) > 1)
     ## Add na and infinite indexes
     rank.diff.ind.i <- unique(c(rank.diff.ind.i, which(is.na(norm.i)), which(is.infinite(norm.i))))
@@ -883,6 +884,7 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
     # methyLumiM <- as(methyLumiM, "ExpressionSet")
     # exprs(methyLumiM) <- intensity
 		assayDataElement(methyLumiM, 'exprs') <- intensity
+		dataType(methyLumiM) <- 'Intensity'
     return(methyLumiM)
   }
 }
@@ -918,6 +920,7 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
   if (returnType == "matrix") {
     return(M)
   } else {
+		dataType(methyLumiM) <- 'M'
 		assayDataElement(methyLumiM, 'exprs') <- M
     return(methyLumiM)
   }
@@ -941,6 +944,7 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
   } else {
     # methyLumiBeta <- as(methyLumiM, "ExpressionSet")
 		assayDataElement(methyLumiM, 'exprs') <- beta
+		dataType(methyLumiM) <- 'Beta'
     # exprs(methyLumiBeta) <- beta
     return(methyLumiM)
   }
@@ -948,7 +952,7 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
 
 # boxplot unique for MethyLumiM-class
 setMethod("boxplot",signature(x="MethyLumiM"),
-  function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), ...) {
+  function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), logMode=TRUE, ...) {
     
   # if (!require(hdrcde)) stop("Please install the required hdrcde package./n")  
 
@@ -966,8 +970,23 @@ setMethod("boxplot",signature(x="MethyLumiM"),
   par(xaxt='n')
   par(mar=mar)
 
+	if ('dataType' %in% slotNames(x)) {
+		datatype <- dataType(x)
+		ylab <- switch(datatype,
+			M='M-value',
+			Beta='Beta-value',
+			datatype)
+		if (datatype == 'Intensity' && logMode) {
+			dataMatrix[dataMatrix <= 0] <- NA
+			dataMatrix <- log2(dataMatrix)
+			ylab <- 'Log2-Intensity'
+		}	
+	} else {
+		ylab <- 'M-value'
+	}
+
   tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
-  hdr.boxplot(tmp, main=main, xlab='', ylab='M-value', prob=prob, col=col, ...)
+  hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
   par(xaxt='s')
   axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
   par(mar=old.mar)
@@ -2015,7 +2034,7 @@ smoothMethyData <- function(methyData, winSize=250, lib='IlluminaHumanMethylatio
 
   if (is.character(chrInfo$POSITION)) chrInfo$POSITION = as.numeric(chrInfo$POSITION)
   # remove those probes lack of position information
-  rmInd <- which(is.na(chrInfo$POSITION) | chrInfo$CHROMOSOME == '')
+  rmInd <- which(is.na(chrInfo$POSITION) | chrInfo$CHROMOSOME == '' )
   if (length(rmInd) > 0)  {
     ratioData <- ratioData[-rmInd,]
     chrInfo <- chrInfo[-rmInd,]
@@ -2027,8 +2046,8 @@ smoothMethyData <- function(methyData, winSize=250, lib='IlluminaHumanMethylatio
   chrInfo <- chrInfo[ord,]
   
   # split data by Chromosome 
-  ratioData.chrList <- split(ratioData, chrInfo$CHROMOSOME)
-  chrInfoList <- split(chrInfo, chrInfo$CHROMOSOME)
+  ratioData.chrList <- split(ratioData, as.character(chrInfo$CHROMOSOME))
+  chrInfoList <- split(chrInfo, as.character(chrInfo$CHROMOSOME))
   windowIndex <- vector(mode='list', length=length(chrInfoList))
   windowRange <- vector(mode='list', length=length(chrInfoList))
   smooth.ratioData <- lapply(seq(ratioData.chrList), function(i) {
@@ -2060,15 +2079,15 @@ smoothMethyData <- function(methyData, winSize=250, lib='IlluminaHumanMethylatio
   smooth.ratioData <- do.call('rbind', smooth.ratioData)
   windowRange <- do.call('rbind', windowRange)
   colnames(windowRange) <- c('startLocation', 'endLocation')
-  
+
   if (asDataFrame) {
     methyData <- data.frame(chrInfo, smooth.ratioData)
   } else {
-    if (class(methyData) == 'MethyLumiM') {
+    if (class(methyData) == 'MethyLumiM' || class(methyData) == 'MethyGenoSet') {
       methyData <- methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)]
-    exprs(methyData) <- smooth.ratioData
+    	exprs(methyData) <- smooth.ratioData
     } else {
-    methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)] <- smooth.ratioData
+    	methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)] <- smooth.ratioData
     }
   }
   attr(methyData, 'windowIndex') <- windowIndex

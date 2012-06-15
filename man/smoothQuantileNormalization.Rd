@@ -8,7 +8,7 @@ Smooth quantile normalization
 Smooth quantile normalization with a reference sample
 }
 \usage{
-smoothQuantileNormalization(dataMatrix, ref = NULL, adjData=NULL, logMode = TRUE, bandwidth = NULL, degree = 1, ...)
+smoothQuantileNormalization(dataMatrix, ref = NULL, adjData=NULL, logMode = TRUE, bandwidth = NULL, degree = 1, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,7 @@ smoothQuantileNormalization(dataMatrix, ref = NULL, adjData=NULL, logMode = TRUE
   \item{logMode}{ whether perform the analysis in log2 scale}
   \item{bandwidth}{ a parameter used by \code{\link[KernSmooth]{locpoly}} }
   \item{degree}{ a parameter used by \code{\link[KernSmooth]{locpoly}} }
+  \item{verbose}{ whether print the processing sample names }
   \item{\dots}{other parameters used by \code{\link[KernSmooth]{locpoly}} }
 }
 \value{

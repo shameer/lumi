@@ -17,7 +17,7 @@ importMethodsFrom(Biobase,
 
 importClassesFrom(methylumi, MethyLumi, MethyLumiSet, MethyLumiQC, MethyLumiM)
 importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethylated<-", "betas", "betas<-", QCdata, combine, "[", 
- "controlData", "controlData<-", detection, "detection<-")
+ "controlData", "controlData<-", detection, "detection<-", "dataType", "dataType<-")
 importFrom(methylumi, methylumiR, controlTypes)
 
 # GenoSet related classes and functions

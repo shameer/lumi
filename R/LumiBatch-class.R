@@ -658,7 +658,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 			down <- length(which((y/x) > fold))
 		}
 		ex <- par("fin")[1]*0.9
-		txt <- paste("Cor =", as.character(round(cor(x,y),2)),"\n")
+		txt <- paste("Cor =", as.character(round(cor(x,y),3)),"\n")
 		txt <- paste(txt, up, " (> ", fold, ", up)\n", sep="")
 		txt <- paste(txt, down, " (> ", fold, ", down)\n", sep="")
 		text(mean(range(x)), mean(range(x)), labels=txt, cex=ex)
@@ -688,7 +688,7 @@ setMethod("pairs", signature(x="ExpressionSet"),
 			}
 			expr <- log2(expr)
 		}
-	} else {
+	} else if (class(x) != 'MethyLumiM') {
 		if (max(expr, na.rm=TRUE) < 50) {
 			expr <- 2^expr
 		}

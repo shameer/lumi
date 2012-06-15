@@ -30,8 +30,12 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 	
 	## add code of parsing processing history 
 	preprocessMethod <- ''
-	if (is(lumiNormalized, 'LumiBatch') || is(lumiNormalized, 'MethyLumiM')) {
+	if (is(lumiNormalized, 'LumiBatch')) {
 		hh <- getHistory(lumiNormalized)
+		comm <- hh$command
+	}
+	if (is(lumiNormalized, 'MethyLumiM')) {
+		hh <- methylumi:::getHistory(lumiNormalized)
 		comm <- hh$command
 	}
 	if (is(lumiNormalized, 'LumiBatch')) {
