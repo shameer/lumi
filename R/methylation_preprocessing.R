@@ -243,7 +243,7 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
     if (method == 'quantile') {
       methyLumiM <- adjColorBias.quantile(methyLumiM, verbose=verbose, ...)
     } else if (method == 'ssn') {
-      methyLumiM <- adjColorBias.ssn(methyLumiM, verbose=verbose, ...)
+      methyLumiM <- adjColorBias.ssn(methyLumiM, ...)
     } 
   }
   history.finished <- as.character(Sys.time())
@@ -970,7 +970,7 @@ setMethod("boxplot",signature(x="MethyLumiM"),
   par(xaxt='n')
   par(mar=mar)
 
-	if ('dataType' %in% slotNames(x)) {
+	if (.hasSlot(x, 'dataType')) {
 		datatype <- dataType(x)
 		ylab <- switch(datatype,
 			M='M-value',
