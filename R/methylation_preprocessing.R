@@ -19,73 +19,134 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 }
 
 
-addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
+## import Illumina Infinium methylation IDAT files based on barcodes.
+## This is an extension of the methylumi::lumIDAT function 
+importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, hgVersion=c('hg19', 'hg18'), ...) {
   
-#  hgVersion <- match.arg(hgVersion)
-  # retrieve feature data
-  ff <- fData(methyLumiM)
-  if (is.null(ff$COLOR_CHANNEL)) {
-    if (is.null(lib)) stop("Please provide the annotation library!\n")
-    if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
-    
-    obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
-    colorInfo <- as.list(obj[mappedkeys(obj)])
-    colorInfo <- colorInfo[rownames(ff)]
-    ff$COLOR_CHANNEL <- sapply(colorInfo, function(x) x[1])
-    
-  } 
-  
-#   if (length(grep('27k', lib, ignore.case=T)) > 0) {
-#     fData(methyLumiM) <- ff  
-#     return(methyLumiM)
-#   }
-#   ## Only for 450K data, chromosome information will be added.
-#   if (hgVersion == 'hg18') {
-#     if (all(c('CHROMOSOME_36', 'COORDINATE_36') %in% names(ff))) {
-#       ff$CHROMOSOME <- ff$CHROMOSOME_36
-#       ff$POSITION <- as.numeric(ff$COORDINATE_36)
-#     } else {
-#       if (is.null(lib)) {
-#         warning("Please provide the annotation library!\n")
-#         return(methyLumiM)
-#       }
-#       if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
-#     
-#       obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
-#       chr <- as.list(obj[mappedkeys(obj)])
-#       chr <- chr[rownames(ff)]
-#       ## only retrieve the first element
-#       ff$CHROMOSOME <- sapply(chr, function(x) x[1])
-# 
-#       obj <- get(paste(sub("\\.db$", "", lib), "CPG36", sep=""))
-#       loc <- as.list(obj[mappedkeys(obj)])
-#       loc <- loc[rownames(ff)]
-#       ff$POSITION <- sapply(loc, function(x) x[1])
-#     }
-#   } else {
-    if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
-      ff$CHROMOSOME <- ff$CHR
-      ff$POSITION <- as.numeric(ff$MAPINFO)
-    } else {
-      if (is.null(lib)) {
-        warning("Please provide the annotation library!\n")
-        return(methyLumiM)
-      }
-      if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
-      
-      probeList <- featureNames(methyLumiM)
-      obj <- get(paste(sub("\\.db$", "", lib), "CHR", sep=""))
-      chr <- AnnotationDbi::mget(probeList, obj)
-      ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
-
-      obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
-      loc <- AnnotationDbi::mget(probeList, obj)
-      ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+  hgVersion <- match.arg(hgVersion)
+  if (missing(sampleInfo)) {
+    stop('Please provide "sampleInfo"!')
+  }
+	if (is.character(sampleInfo)) {
+		barcodes <- sampleInfo
+		sampleInfo <- NULL
+    barcodeInfo <- strsplit(barcodes, split='_')
+    if (!all(sapply(barcodeInfo, length) == 2)) {
+      warning('Some barcodes not in the correct format!')
+      barcodeInfo <- lapply(barcodeInfo, function(x) {
+        if (length(x) == 1) {
+          x <- c(x, '')
+        } else {
+          x <- x[1:2]
+        }
+        return(x)
+      })
     }
-#   }
+    barcodeInfo <- matrix(unlist(barcodeInfo), ncol=2)
+    colnames(barcodeInfo) <- c('Sentrix_Barcode', 'Sentrix_Position')
+	} else {
+    if (!all(c('Sentrix_Barcode', 'Sentrix_Position') %in% colnames(sampleInfo))) {
+      stop("'Sentrix_Barcode' and 'Sentrix_Position' are required in 'sampleInfo'!")
+    }
+    barcodeInfo <- sampleInfo[,c('Sentrix_Barcode', 'Sentrix_Position')]
+    barcodes <- paste(barcodeInfo[, 'Sentrix_Barcode'], barcodeInfo[, 'Sentrix_Position'], sep='_')
+  }
   
-  fData(methyLumiM) <- ff  
-  return(methyLumiM)
+  ## read IDAT files
+  ## check the folder location
+  ## read data path could be either dataPath or dataPath/Sentrix_Barcode
+  realDataPath <- dataPath
+  for (i in 1:length(barcodes)) {
+    file.pattern.i <- paste(barcodes[i], '.*\\.idat$', sep='')
+    data.path.i <- file.path(dataPath, barcodeInfo[i, 'Sentrix_Barcode'])
+    if (length(dir(data.path.i, pattern=file.pattern.i, ignore.case=T)) == 2) {
+      realDataPath[i] <- data.path.i
+    } else if (length(dir(dataPath, pattern=file.pattern.i, ignore.case=T)) != 2) {
+      realDataPath[i] <- NA
+    }
+  }
+  if (any(is.na(realDataPath))) {
+    stop(paste('IDAT files cannot be located for barcodes:', paste(barcodes[is.na(realDataPath)], collapse=',')))
+  }
+  
+  ## read IDAT files by individual dataPath
+  barcodesList <- split(barcodes, realDataPath)
+  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
+  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
+  
+  ## add sample info 
+  if (!is.null(sampleInfo)) {
+    rownames(sampleInfo) <- paste(barcodeInfo[, 'Sentrix_Barcode'], barcodeInfo[, 'Sentrix_Position'], sep='_')
+    pData(lumi450k) <- sampleInfo[barcodes,]
+    ## rename the samples if Sample_Name is provided in sampleInfo
+    samplename <- sampleInfo[barcodes,'Sample_Name']
+    if (!is.null(samplename)) {
+      sampleNames(lumi450k) <- samplename
+    }
+  }
+  
+	if (!is.null(lib)) {
+		## add annotation information: 'COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'
+		lumi450k <- addAnnotationInfo(lumi450k, lib=lib, hgVersion=hgVersion)
+	}
+
+  return(lumi450k)
+}
+
+
+addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'), annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
+  
+  hgVersion <- match.arg(hgVersion)
+	if (is(methyLumiM, 'MethyLumiM')) {
+	  # retrieve feature data
+	  ff <- fData(methyLumiM)
+    probeList <- featureNames(methyLumiM)
+	} else if (is.character(methyLumiM)) {
+		probeList <- methyLumiM
+		ff <- data.frame()
+	} else {
+		stop('methyLumiM should be either a MethyLumiM object of a character vectors of probe names!')
+	}
+	
+	if (!is.null(lib) && require(lib, character.only=TRUE)) {
+    obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
+    colorInfo <- AnnotationDbi::mget(probeList, obj)
+    ff$COLOR_CHANNEL <- sapply(colorInfo, function(x) x[1])
+		
+		if (hgVersion == 'hg19') {
+	    obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
+	    chr <- AnnotationDbi::mget(probeList, obj)
+	    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+
+	    obj <- get(paste(sub("\\.db$", "", lib), "CPG37", sep=""))
+	    loc <- AnnotationDbi::mget(probeList, obj)
+	    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+		} else {
+	    obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
+	    chr <- AnnotationDbi::mget(probeList, obj)
+	    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+
+	    obj <- get(paste(sub("\\.db$", "", lib), "CPG36", sep=""))
+	    loc <- AnnotationDbi::mget(probeList, obj)
+	    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+		}
+	} else {
+		if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
+	    ff$CHROMOSOME <- ff$CHR
+	    ff$POSITION <- as.numeric(ff$MAPINFO)
+	  }
+		if (!all(c('CHROMOSOME', 'POSITION', 'COLOR_CHANNEL') %in% names(ff))) {
+			stop('Probe annotation information is not available. Please provide annotation library!')
+		}
+	}
+	
+	rownames(ff) <- probeList
+	if (is(methyLumiM, 'MethyLumiM')) {
+	  fData(methyLumiM) <- ff
+		return(methyLumiM)
+	} else {
+		return(ff)
+	}
 }
 
 
@@ -343,7 +404,7 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
 
 
 bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=300, negPercTh=0.25) {
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   methy <- methylated(methyLumiM)
@@ -408,7 +469,7 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
 # M.adj <- log2(methy.adj/unmethy.adj)
 adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   if (storageMode(assayData(methyLumiM)) == "environment") storageMode(assayData(methyLumiM)) <- "lockedEnvironment"
@@ -475,7 +536,7 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 
 adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logMode=TRUE, ...) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   if (storageMode(assayData(methyLumiM)) == "environment") storageMode(assayData(methyLumiM)) <- "lockedEnvironment"
@@ -712,7 +773,7 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
   
   ## In the case the negative control data is not available, the background will be estimated based on the mode positions of unmethylated or methylated distribution (the smaller one)
   if (is(methyLumiM, "eSet")) {
-    if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+		if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
       stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
     }
     unmethy <- assayDataElement(methyLumiM, 'unmethylated')
@@ -754,7 +815,7 @@ estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
 
 normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   if (storageMode(assayData(methyLumiM)) == "environment") storageMode(assayData(methyLumiM)) <- "lockedEnvironment"  
@@ -806,7 +867,7 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
 
 normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   if (storageMode(assayData(methyLumiM)) == "environment") storageMode(assayData(methyLumiM)) <- "lockedEnvironment"
@@ -866,7 +927,7 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
 # which basically is the sum of methylated and unmethylated probe intensity
 estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix")) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   returnType <- match.arg(returnType)
@@ -883,8 +944,10 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
   } else {
     # methyLumiM <- as(methyLumiM, "ExpressionSet")
     # exprs(methyLumiM) <- intensity
+		if ('dataType' %in% slotNames(methyLumiM)) {
+			dataType(methyLumiM) <- 'Intensity'
+		}
 		assayDataElement(methyLumiM, 'exprs') <- intensity
-		dataType(methyLumiM) <- 'Intensity'
     return(methyLumiM)
   }
 }
@@ -904,7 +967,7 @@ m2beta <- function(m) {
 # estimate the M-value based on methylated and unmethylated probe intensities
 estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offset=100) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   returnType <- match.arg(returnType)
@@ -920,7 +983,9 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
   if (returnType == "matrix") {
     return(M)
   } else {
-		dataType(methyLumiM) <- 'M'
+		if ('dataType' %in% slotNames(methyLumiM)) {
+			dataType(methyLumiM) <- 'M'
+		}
 		assayDataElement(methyLumiM, 'exprs') <- M
     return(methyLumiM)
   }
@@ -929,7 +994,7 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
 # estimate the Beta-value based on methylated and unmethylated probe intensities
 estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offset=100) {
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   returnType <- match.arg(returnType)
@@ -944,7 +1009,9 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
   } else {
     # methyLumiBeta <- as(methyLumiM, "ExpressionSet")
 		assayDataElement(methyLumiM, 'exprs') <- beta
-		dataType(methyLumiM) <- 'Beta'
+		if ('dataType' %in% slotNames(methyLumiM)) {
+			dataType(methyLumiM) <- 'Beta'
+		}
     # exprs(methyLumiBeta) <- beta
     return(methyLumiM)
   }
@@ -954,11 +1021,9 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
 setMethod("boxplot",signature(x="MethyLumiM"),
   function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), logMode=TRUE, ...) {
     
-  # if (!require(hdrcde)) stop("Please install the required hdrcde package./n")  
-
-    tmp <- description(x)
-    if (missing(main) && (is(tmp, "MIAME")))
-       main <- tmp@title
+  tmp <- description(x)
+  if (missing(main) && (is(tmp, "MIAME")))
+     main <- tmp@title
 
   dataMatrix <- exprs(x)
   labels <- colnames(dataMatrix)
@@ -972,6 +1037,7 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 
 	if (.hasSlot(x, 'dataType')) {
 		datatype <- dataType(x)
+		if (datatype == '') datatype <- 'M'
 		ylab <- switch(datatype,
 			M='M-value',
 			Beta='Beta-value',
@@ -979,14 +1045,19 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 		if (datatype == 'Intensity' && logMode) {
 			dataMatrix[dataMatrix <= 0] <- NA
 			dataMatrix <- log2(dataMatrix)
-			ylab <- 'Log2-Intensity'
+			ylab <- 'Log2-Intensity of CpG-sites'
 		}	
 	} else {
 		ylab <- 'M-value'
+		datatype <- 'M'
 	}
 
-  tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
-  hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
+ 	if (datatype == 'Intensity') {
+		boxplot(as(x, 'ExpressionSet'), main=main, xlab='', ylab=ylab, ...)
+	} else {
+	  tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
+	  hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
+	}
   par(xaxt='s')
   axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
   par(mar=old.mar)
@@ -999,7 +1070,7 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 boxplotColorBias <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum'), grid=TRUE, main=NULL, mar=NULL, verbose=F, subset=NULL, ...) {
   
   channel <- match.arg(channel)
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   if (!is.null(subset)) {
@@ -1095,7 +1166,7 @@ plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 's
   densityPar <- otherPar[names(otherPar) %in% names(formals(density.default))]
   otherPar[names(otherPar) %in% names(formals(density.default))] <- NULL
   
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
 
@@ -1238,7 +1309,7 @@ plotColorBias1D <- function(methyLumiM, channel=c('both', 'unmethy', 'methy', 's
 plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioWidth=c(0.75,0.25), layoutRatioHeight=c(0.25, 0.75), 
       margins = c(5, 5, 2, 2), cex=1.25, logMode=TRUE, subset=NULL, ...) {
 
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   otherPar <- list(...)
@@ -1331,7 +1402,7 @@ plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioW
 colorBiasSummary <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum')) {
 
   channel <- match.arg(channel)
-  if (!assayDataValidMembers(assayData(methyLumiM), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
@@ -1919,35 +1990,21 @@ lumiMethyStatus <- function(methyLumiM, ...)
 
 ## Get chromosome information of a MethyLumiM or MethyGenoSet object
 # chrInfo <- getChrInfo(methyLumiM, lib=lib)
-getChrInfo <- function(methyData, lib='IlluminaHumanMethylation450k.db', as.GRanges=FALSE) {
+getChrInfo <- function(methyData, lib=NULL, as.GRanges=FALSE, ...) {
   
-  if (class(methyData) == 'MethyLumiM') {
-    methyData <- addAnnotationInfo(methyData, lib=lib)
-    ff <- fData(methyData)
-    probeList <- featureNames(methyData)
-  } else if (is(methyData, 'GenoSet')) {
+	hgVersion <- match.arg(hgVersion)
+	if (is(methyData, 'GenoSet')) {
     ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
     probeList <- featureNames(methyData)
-  } else {
-    if (is.character(methyData)) {
-      probeList <- methyData
-    } else {
-      stop('methyData should be a MethyLumiM object or a character vector')
-    }
-  }
-  if (is.null(ff$CHROMOSOME)) { 
-    if (nrow(ff) == 0) ff <- data.frame(CHROMOSOME=rep('', length(probeList)), POSITION=rep(0, length(probeList)))
-    
-    if (is.null(lib)) stop("Please provide the annotation library!\n")
-    if (!require(lib, character.only=TRUE)) stop(paste(lib, "is not available!\n"))
-    
-    obj <- get(paste(sub("\\.db$", "", lib), "CHR", sep=""))
-    chr <- AnnotationDbi::mget(probeList, obj)
-    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
-    
-    obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
-    loc <- AnnotationDbi::mget(probeList, obj)
-    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+  } else if (is(methyData, 'MethyLumiM')) {
+    methyData <- addAnnotationInfo(methyData, lib=lib, ...)
+    ff <- fData(methyData)
+    probeList <- featureNames(methyData)
+  } else if (is.character(methyData)) {
+    ff <- addAnnotationInfo(methyData, lib=lib, ...)
+    probeList <- rownames(methyData)
+	} else {
+    stop('methyData should be a MethyLumiM object or a character vector')
   }
   if (as.GRanges) {
     chr <- ff$CHROMOSOME

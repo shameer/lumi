@@ -202,7 +202,7 @@ setAs("MethyGenoSet", "MethyLumiM", function(from) {
 	locdata <- as(locData(from), 'GRanges')
 	chrInfo <- data.frame(CHROMOSOME=as.character(seqnames(locdata)), POSITION=start(locdata))
 
-  methyLumiM <- new('MethyLumiM', phenoData=phenoData(from), annotation=annotation(from), experimentData=experimentData(from), exprs=exprs(from), 
+  methyLumiM <- new('MethyLumiM', phenoData=phenoData(from), annotation=annotation(from), exprs=exprs(from), 
 	  methylated=methylated(from), unmethylated=unmethylated(from), detection=detection(from))
   fData(methyLumiM) <- data.frame(locdata, oldFeatureData)
   methyLumiM@history <- from@history
@@ -222,20 +222,21 @@ setAs("MethyGenoSet", "MethyLumiM", function(from) {
 
 setAs("GenoSet", "MethyGenoSet", function(from) {
 	
-	if (!assayDataValidMembers(assayData(from), c("unmethylated", "methylated"))) {
+	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(from))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   
 	from <- estimateM(from)
 	mm <- assayDataElement(from,"exprs")
-	if (assayDataValidMembers(assayData(from), "detection")) {
-	  methyGenoSet <- MethyGenoSet(locData=locData(from), phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from),
-				exprs=exprs(from), methylated=methylated(from), unmethylated=unmethylated(from), detection=assayDataElement(from,"detection"))
+	if (!is.null(assayDataElement(from,"detection"))) {
+	  methyGenoSet <- MethyGenoSet(locData=locData(from), pData=pData(from), annotation=annotation(from), 
+				exprs=assayDataElement(from,"exprs"), methylated=assayDataElement(from,"methylated"), unmethylated=assayDataElement(from,"unmethylated"), 
+				detection=assayDataElement(from,"detection"))
 	} else {
-	  methyGenoSet <- MethyGenoSet(locData=locData(from), phenoData=phenoData(from), featureData=featureData(from), annotation=annotation(from), experimentData=experimentData(from),
-				exprs=exprs(from), methylated=methylated(from), unmethylated=unmethylated(from))
+	  methyGenoSet <- MethyGenoSet(locData=locData(from), pData=pData(from), annotation=annotation(from), 
+				exprs=assayDataElement(from,"exprs"), methylated=assayDataElement(from,"methylated"), unmethylated=assayDataElement(from,"unmethylated"))
 	}
-	
+	fData(methyGenoSet) <- fData(from)
 	return(methyGenoSet)
 })
 

@@ -18,7 +18,7 @@ importMethodsFrom(Biobase,
 importClassesFrom(methylumi, MethyLumi, MethyLumiSet, MethyLumiQC, MethyLumiM)
 importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethylated<-", "betas", "betas<-", QCdata, combine, "[", 
  "controlData", "controlData<-", detection, "detection<-", "dataType", "dataType<-")
-importFrom(methylumi, methylumiR, controlTypes)
+importFrom(methylumi, controlTypes, lumIDAT, methylumiR)
 
 # GenoSet related classes and functions
 importClassesFrom(genoset, GenoSet)
@@ -61,7 +61,7 @@ plotCDF, plotControlData, plotDensity, plotHousekeepingGene, plotSampleRelation,
 produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, rsn, seq2id, ssn, targetID2nuID, vst, rankinvariant,
 # methylation analysis functions
 addAnnotationInfo, addControlData2methyLumiM, adjColorBias.quantile, adjColorBias.ssn, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
-estimateIntensity, estimateMethylationBG, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
+estimateIntensity, estimateMethylationBG, importMethyIDAT, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
 # methylation status estimation function
 lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit,

@@ -474,7 +474,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 ##some special handling of main is needed
 setMethod("boxplot",signature(x="ExpressionSet"),
-	function(x, range=0, main, logMode=TRUE, subset=NULL, ...) 
+	function(x, range=0, main, logMode=TRUE, subset=NULL, xlab='', ylab='Amplitude', ...) 
 {
   	tmp <- description(x)
   	if (missing(main) && (is(tmp, "MIAME")))
@@ -513,7 +513,7 @@ setMethod("boxplot",signature(x="ExpressionSet"),
 	old.xaxt <- par('xaxt')
 	par(xaxt='n')
 	par(mar=mar)
-	boxplot(dataMatrix ~ col(dataMatrix), main=main, range=range, xlab='', ylab='amplitude', ...)
+	boxplot(dataMatrix ~ col(dataMatrix), main=main, range=range, xlab=xlab, ylab=ylab, ...)
 	par(xaxt='s')
 	axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
 	par(mar=old.mar)
