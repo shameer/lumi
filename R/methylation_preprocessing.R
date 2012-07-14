@@ -1037,7 +1037,7 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 
 	if (.hasSlot(x, 'dataType')) {
 		datatype <- dataType(x)
-		if (datatype == '') datatype <- 'M'
+		if (datatype == '' || length(datatype) == 0) datatype <- 'M'
 		ylab <- switch(datatype,
 			M='M-value',
 			Beta='Beta-value',
@@ -2057,7 +2057,7 @@ MethyLumiM2GenoSet <- function(methyLumiM, lib=NULL) {
   locdata <- RangedData(ranges=IRanges(start=ff$POSITION, width=1, names=featureNames(methyLumiM)), space=ff$CHROMOSOME, universe=hgVersion)
 
   methyGenoSet <- MethyGenoSet(locData=locdata, pData=pData(methyLumiM), annotation=as.character(lib), exprs=exprs(methyLumiM), methylated=methylated(methyLumiM), 
-	  unmethylated=unmethylated(methyLumiM), detection=detection(methyLumiM))
+	  unmethylated=unmethylated(methyLumiM), detection=detection(methyLumiM), universe=hgVersion)
   fData(methyGenoSet) <- oldFeatureData
   methyGenoSet@history <- methyLumiM@history
   
@@ -2164,7 +2164,7 @@ export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), export
   start <- start(methyGenoSet)
   ## Sort the rows of ratios.obj
   methyGenoSet <- methyGenoSet[order(chr, start),]
-    
+	
   ## check overlap probes and average them
   locationID <- paste(chr, start, sep='_')
   dupInd <- which(duplicated(locationID))
@@ -2185,12 +2185,15 @@ export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), export
   if (exportValue == 'beta') {
     methyData <- m2beta(methyData) # - 0.5
   } 
+	
+	## only keep 3 digit to save space
+  methyData <- signif(methyData, 3)
   
   if (file.format == 'gct') {
     chrInfo <- data.frame(PROBEID=featureNames(methyGenoSet), CHROMOSOME=space(methyGenoSet), START=start(methyGenoSet), END=end(methyGenoSet),  stringsAsFactors=FALSE)
 
     # remove those probes lack of position information
-    rmInd <- which(is.na(chrInfo$POSITION))
+    rmInd <- which(is.na(chrInfo$START))
     if (length(rmInd) > 0)  {
       chrInfo <- chrInfo[-rmInd,]
       methyData <- methyData[-rmInd,]
@@ -2207,6 +2210,9 @@ export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), export
     write.table(gct, sep="\t", file=filename, row.names=FALSE, append=TRUE)
     return(invisible(filename))
   } else if (file.format == 'bw') {
+ 		chrInfo <- getChromInfoFromUCSC(hgVersion)
+		rownames(chrInfo) <- chrInfo[,'chrom']
+ 
     samplenames <- sampleNames(methyGenoSet)
     pdata <- pData(methyGenoSet)
     if ('SAMID' %in% names(pdata)) {
@@ -2218,8 +2224,9 @@ export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), export
     seq.lengths <- chr.info[,"stop"] - chr.info[,"offset"]
     for (i in 1:ncol(methyData)) {    
       score.i <- methyData[,i]
-      cn.data.i <- RangedData(ranges=IRanges(start=start(methyGenoSet),end=end(methyGenoSet)), space=space(methyGenoSet), score=score.i, universe=universe(methyGenoSet))
-      cn.data.i <- cn.data.i[!is.na(score.i), ]
+      cn.data.i <- GRanges(seqnames=space(methyGenoSet), ranges=IRanges(start=start(methyGenoSet),end=end(methyGenoSet)), strand='*', score=score.i)
+      genome(cn.data.i) <- universe(methyGenoSet)
+			cn.data.i <- cn.data.i[!is.na(score.i), ]
       if (savePrefix == '' || is.null(savePrefix)) {
         savePrefix.i <- samplenames[i]
       } else {
@@ -2227,11 +2234,12 @@ export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), export
       }
       if (!is.null(samid)) savePrefix.i <- paste(savePrefix.i, samid[i], sep='_')
       
+			seqlengths(cn.data.i) <- chrInfo[as.character(seqlevels(cn.data.i)), 'length']
       filename.i <- paste(savePrefix.i, "_", exportValue, "_", hgVersion, ".bw", sep='')
       # export.bw(cn.data.i, filename.i, dataFormat="auto", seqlengths=seq.lengths)
       export.bw(cn.data.i, filename.i, dataFormat="auto")
     }
-    return(invisible(TRUE))
+    return(invisible(filename.i))
   }
   
 }
