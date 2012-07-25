@@ -177,8 +177,6 @@ setMethod("[", "MethyGenoSet", function(x, i, j, ..., drop = FALSE)  {
       history.command <- paste('Subsetting', ddim[1], 'features.')
   } else if (!missing(j)) {
       history.command <- paste('Subsetting', ddim[2], 'samples.')
-      if (!is.null(controlData(x)))
-        controlData(x) <- controlData(x)[,j]
   } else {
       return(x)
   }
@@ -226,7 +224,9 @@ setAs("GenoSet", "MethyGenoSet", function(from) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
   }
   
-	from <- estimateM(from)
+	if (is.null(assayDataElement(from,"exprs"))) {
+		from <- estimateM(from)
+	}
 	mm <- assayDataElement(from,"exprs")
 	if (!is.null(assayDataElement(from,"detection"))) {
 	  methyGenoSet <- MethyGenoSet(locData=locData(from), pData=pData(from), annotation=annotation(from), 

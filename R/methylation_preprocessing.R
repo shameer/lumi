@@ -1992,7 +1992,7 @@ lumiMethyStatus <- function(methyLumiM, ...)
 # chrInfo <- getChrInfo(methyLumiM, lib=lib)
 getChrInfo <- function(methyData, lib=NULL, as.GRanges=FALSE, ...) {
   
-	hgVersion <- match.arg(hgVersion)
+	# hgVersion <- match.arg(hgVersion)
 	if (is(methyData, 'GenoSet')) {
     ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
     probeList <- featureNames(methyData)
