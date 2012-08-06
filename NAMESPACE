@@ -27,9 +27,10 @@ importClassesFrom(GenomicRanges, GRanges)
 importMethodsFrom(IRanges, space, start, end, width, universe)
 importMethodsFrom(genoset, locData, "locData<-")
 importFrom(rtracklayer, export.bw)
+importFrom(GenomicFeatures, getChromInfoFromUCSC)
 importFrom(IRanges, IRanges, RangedData)
 importFrom(genoset, GenoSet)
-importFrom(GenomicRanges, GRanges)
+importFrom(GenomicRanges, GRanges, "genome<-", "seqlengths<-", seqlevels)
 
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(KernSmooth, locpoly)
@@ -51,7 +52,7 @@ importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 
 exportClasses(LumiBatch, MethyGenoSet)
-exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, sampleNames, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce)
+exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce)
 
 export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            
 bgAdjust, detectOutlier, detectionCall, estimateLumiCV, getChipInfo, getControlData, getControlProbe,
