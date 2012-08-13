@@ -31,7 +31,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 	options(stringsAsFactors = FALSE)
 	version <- 2
 
-	if (!file.exists(fileName)) stop('The file is not exist! Please check your file path!\n')
+	if (!file.exists(fileName)) stop('The file does not exist! Please check your file path!\n')
 	## ---------------------------------------
 	## identify the Metadata lines 
 	info <- readLines(fileName, n=20)    # take the first 20 lines to have a taste
@@ -56,10 +56,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 			if (sepNum1[1] > 0 && length(sepNum1) == length(sepNum2)) {
 				sep <- ','
 			} else {
-				stop('The seperator is not Tab or comma!\n Please sepecify the seperator used in the file!\n')
+				stop('The seperator is not Tab or comma!\n Please specify the seperator used in the file!\n')
 			}
 		} else {
-			stop('Please sepecify the seperator used in the file!\n')
+			stop('Please specify the seperator used in the file!\n')
 		}
 	}
 	## determine whether the quote is used or not
@@ -91,10 +91,10 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		markerInd <- grep('^\\[.*\\]', info, ignore.case=TRUE)
 		if (length(markerInd) > 0) {
 			if (length(grep('^\\[Header\\]', info[markerInd[1]], ignore.case=TRUE)) == 0) 
-				warning('The data file may not be in the Illumia BeadStudio or GenomeStudio output format!\n')
+				warning('The data file may not be in the Illumina BeadStudio or GenomeStudio output format!\n')
 			if (length(markerInd) > 1) {
 				if (length(grep('^\\[.*\\Profile]', info[markerInd[2]], ignore.case=TRUE)) == 0) 
-					warning('The data file may not be in the Illumia BeadStudio or GenomeStudio output format!\n')
+					warning('The data file may not be in the Illumina BeadStudio or GenomeStudio output format!\n')
 			}
 			version <- 3  # version 3 also includes the GenomeStudio output format
 			info <- info[-markerInd]
@@ -111,7 +111,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 # 				ind <- grep("SGX Version", info, ignore.case=TRUE)
 # 			}
 # 			if (length(ind) == 0) 	ind <- grep("GenomeStudio version", info, ignore.case=TRUE)
-# 			if (length(ind) == 0)   warning("The data file may not be in the Illumia BeadStudio or GenomeStudio output format.\n")
+# 			if (length(ind) == 0)   warning("The data file may not be in the Illumina BeadStudio or GenomeStudio output format.\n")
 
 			## should not be normalized in BeadStudio
 			ind <- grep("Normalization", info, ignore.case=TRUE)  # find where is the row index
@@ -475,7 +475,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		options(stringsAsFactors = oldSetting)
 		return(x.lumi)
 	}
-	x.lumi@controlData <- controlData
+	controlData(x.lumi) <- controlData
 	x.lumi@QC <- list(BeadStudioSummary=sampleSummary)
 	sampleNames(x.lumi) <- label
 	

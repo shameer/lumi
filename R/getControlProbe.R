@@ -2,7 +2,7 @@
 function(controlData, type=NULL) 
 {
 	if (is(controlData, 'LumiBatch')) {
-		controlData <- controlData@controlData
+		controlData <- controlData(controlData)
 	} 
 	allControlType <- controlData$controlType
 	uniControlType <- getControlType(controlData)

@@ -91,10 +91,10 @@ presentCount <- detectionCall(x.lumi)
 ## Since the Barnes data was not background removed, we will do background adjustment first.
 ## The background estimation will be based on the control probe information. 
 ##  As the old version lumiBarnes library does not include controlData slot, we will check it first.
-if (nrow(x.lumi@controlData) == 0) {
+if (nrow(controlData(x.lumi)) == 0) {
 	## We will use the control probe information in the example.lumi in the updated lumi package
 	data(example.lumi)
-	x.lumi@controlData <- example.lumi@controlData
+	controlData(x.lumi) <- controlData(example.lumi)
 }
 
 x.lumi <- lumiB(x.lumi, method='bgAdjust')

@@ -2,7 +2,7 @@
 function(controlData) 
 {
 	if (is(controlData, 'LumiBatch')) {
-		controlData <- controlData@controlData
+		controlData <- controlData(controlData)
 	} 
 	if (is(controlData, 'data.frame')) {
 		if (nrow(controlData) == 0) stop('controlData is empty!')

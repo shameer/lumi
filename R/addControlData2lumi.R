@@ -19,10 +19,11 @@ function(controlData, x.lumi)
 		probeId.pos <- grep('Probe.?ID', controlSampleID, ignore.case=TRUE)
 		if (length(probeId.pos) > 0) {
 			names(controlData)[probeId.pos] <- 'ProbeID'
-			retrieveColName <- c('controlType', 'ProbeID')
 		} else {
-			retrieveColName <- 'controlType'
+			controlData$ProbeID <- NA
 		}
+		retrieveColName <- c('controlType', 'ProbeID')
+		
 		if (all(sampleID %in% controlSampleID)) {
 			x.lumi@controlData <- controlData[, c(retrieveColName, sampleID)]
 		} else {
@@ -32,12 +33,12 @@ function(controlData, x.lumi)
 				newID <<- c(newID, paste(x[1:2], collapse="_"))
 			})
 			if (all(newID %in% controlSampleID)) {
-				x.lumi@controlData <- controlData[, c(retrieveColName, newID)]
+				controlData(x.lumi) <- controlData[, c(retrieveColName, newID)]
 			} else {
 				stop('SampleID does not match up between controlData and x.lumi!')				
 			}
 		}
-		names(x.lumi@controlData) <- c(retrieveColName, sampleNames(x.lumi))		
+		names(controlData(x.lumi)) <- c(retrieveColName, sampleNames(x.lumi))		
 	} else {
 		stop('Input data type is not supported!')
 	}

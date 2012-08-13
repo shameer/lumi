@@ -26,6 +26,7 @@
 \alias{controlData<-}
 \alias{controlData,LumiBatch-method}
 \alias{controlData<-,LumiBatch-method}
+\alias{controlData<-,LumiBatch,ANY-method}
 
 \alias{initialize,LumiBatch-method}
 \alias{summary,LumiBatch-method}
@@ -131,7 +132,7 @@ data(example.lumi)
 # summary(example.lumi)
 example.lumi	
 
-## get express matrix
+## get expression matrix
 temp <- exprs(example.lumi)
 
 ## get a subset

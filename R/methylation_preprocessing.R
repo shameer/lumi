@@ -1018,8 +1018,9 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
 }
 
 # boxplot unique for MethyLumiM-class
-setMethod("boxplot",signature(x="MethyLumiM"),
-  function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), logMode=TRUE, ...) {
+# setMethod("boxplot",signature(x="MethyLumiM"),
+#   function(x, main, prob=c(seq(10,90, by=10), 95), col=gray(rev(seq(prob)/length(prob))), logMode=TRUE, ...) {
+setMethod("boxplot",signature(x="MethyLumiM"), function(x, main, logMode=TRUE, ...) {
     
   tmp <- description(x)
   if (missing(main) && (is(tmp, "MIAME")))
@@ -1031,9 +1032,8 @@ setMethod("boxplot",signature(x="MethyLumiM"),
   ## set the margin of the plot
   mar <- c(max(nchar(labels))/2 + 4.5, 5, 5, 3)
   old.mar <- par('mar')
-  old.xaxt <- par('xaxt')
-  par(xaxt='n')
   par(mar=mar)
+  on.exit(par(old.mar))
 
 	if (.hasSlot(x, 'dataType')) {
 		datatype <- dataType(x)
@@ -1053,15 +1053,19 @@ setMethod("boxplot",signature(x="MethyLumiM"),
 	}
 
  	if (datatype == 'Intensity') {
-		boxplot(as(x, 'ExpressionSet'), main=main, xlab='', ylab=ylab, ...)
+		boxplot(as(x, 'ExpressionSet'), main=main, xlab='', ylab=ylab, xaxt='n', ...)
+	  axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
 	} else {
-	  tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
-	  hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
+	  # tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
+	  tmp <- data.frame(M=as.vector(dataMatrix), sample=factor(col(dataMatrix), labels=colnames(dataMatrix)))
+	   
+	  bwplot(M ~ sample, data=tmp, ylab=ylab, main=main, scales=list(rot=90),
+		       panel = function(..., box.ratio) {
+		           panel.violin(..., col = "grey", varwidth = FALSE, box.ratio = box.ratio)
+		       })
+	  # hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
 	}
-  par(xaxt='s')
-  axis(1, at=1:ncol(dataMatrix), labels=labels, tick=TRUE, las=2)
-  par(mar=old.mar)
-  par(xaxt=old.xaxt)
+
 })
 
 
@@ -2027,220 +2031,6 @@ getChrInfo <- function(methyData, lib=NULL, as.GRanges=FALSE, ...) {
   return(chrInfo)
 }
 
-## convert MethyLumiM class object to GenoSet class object
-MethyLumiM2GenoSet <- function(methyLumiM, lib=NULL) {
-	oldFeatureData <- fData(methyLumiM)
-  methyLumiM <- addAnnotationInfo(methyLumiM, lib=lib)
-  ff <- fData(methyLumiM)
-  if (is.null(ff$CHROMOSOME))
-    stop('Chromosome information is not available!\n')
-    
-  ## remove those without chromosome location
-  rmInd <- which(is.na(ff$CHROMOSOME) | ff$CHROMOSOME == '')
-  if (length(rmInd) > 0) {
-    ff <- ff[-rmInd,]
-    methyLumiM <- methyLumiM[-rmInd,]
-  }
-  if (length(grep('^chr', ff$CHROMOSOME)) == 0) {
-    ff$CHROMOSOME <- paste('chr', ff$CHROMOSOME, sep='')
-  }
-  
-  hgVersion <- ''
-  ## retrieve the hgVersion information from the annotation library
-  if (require(lib, character.only=TRUE)) {
-    dbInfo <- do.call(paste(sub('.db$', '', lib), '_dbInfo', sep=''), list())
-    rownames(dbInfo) <- dbInfo$name
-    hgVersion <- strsplit(dbInfo['GPSOURCEURL', 'value'], '/')[[1]]
-    hgVersion <- hgVersion[length(hgVersion)]
-  }
-  ## create RangedData for location information
-  locdata <- RangedData(ranges=IRanges(start=ff$POSITION, width=1, names=featureNames(methyLumiM)), space=ff$CHROMOSOME, universe=hgVersion)
-
-  methyGenoSet <- MethyGenoSet(locData=locdata, pData=pData(methyLumiM), annotation=as.character(lib), exprs=exprs(methyLumiM), methylated=methylated(methyLumiM), 
-	  unmethylated=unmethylated(methyLumiM), detection=detection(methyLumiM), universe=hgVersion)
-  fData(methyGenoSet) <- oldFeatureData
-  methyGenoSet@history <- methyLumiM@history
-  
-  ## set smoothing attributes if exists
-  if (!is.null(attr(methyLumiM, 'windowIndex')))
-    attr(methyGenoSet, 'windowIndex') <- attr(methyLumiM, 'windowIndex')
-  if (!is.null(attr(methyLumiM, 'windowRange')))
-    attr(methyGenoSet, 'windowRange') <- attr(methyLumiM, 'windowRange')
-  if (!is.null(attr(methyLumiM, 'windowSize')))
-    attr(methyGenoSet, 'windowSize') <- attr(methyLumiM, 'windowSize')
-
-  return(methyGenoSet)
-}
 
 
-
-##
-smoothMethyData <- function(methyData, winSize=250, lib='IlluminaHumanMethylation450k.db', asDataFrame=FALSE, ...) {
-
-  if (class(methyData) == 'MethyLumiM' || class(methyData) == 'MethyGenoSet') {
-    chrInfo <- getChrInfo(methyData, lib=lib)
-    ratioData <- as.data.frame(exprs(methyData))
-  } else if (is.data.frame(methyData)) {
-    if (!all(c("PROBEID","CHROMOSOME","POSITION") %in% names(methyData)))
-      stop(" PROBEID, CHROMOSOME and POSITION are required columns in the methyData data.frame!")
-  
-    chrInfo <- methyData[, c("PROBEID","CHROMOSOME","POSITION")]
-    ratioData <- methyData[, -c(1:3)]
-  } else 
-    stop("methyData should be a MethyLumiM, MethyGenoSet or data.frame object!")
-
-  if (is.character(chrInfo$POSITION)) chrInfo$POSITION = as.numeric(chrInfo$POSITION)
-  # remove those probes lack of position information
-  rmInd <- which(is.na(chrInfo$POSITION) | chrInfo$CHROMOSOME == '' )
-  if (length(rmInd) > 0)  {
-    ratioData <- ratioData[-rmInd,]
-    chrInfo <- chrInfo[-rmInd,]
-  }
-  
-  # Sort the ratioData by chromosome and location
-  ord <- order(chrInfo$CHROMOSOME, chrInfo$POSITION, decreasing=FALSE)
-  ratioData <- ratioData[ord,]
-  chrInfo <- chrInfo[ord,]
-  
-  # split data by Chromosome 
-  ratioData.chrList <- split(ratioData, as.character(chrInfo$CHROMOSOME))
-  chrInfoList <- split(chrInfo, as.character(chrInfo$CHROMOSOME))
-  windowIndex <- vector(mode='list', length=length(chrInfoList))
-  windowRange <- vector(mode='list', length=length(chrInfoList))
-  smooth.ratioData <- lapply(seq(ratioData.chrList), function(i) {
- 
-    ratioData.i <- as.matrix(ratioData.chrList[[i]])
-    chrInfo.i <- chrInfoList[[i]]
-    chr.i <- chrInfo.i$CHROMOSOME[1]
-    cat(paste("Smoothing Chromosome", chr.i, "...\n"))
-
-    # return the index of sorted probes in each slide window
-    windowIndex.i <- eval(call(".setupSlidingTests", pos_data=chrInfo.i$POSITION, winSize=winSize))
-    names(windowIndex.i) <- chrInfoList[[i]]$PROBEID
-    smooth.ratio.i <- sapply(windowIndex.i, function(ind) {
-      # average the values in slide window and perform test
-      smooth.ij <- colMeans(ratioData.i[ind,,drop=FALSE])
-      return(smooth.ij)
-    })
-    smooth.ratio.i <- t(smooth.ratio.i) 
-    windowIndex[[i]] <<- windowIndex.i
-    windowRange.i <- sapply(windowIndex.i, function(ind) {
-      # average the values in slide window and perform test
-      range.ij <- range(chrInfo.i$POSITION[ind])
-      return(range.ij)
-    })
-    windowRange[[i]] <<- t(windowRange.i)
-    cat("\n")
-    return(smooth.ratio.i)  
-  })
-  smooth.ratioData <- do.call('rbind', smooth.ratioData)
-  windowRange <- do.call('rbind', windowRange)
-  colnames(windowRange) <- c('startLocation', 'endLocation')
-
-  if (asDataFrame) {
-    methyData <- data.frame(chrInfo, smooth.ratioData)
-  } else {
-    if (class(methyData) == 'MethyLumiM' || class(methyData) == 'MethyGenoSet') {
-      methyData <- methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)]
-    	exprs(methyData) <- smooth.ratioData
-    } else {
-    	methyData[rownames(smooth.ratioData),colnames(smooth.ratioData)] <- smooth.ratioData
-    }
-  }
-  attr(methyData, 'windowIndex') <- windowIndex
-  attr(methyData, 'windowRange') <- windowRange
-  return(methyData)
-}
-
-
-export.methyGenoSet <- function(methyGenoSet, file.format=c('gct', 'bw'), exportValue=c('beta', 'M'), savePrefix=NULL) {
-  
-  exportValue <- match.arg(exportValue)
-  file.format <- match.arg(file.format)
-  ## get the annotation version
-  hgVersion <- universe(methyGenoSet)
-  
-  chr <- space(methyGenoSet)
-  start <- start(methyGenoSet)
-  ## Sort the rows of ratios.obj
-  methyGenoSet <- methyGenoSet[order(chr, start),]
-	
-  ## check overlap probes and average them
-  locationID <- paste(chr, start, sep='_')
-  dupInd <- which(duplicated(locationID))
-  if (length(dupInd) > 0) {
-    dupID <- unique(locationID[dupInd])
-    for (dupID.i in dupID) {
-      selInd.i <- which(locationID == dupID.i)
-      exprs(methyGenoSet)[selInd.i[1],] <- colMeans(exprs(methyGenoSet)[selInd.i,], na.rm=T)
-    }
-    methyGenoSet <- methyGenoSet[-dupInd,]
-  }
-  ## attach chr prefix in the chromosome names if it does not include it
-  if (length(grep('^chr', chr)) == 0) {
-    names(locData(methyGenoSet)) <- paste('chr', names(locData(methyGenoSet)), sep='')
-  } 
-  
-  methyData <- assayDataElement(methyGenoSet, 'exprs')
-  if (exportValue == 'beta') {
-    methyData <- m2beta(methyData) # - 0.5
-  } 
-	
-	## only keep 3 digit to save space
-  methyData <- signif(methyData, 3)
-  
-  if (file.format == 'gct') {
-    chrInfo <- data.frame(PROBEID=featureNames(methyGenoSet), CHROMOSOME=space(methyGenoSet), START=start(methyGenoSet), END=end(methyGenoSet),  stringsAsFactors=FALSE)
-
-    # remove those probes lack of position information
-    rmInd <- which(is.na(chrInfo$START))
-    if (length(rmInd) > 0)  {
-      chrInfo <- chrInfo[-rmInd,]
-      methyData <- methyData[-rmInd,]
-    }
-    
-    description <- with(chrInfo, paste("|@", CHROMOSOME, ":", START, "-", END, "|", sep=""))
-    gct <- cbind(Name=chrInfo[,'PROBEID'], Description=description, methyData)
-    
-    ## check version hgVersion is included in the filename
-     filename <- paste(savePrefix, "_", exportValue, "_", hgVersion, ".gct", sep='')
-    
-    cat("#1.2\n", file=filename)
-    cat(paste(dim(gct), collapse='\t', sep=''), "\n", file=filename, append=TRUE)
-    write.table(gct, sep="\t", file=filename, row.names=FALSE, append=TRUE)
-    return(invisible(filename))
-  } else if (file.format == 'bw') {
- 		chrInfo <- getChromInfoFromUCSC(hgVersion)
-		rownames(chrInfo) <- chrInfo[,'chrom']
- 
-    samplenames <- sampleNames(methyGenoSet)
-    pdata <- pData(methyGenoSet)
-    if ('SAMID' %in% names(pdata)) {
-      samid <- pdata[,'samid']
-    } else {
-      samid <- NULL
-    }
-    chr.info <- chrInfo(methyGenoSet)
-    seq.lengths <- chr.info[,"stop"] - chr.info[,"offset"]
-    for (i in 1:ncol(methyData)) {    
-      score.i <- methyData[,i]
-      cn.data.i <- GRanges(seqnames=space(methyGenoSet), ranges=IRanges(start=start(methyGenoSet),end=end(methyGenoSet)), strand='*', score=score.i)
-      genome(cn.data.i) <- universe(methyGenoSet)
-			cn.data.i <- cn.data.i[!is.na(score.i), ]
-      if (savePrefix == '' || is.null(savePrefix)) {
-        savePrefix.i <- samplenames[i]
-      } else {
-        savePrefix.i <- paste(savePrefix, samplenames[i], sep='_')
-      }
-      if (!is.null(samid)) savePrefix.i <- paste(savePrefix.i, samid[i], sep='_')
-      
-			seqlengths(cn.data.i) <- chrInfo[as.character(seqlevels(cn.data.i)), 'length']
-      filename.i <- paste(savePrefix.i, "_", exportValue, "_", hgVersion, ".bw", sep='')
-      # export.bw(cn.data.i, filename.i, dataFormat="auto", seqlengths=seq.lengths)
-      export.bw(cn.data.i, filename.i, dataFormat="auto")
-    }
-    return(invisible(filename.i))
-  }
-  
-}
 

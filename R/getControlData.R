@@ -20,23 +20,18 @@ function(x, type=c('data.frame', 'LumiBatch'), ...)
 		if (type == 'LumiBatch') {
 			return(x)
 		} else {
-			if ('controlData' %in% slotNames(x)) {
-				if (nrow(x@controlData) > 0) {
-					controlData <- x@controlData
-					return(controlData)
-				}
+			if (.hasSlot(x, 'controlData')) {
+				return(controlData(x))
 			} 
 			controlData <- as.data.frame(exprs(x))
-			controlType <- pData(featureData(allControlInfo))[,'TargetID']
+			controlType <- pData(featureData(x))[,'TargetID']
+			ProbeID <- pData(featureData(x))$ProbeID
 			if (length(which(toupper(controlType) == 'NEGATIVE')) > 10) {
-				ProbeID <- pData(featureData(allControlInfo))$ProbeID
 				controlNames <- names(controlData)
-				controlData <- data.frame(controlType=as.character(controlType), ProbeID=as.character(ProbeID), controlData)
+				controlData <- data.frame(controlType=as.character(controlType), ProbeID=as.character(ProbeID), controlData, stringsAsFactors=FALSE)
 				names(controlData) <- c('controlType', 'ProbeID', controlNames)
 			} else {
-				controlNames <- names(controlData)
-				controlData <- data.frame(controlType=as.character(controlType), controlData)
-				names(controlData) <- c('controlType', controlNames)
+				stop("Can't find controlData slot, nor do the TargetID looks like control probes")
 			}
 		}		
 	} else {

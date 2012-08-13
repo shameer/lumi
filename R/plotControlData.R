@@ -16,7 +16,7 @@ function(controlData, type=NULL, slideIndex=NULL, logMode=FALSE, new=TRUE, ...)
 	} else {
 		if (is(controlData, 'LumiBatch')) {
 			sampleID <- pData(phenoData(controlData))$sampleID
-			controlData <- controlData@controlData
+			controlData <- controlData(controlData)
 			if (nrow(controlData) == 0) stop('Slot controlData is empty!')
 		} else {
 			sampleID <- NULL

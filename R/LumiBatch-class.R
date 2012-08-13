@@ -39,8 +39,34 @@ setValidity("LumiBatch", function(object)
     msg <- Biobase:::validMsg(NULL, Biobase:::isValidVersion(object, "ExpressionSet"))
     msg <- Biobase:::validMsg(msg, assayDataValidMembers(assayData(object), c("exprs")))
     msg <- Biobase:::validMsg(msg, assayDataValidMembers(assayData(object), c("se.exprs")))
+		## validate controlData slot, added by Mark Cowley
+		msg <- Biobase:::validMsg(msg, valid_controlData(object))
     if (is.null(msg)) TRUE else msg
 })
+
+
+## validate controlData slot, added based on the code provided by Mark Cowley
+valid_controlData <- function(object) {
+	is(object, "LumiBatch") || return("object must be a LumiBatch")
+	if ( nrow(controlData(object)) == 0 ) {
+		return(TRUE)
+	} else if ( ncol(controlData(object)) == (ncol(object) + 2) ) {
+	 	if ( !identical(colnames(controlData(object))[1:2], c("controlType", "ProbeID")) ) {
+		  cat("The first 2 extra columns in the controlData should be 'controlType' and 'ProbeID'.\n")
+			return(FALSE)
+		} 
+		sampleName.ctrl <- colnames(controlData(object))[-c(1,2)]
+	} else {
+		sampleName.ctrl <- colnames(controlData(object))
+	}
+
+	if (!identical(sampleName.ctrl, sampleNames(object))) {
+		cat("The sample names in the controlData don't match sampleNames(object).\n")
+		return(FALSE)
+	}
+	
+	return(TRUE)
+}
 
 
 ##=================================================
@@ -123,8 +149,25 @@ setMethod("controlData", signature(object="LumiBatch"), function(object) {
 	object@controlData
 })
 
+
+## added based on the code provided by Mark Cowley
 setReplaceMethod("controlData", signature(object="LumiBatch"), function(object, value) {
+	
+	if (is.null(value)) value <- data.frame()
+	
+	if (is.character(value) && length(value) == 1) {
+		if ( file.exists(value) ) {
+			object <- addControlData2lumi(value, object)
+			validObject(object)
+		}
+	} else if (is(value, 'data.frame')) {
 		object@controlData <- value
+		validObject(object)
+	} else {
+		stop("value must be one of: NULL, data.frame, or character(1) as the path to a control data file")
+	}
+	
+	return(object)
 })	
 
 
@@ -163,11 +206,15 @@ setReplaceMethod("sampleNames", signature(object="LumiBatch",value="ANY"),
         
 	 	## controlData information
 	 	if (nrow(object@controlData) > 0) {
-			if (ncol(object@controlData) == ddim[2])
+			if (ncol(object@controlData) == ddim[2]) {
 				colnames(object@controlData) <- value
+			} else if (ncol(object@controlData) == ddim[2] + 2) {
+				colnames(controlData(object)) <- c("controlType", "ProbeID", value)
+			} 				
 	 	}
 	 	    
-	 	return(object)
+	 	validObject(object)
+	  return(object)
 	})
 
 
@@ -216,7 +263,7 @@ setMethod("show",signature(object="LumiBatch"), function(object)
 	}	
 	cat('\nObject Information:\n')
 	callNextMethod()
-	if (!is.null(object@controlData)) {
+	if (nrow(controlData(object))>0) {
 		cat('Control Data: Available\n')
 	} else {
 		cat('Control Data: N/A\n')
@@ -294,23 +341,27 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 		}
 
 		## controlData information
-		if (nrow(x@controlData) > 0) {
+		if (nrow(controlData(x)) > 0) {
 			if (is.numeric(j))  j <- sampleName[j]
-			if (all(j %in% colnames(x@controlData))) {
-				x@controlData <- x@controlData[,j, drop=FALSE]
+			if (all(j %in% colnames(controlData(x)))) {
+				if (c("controlType", "ProbeID") %in% colnames(controlData(x))) {
+				  j <- c("controlType", "ProbeID", j)
+				}
+				controlData(x) <- controlData(x)[,j, drop=FALSE]
 			} else {
 				warning('The controlData slot does not match the sampleNames.\nThe subsetting did not execute on controlData.\n')
 			}
 		}
 	}
 
-    # history tracking
-    history.finished <- as.character(Sys.time())
+  # history tracking
+  history.finished <- as.character(Sys.time())
 	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
 	lumiVersion <- packageDescription('lumi')$Version
 	x@history<- rbind(x@history, data.frame(submitted=history.submitted, finished=history.finished, 
 			command=history.command, lumiVersion=lumiVersion))
 
+  validObject(x)
 	return(x)
 })
 
@@ -321,17 +372,17 @@ setMethod("combine", signature=c(x="LumiBatch", y="ExpressionSet"), function(x, 
 	warning('The Lumibatch object was forced as ExpressionSet.')
 	x <- as(x, 'ExpressionSet')
 	if (length(list(...)) > 0) 
-	        return(combine(x, combine(y, ...)))
+		return(combine(x, combine(y, ...)))
 	return(combine(x, y))
 })
 
 setMethod("combine", signature=c(x="ExpressionSet", y="LumiBatch"), function(x, y, ...) 
 {
 	if (missing(y)) return(x)
-	warning('The Lumibatch object was forced as ExpressionSet.')
+	warning('The LumiBatch object was forced as ExpressionSet.')
 	y <- as(y, 'ExpressionSet')
 	if (length(list(...)) > 0) 
-	        return(combine(x, combine(y, ...)))
+		return(combine(x, combine(y, ...)))
 	return(combine(x, y))
 })
 
@@ -339,7 +390,7 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 {
 	if (missing(y)) return(x)
 	if (length(list(...)) > 0) 
-	        return(combine(x, combine(y, ...)))
+		return(combine(x, combine(y, ...)))
 	if (class(x) != class(y))
 		stop(paste("objects must be the same class, but are ",
                  class(x), ", ", class(y), sep=""))
@@ -378,25 +429,6 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	## combine protocolData 
 	protocolData(x) <- combine(protocolData(x),protocolData(y))
 	
-	## featureData(x) <- combine(featureData(x),featureData(y)) # very slow
-	## For the feature data, we assume all the data have the same information,
-	##    so only the first feature data will be used.
-	# if (!is.null(featureData(x)) || !is.null(featureData(y))) {
-	# 	feature.x <- featureData(x)
-	# 	feature.y <- featureData(y)
-    # 
-	# 	pData.x <- pData(feature.x)
-	# 	pData.y <- pData(feature.y)
-	# 	if (names(pData.x)[1] != names(pData.y)[1])	stop('The featureData of two objects are incompatible!')
-	# 	#repInfo <- merge(pData.x, pData.y, by=names(pData.x)[1], all=TRUE, suffixes = c(".x",".y"), sort=FALSE)
-	# 	#pData(feature.x) <- repInfo
-	# 	#
-	# 	#metaInfo <- rbind(varMetadata(feature.x), varMetadata(feature.y)[-1,])
-	# 	#rownames(metaInfo) <- names(repInfo)
-	# 	#varMetadata(feature.x) <- metaInfo
-	# 	#featureData(x) <- feature.x
-	# }
-
 	## combining the QC information
 	if (length(x@QC) > 0 && length(y@QC) > 0) {
 		if (!is.null(x@QC$BeadStudioSummary) && !is.null(y@QC$BeadStudioSummary)) {
@@ -451,13 +483,23 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 	}
 	
 	## controlData information
-	if (nrow(x@controlData) > 0) {
-		if (nrow(x@controlData) == nrow(y@controlData)) {
-			controlData <- cbind(x@controlData, y@controlData)
-			x@controlData <- as.data.frame(controlData)
+	if (nrow(controlData(x)) > 0) {
+		if (nrow(controlData(x)) == nrow(controlData(y))) {
+			if (c('controlType', 'ProbeID') %in% colnames(controlData(x)) && 
+				  c('controlType', 'ProbeID') %in% colnames(controlData(y))) {
+					if (all(controlData(x)$controlType == controlData(y)$controlType) &&
+				      all(controlData(x)$ProbeID == controlData(y)$ProbeID)) {
+								controlData <- cbind(controlData(x), controlData(y)[,-c(1,2)])
+								controlData(x) <- as.data.frame(controlData)
+					} else {
+						warning("controlData slot not combined: controlType and ProbeID do not match.")
+					}
+			} else {
+				warning("controlData slot not combined: controlType and ProbeID are required.")
+			}
 		} else {
-           warning("controlData slot not combined: different numbers of rows found") 
-       }
+    	warning("controlData slot not combined: different numbers of rows found.") 
+    }
 	}
 
 	# history tracking

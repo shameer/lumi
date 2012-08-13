@@ -25,7 +25,7 @@ function(nuID, lib.mapping=NULL, species=c('Human', 'Mouse', 'Rat', 'Unknown'), 
 	idMapping <- chipInfo$idMapping
 	if (length(nuID) > 0) {
 		if (chipInfo$IDType[1] != 'nuID') {
-			cat('The input ID is not nuID. So no ID converstion will be made!\n')
+			cat('The input ID is not nuID. So no ID conversion will be made!\n')
 			return(nuID)
 		}
 	} 

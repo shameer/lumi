@@ -20,22 +20,10 @@ importMethodsFrom(methylumi, methylated, unmethylated, "methylated<-", "unmethyl
  "controlData", "controlData<-", detection, "detection<-", "dataType", "dataType<-")
 importFrom(methylumi, controlTypes, lumIDAT, methylumiR)
 
-# GenoSet related classes and functions
-importClassesFrom(genoset, GenoSet)
-importClassesFrom(IRanges, IRanges, RangedData)
-importClassesFrom(GenomicRanges, GRanges)
-importMethodsFrom(IRanges, space, start, end, width, universe)
-importMethodsFrom(genoset, locData, "locData<-")
-importFrom(rtracklayer, export.bw)
-importFrom(GenomicFeatures, getChromInfoFromUCSC)
-importFrom(IRanges, IRanges, RangedData)
-importFrom(genoset, GenoSet)
-importFrom(GenomicRanges, GRanges, "genome<-", "seqlengths<-", seqlevels)
-
 importFrom(mgcv, gam, smoothCon, mono.con, pcls, s, Predict.matrix)
 importFrom(KernSmooth, locpoly)
-importFrom(hdrcde, hdr.boxplot)
-# importFrom(nleqslv, nleqslv)
+importFrom(lattice, bwplot, panel.violin)
+importFrom(nleqslv, nleqslv)
 importFrom(annotate, lookUp, getSYMBOL)
 importClassesFrom(RSQLite, SQLiteDriver, SQLiteConnection)
 importMethodsFrom(RSQLite, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields)
@@ -51,8 +39,8 @@ importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 
-exportClasses(LumiBatch, MethyGenoSet)
-exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce)
+exportClasses(LumiBatch)
+exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce, "controlData", "controlData<-")
 
 export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            
 bgAdjust, detectOutlier, detectionCall, estimateLumiCV, getChipInfo, getControlData, getControlProbe,
@@ -65,9 +53,7 @@ addAnnotationInfo, addControlData2methyLumiM, adjColorBias.quantile, adjColorBia
 estimateIntensity, estimateMethylationBG, importMethyIDAT, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
 # methylation status estimation function
-lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit,
-# MethyGenoSet related functions
-MethyGenoSet, MethyLumiM2GenoSet, export.methyGenoSet, getChrInfo
+lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit, getChrInfo
 )
 
 
