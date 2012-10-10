@@ -43,22 +43,26 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, hgVersion=c(
       })
     }
     barcodeInfo <- matrix(unlist(barcodeInfo), ncol=2)
-    colnames(barcodeInfo) <- c('Sentrix_Barcode', 'Sentrix_Position')
+    colnames(barcodeInfo) <- c('SENTRIX_BARCODE', 'SENTRIX_POSITION')
 	} else {
-    if (!all(c('Sentrix_Barcode', 'Sentrix_Position') %in% colnames(sampleInfo))) {
-      stop("'Sentrix_Barcode' and 'Sentrix_Position' are required in 'sampleInfo'!")
+		colnames(sampleInfo) <- toupper(colnames(sampleInfo))
+		if (any(colnames(sampleInfo) == 'SENTRIX_ID')) {
+			colnames(sampleInfo)[colnames(sampleInfo) == 'SENTRIX_ID'] <- 'SENTRIX_BARCODE'
+		}
+    if (!all(c('SENTRIX_BARCODE', 'SENTRIX_POSITION') %in% colnames(sampleInfo))) {
+      stop("'SENTRIX_POSITION' and 'SENTRIX_BARCODE' or 'SENTRIX_ID' and are required in 'sampleInfo'!")
     }
-    barcodeInfo <- sampleInfo[,c('Sentrix_Barcode', 'Sentrix_Position')]
-    barcodes <- paste(barcodeInfo[, 'Sentrix_Barcode'], barcodeInfo[, 'Sentrix_Position'], sep='_')
+    barcodeInfo <- sampleInfo[,c('SENTRIX_BARCODE', 'SENTRIX_POSITION')]
+    barcodes <- paste(barcodeInfo[, 'SENTRIX_BARCODE'], barcodeInfo[, 'SENTRIX_POSITION'], sep='_')
   }
   
   ## read IDAT files
   ## check the folder location
-  ## read data path could be either dataPath or dataPath/Sentrix_Barcode
+  ## read data path could be either dataPath or dataPath/SENTRIX_BARCODE
   realDataPath <- dataPath
   for (i in 1:length(barcodes)) {
     file.pattern.i <- paste(barcodes[i], '.*\\.idat$', sep='')
-    data.path.i <- file.path(dataPath, barcodeInfo[i, 'Sentrix_Barcode'])
+    data.path.i <- file.path(dataPath, barcodeInfo[i, 'SENTRIX_BARCODE'])
     if (length(dir(data.path.i, pattern=file.pattern.i, ignore.case=T)) == 2) {
       realDataPath[i] <- data.path.i
     } else if (length(dir(dataPath, pattern=file.pattern.i, ignore.case=T)) != 2) {
@@ -76,10 +80,10 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, hgVersion=c(
   
   ## add sample info 
   if (!is.null(sampleInfo)) {
-    rownames(sampleInfo) <- paste(barcodeInfo[, 'Sentrix_Barcode'], barcodeInfo[, 'Sentrix_Position'], sep='_')
+    rownames(sampleInfo) <- paste(barcodeInfo[, 'SENTRIX_BARCODE'], barcodeInfo[, 'SENTRIX_POSITION'], sep='_')
     pData(lumi450k) <- sampleInfo[barcodes,]
-    ## rename the samples if Sample_Name is provided in sampleInfo
-    samplename <- sampleInfo[barcodes,'Sample_Name']
+    ## rename the samples if SAMPLE_NAME is provided in sampleInfo
+    samplename <- sampleInfo[barcodes,'SAMPLE_NAME']
     if (!is.null(samplename)) {
       sampleNames(lumi450k) <- samplename
     }
@@ -1031,8 +1035,7 @@ setMethod("boxplot",signature(x="MethyLumiM"), function(x, main, logMode=TRUE, .
   if (is.null(labels)) labels <- as.character(1:ncol(dataMatrix))
   ## set the margin of the plot
   mar <- c(max(nchar(labels))/2 + 4.5, 5, 5, 3)
-  old.mar <- par('mar')
-  par(mar=mar)
+  old.mar <- par(mar=mar)
   on.exit(par(old.mar))
 
 	if (.hasSlot(x, 'dataType')) {
@@ -1994,13 +1997,14 @@ lumiMethyStatus <- function(methyLumiM, ...)
 
 ## Get chromosome information of a MethyLumiM or MethyGenoSet object
 # chrInfo <- getChrInfo(methyLumiM, lib=lib)
-getChrInfo <- function(methyData, lib=NULL, as.GRanges=FALSE, ...) {
+getChrInfo <- function(methyData, lib=NULL, ...) {
   
 	# hgVersion <- match.arg(hgVersion)
-	if (is(methyData, 'GenoSet')) {
-    ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
-    probeList <- featureNames(methyData)
-  } else if (is(methyData, 'MethyLumiM')) {
+	# if (is(methyData, 'GenoSet')) {
+	#     ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
+	#     probeList <- featureNames(methyData)
+	#   } 
+ if (is(methyData, 'MethyLumiM')) {
     methyData <- addAnnotationInfo(methyData, lib=lib, ...)
     ff <- fData(methyData)
     probeList <- featureNames(methyData)
@@ -2010,23 +2014,26 @@ getChrInfo <- function(methyData, lib=NULL, as.GRanges=FALSE, ...) {
 	} else {
     stop('methyData should be a MethyLumiM object or a character vector')
   }
-  if (as.GRanges) {
-    chr <- ff$CHROMOSOME
-    if (length(grep('^chr', chr[1])) == 0) 
-      chr <- paste('chr', chr, sep='')
-    if (!is.null(ff$END)) {
-      END <- ff$END
-    } else {
-      END <- ff$POSITION
-    }
-    chrInfo = GRanges(seqnames=chr,   
-         ranges=IRanges(start=ff$POSITION, 
-         end=END), strand='*', PROBEID=probeList)  
-  } else {
-    chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
-    if (!is.null(ff$END))
-      chrInfo <- data.frame(chrInfo, END=ff$END)
-  }
+  # if (as.GRanges) {
+  #   chr <- ff$CHROMOSOME
+  #   if (length(grep('^chr', chr[1])) == 0) 
+  #     chr <- paste('chr', chr, sep='')
+  #   if (!is.null(ff$END)) {
+  #     END <- ff$END
+  #   } else {
+  #     END <- ff$POSITION
+  #   }
+  #   chrInfo <- GRanges(seqnames=chr,   
+  #        ranges=IRanges(start=ff$POSITION, 
+  #        end=END), strand='*', PROBEID=probeList)  
+  # } else {
+  #   chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
+  #   if (!is.null(ff$END))
+  #     chrInfo <- data.frame(chrInfo, END=ff$END)
+  # }
+  chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
+  if (!is.null(ff$END))
+    chrInfo <- data.frame(chrInfo, END=ff$END)
 
   return(chrInfo)
 }

@@ -24,7 +24,7 @@
 
 \SweaveOpts{keep.source=TRUE}
 
-\author{Pan Du$^\ddagger$\footnote{dupan (at) northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng (at) northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe (at) northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2 (at) northwestern.edu}}
+\author{Pan Du$^\ddagger$\footnote{dupan.mail (at) gmail.com}, Gang Feng$^\ddagger$\footnote{g-feng (at) northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe (at) northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2 (at) northwestern.edu}}
 \begin{document}
 
 \setkeys{Gin}{width=1\textwidth} 
@@ -614,10 +614,13 @@ Retrieve the normalized data
 dataMatrix <- exprs(lumi.N.Q)
 @
 
-To speed up the processing and reduce false positives, remove the unexpressed genes
+To speed up the processing and reduce false positives, remove the unexpressed and un-annotated genes
 <<filtering>>=
 presentCount <- detectionCall(example.lumi)
 selDataMatrix <- dataMatrix[presentCount > 0,]
+if (require(lumiHumanAll.db) & require(annotate)) {
+  selDataMatrix <- selDataMatrix[!is.na(getSYMBOL(rownames(selDataMatrix), 'lumiHumanAll.db')),]
+}
 probeList <- rownames(selDataMatrix)
 @
 

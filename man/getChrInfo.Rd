@@ -8,7 +8,7 @@ get the chromosome location information of methylation probes
 get the chromosome location information of methylation probes
 }
 \usage{
-getChrInfo(methyData, lib = NULL, as.GRanges = FALSE, ...)
+getChrInfo(methyData, lib = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,16 +18,13 @@ a MethyLumiM object
   \item{lib}{
 Methylation annotation library
 }
-  \item{as.GRanges}{
-whether convert as GRanges or data.frame.
-}
 \item{\dots}{ optional arguments to \code{\link{addAnnotationInfo}}.}
 }
 \details{
 
 }
 \value{
-a GRanges or data.frame object 
+a data.frame  
 }
 \references{
 
