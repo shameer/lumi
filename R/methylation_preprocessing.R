@@ -21,9 +21,8 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 
 ## import Illumina Infinium methylation IDAT files based on barcodes.
 ## This is an extension of the methylumi::lumIDAT function 
-importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, hgVersion=c('hg19', 'hg18'), ...) {
+importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, ...) {
   
-  hgVersion <- match.arg(hgVersion)
   if (missing(sampleInfo)) {
     stop('Please provide "sampleInfo"!')
   }
@@ -91,17 +90,16 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, hgVersion=c(
   
 	if (!is.null(lib)) {
 		## add annotation information: 'COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'
-		lumi450k <- addAnnotationInfo(lumi450k, lib=lib, hgVersion=hgVersion)
+		lumi450k <- addAnnotationInfo(lumi450k, lib=lib)
 	}
 
   return(lumi450k)
 }
 
 
-addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'), annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
+addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
   
-  hgVersion <- match.arg(hgVersion)
-	if (is(methyLumiM, 'MethyLumiM')) {
+ 	if (is(methyLumiM, 'MethyLumiM')) {
 	  # retrieve feature data
 	  ff <- fData(methyLumiM)
     probeList <- featureNames(methyLumiM)
@@ -116,24 +114,15 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, hgVersion=c('hg19', 'hg18'),
     obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
     colorInfo <- AnnotationDbi::mget(probeList, obj)
     ff$COLOR_CHANNEL <- sapply(colorInfo, function(x) x[1])
+
+    obj <- get(paste(sub("\\.db$", "", lib), "CHR", sep=""))
+    chr <- AnnotationDbi::mget(probeList, obj)
+    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+
+    obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
+    loc <- AnnotationDbi::mget(probeList, obj)
+    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
 		
-		if (hgVersion == 'hg19') {
-	    obj <- get(paste(sub("\\.db$", "", lib), "CHR37", sep=""))
-	    chr <- AnnotationDbi::mget(probeList, obj)
-	    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
-
-	    obj <- get(paste(sub("\\.db$", "", lib), "CPG37", sep=""))
-	    loc <- AnnotationDbi::mget(probeList, obj)
-	    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
-		} else {
-	    obj <- get(paste(sub("\\.db$", "", lib), "CHR36", sep=""))
-	    chr <- AnnotationDbi::mget(probeList, obj)
-	    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
-
-	    obj <- get(paste(sub("\\.db$", "", lib), "CPG36", sep=""))
-	    loc <- AnnotationDbi::mget(probeList, obj)
-	    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
-		}
 	} else {
 		if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
 	    ff$CHROMOSOME <- ff$CHR
@@ -1999,11 +1988,6 @@ lumiMethyStatus <- function(methyLumiM, ...)
 # chrInfo <- getChrInfo(methyLumiM, lib=lib)
 getChrInfo <- function(methyData, lib=NULL, ...) {
   
-	# hgVersion <- match.arg(hgVersion)
-	# if (is(methyData, 'GenoSet')) {
-	#     ff <- data.frame(CHROMOSOME=space(methyData), POSITION=start(methyData), END=end(methyData))
-	#     probeList <- featureNames(methyData)
-	#   } 
  if (is(methyData, 'MethyLumiM')) {
     methyData <- addAnnotationInfo(methyData, lib=lib, ...)
     ff <- fData(methyData)
@@ -2014,23 +1998,7 @@ getChrInfo <- function(methyData, lib=NULL, ...) {
 	} else {
     stop('methyData should be a MethyLumiM object or a character vector')
   }
-  # if (as.GRanges) {
-  #   chr <- ff$CHROMOSOME
-  #   if (length(grep('^chr', chr[1])) == 0) 
-  #     chr <- paste('chr', chr, sep='')
-  #   if (!is.null(ff$END)) {
-  #     END <- ff$END
-  #   } else {
-  #     END <- ff$POSITION
-  #   }
-  #   chrInfo <- GRanges(seqnames=chr,   
-  #        ranges=IRanges(start=ff$POSITION, 
-  #        end=END), strand='*', PROBEID=probeList)  
-  # } else {
-  #   chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
-  #   if (!is.null(ff$END))
-  #     chrInfo <- data.frame(chrInfo, END=ff$END)
-  # }
+
   chrInfo <- data.frame(PROBEID=probeList, ff[,c('CHROMOSOME', 'POSITION')])  
   if (!is.null(ff$END))
     chrInfo <- data.frame(chrInfo, END=ff$END)

@@ -7,7 +7,7 @@ Import Illumina methylation .idat files as an MethyLumiM object
 Import Illumina methylation .idat files as an MethyLumiM object. An extension of \code{\link[methylumi]{lumIDAT}} function
 }
 \usage{
-importMethyIDAT(sampleInfo, dataPath = getwd(), lib = NULL, hgVersion = c("hg19", "hg18"), ...)
+importMethyIDAT(sampleInfo, dataPath = getwd(), lib = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,9 +19,6 @@ The path of .idat files
 }
   \item{lib}{
 Annotation library
-}
-  \item{hgVersion}{
-human genome version
 }
   \item{\dots}{
 other parameters used by \code{\link[methylumi]{lumIDAT}} function

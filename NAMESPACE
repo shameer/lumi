@@ -49,11 +49,9 @@ getControlType, getNuIDMappingInfo, id2seq, inverseVST, is.nuID, lumiB, lumiExpr
 lumiR, lumiR.batch, lumiT, nuID2EntrezID, nuID2IlluminaID, nuID2RefSeqID, nuID2probeID, nuID2targetID,
 plotCDF, plotControlData, plotDensity, plotHousekeepingGene, plotSampleRelation, plotStringencyGene, plotVST, probeID2nuID,
 produceGEOPlatformFile, produceGEOSampleInfoTemplate, produceGEOSubmissionFile, rsn, seq2id, ssn, targetID2nuID, vst, rankinvariant,
-# methylation analysis functions
 addAnnotationInfo, addControlData2methyLumiM, adjColorBias.quantile, adjColorBias.ssn, beta2m, bgAdjustMethylation, boxplotColorBias, colorBiasSummary, estimateBeta, estimateM,
 estimateIntensity, estimateMethylationBG, importMethyIDAT, lumiMethyB, lumiMethyC, lumiMethyN, lumiMethyR, m2beta, normalizeMethylation.quantile, 
 normalizeMethylation.ssn, plotColorBias2D, plotColorBias1D, produceMethylationGEOSubmissionFile, smoothQuantileNormalization, 
-# methylation status estimation function
 lumiMethyStatus, gammaFitEM, methylationCall, plotGammaFit, getChrInfo
 )
 
