@@ -111,17 +111,33 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CH
 	}
 	
 	if (!is.null(lib) && require(lib, character.only=TRUE)) {
+		
+		colorInfo <- chr <- loc <- rep(NA, length(probeList))
+		names(colorInfo) <- names(chr) <- names(loc) <- probeList
+		
     obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
-    colorInfo <- AnnotationDbi::mget(probeList, obj)
-    ff$COLOR_CHANNEL <- sapply(colorInfo, function(x) x[1])
-
-    obj <- get(paste(sub("\\.db$", "", lib), "CHR", sep=""))
-    chr <- AnnotationDbi::mget(probeList, obj)
-    ff$CHROMOSOME <- as.character(sapply(chr, function(x) x[1]))
+		pp <- probeList[probeList %in% keys(obj)]
+    colorInfo[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+    ff$COLOR_CHANNEL <- colorInfo
+		
+		## Check whether multiple versions of chromosome information is available,
+		## If so, only use the latest version.
+		chrPattern <- paste(sub("\\.db$", "", lib), "CHR", sep="")
+		chrObjs <- ls(paste("package:", lib, sep=""), pattern=paste(chrPattern, "[0-9]+$", sep=""))
+		if (length(chrObjs) > 1) {
+			chrVersion <- sub(".*[^0-9]([0-9]+)$", "\\1", chrObjs)
+			obj <- get(chrObjs[which.max(as.numeric(chrVersion))])
+		} else {
+			obj <- get(chrPattern)
+		}
+		pp <- probeList[probeList %in% keys(obj)]
+    chr[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+    ff$CHROMOSOME <- as.character(chr)
 
     obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
-    loc <- AnnotationDbi::mget(probeList, obj)
-    ff$POSITION <- as.numeric(as.character(sapply(loc, function(x) x[1])))
+ 		pp <- probeList[probeList %in% keys(obj)]
+    loc[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+    ff$POSITION <- as.numeric(as.character(loc))
 		
 	} else {
 		if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
