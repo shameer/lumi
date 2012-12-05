@@ -616,6 +616,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     normData <- limma::normalizeQuantiles(dataMatrix)
     ref <- normData[,1]
   } 
+	
   if (!is.null(adjData)) {
     if (!is.matrix(adjData)) adjData <- matrix(adjData, ncol=1)
     if (ncol(dataMatrix) != ncol(adjData))
@@ -629,6 +630,8 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     if (min(ref, na.rm=TRUE) < 1) ref <- ref - min(ref, na.rm=TRUE) + 1
     ref <- log2(ref)
   }
+	## remove NA in ref
+	ref <- ref[!is.na(ref)]
   len <- nrow(dataMatrix)
   refLen <- length(ref)
   gridsize <- min(min(len, refLen)/2, 1000)
@@ -636,9 +639,9 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
   # In the case of different lengthes between reference and data, interpolation will be performed.
   if (interpolationMode) {
     x <- (1:refLen)/refLen
-    y <- sort(ref, decreasing=F)
+    y <- sort(ref, decreasing=FALSE)
   } else {
-    y <- sort(ref, decreasing=F)
+    y <- sort(ref, decreasing=FALSE)
   }
   
   # smoothing the quantile normalization results
@@ -650,6 +653,9 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
   for (i in 1:ncol(dataMatrix)) {
 	  if (verbose)  cat('Processing sample', colnames(dataMatrix)[i], '...\n')
     profile.i <- dataMatrix[,i]
+		profile.naInd.i <- which(is.na(profile.i))
+		if (length(profile.naInd.i) > 0)
+			profile.i <- profile.i[-profile.naInd.i]
     if (!is.null(adjData)) {
       adjData.i <- adjData[,i]
     } else {
@@ -684,20 +690,20 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     }
     
     ## remove outliers points at two ends
-    rank.i <- rank(selProfile.i, ties.method='min')
-    lowInd.i <- rank.i <= 500
-    highInd.i <- rank.i > length(selProfile.i) - 500
+		rank.i <- rank(selProfile.i, ties.method='min')
+    lowInd.i <- which(rank.i <= 500)
+    highInd.i <- which(rank.i > length(selProfile.i) - 500)
     #boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
     #lowInd.i <- selProfile.i < boundary.i[1]
     #highInd.i <- selProfile.i > boundary.i[2]
     ## fit the low segment
     suppressWarnings(rlm.i <- rlm(selProfile.i[lowInd.i], y.out.i[lowInd.i]))
     dd.i <- y.out.i[lowInd.i] - rlm.i$fitted.values
-    outlier.ind.low.i <- which(lowInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
+    outlier.ind.low.i <- lowInd.i[which(abs(dd.i) > 3 * sd(dd.i))]
     ## fit the high segment
     suppressWarnings(rlm.i <- rlm(selProfile.i[highInd.i], y.out.i[highInd.i]))
     dd.i <- y.out.i[highInd.i] - rlm.i$fitted.values
-    outlier.ind.high.i <- which(highInd.i)[which(abs(dd.i) > 3 * sd(dd.i))]
+    outlier.ind.high.i <- highInd.i[which(abs(dd.i) > 3 * sd(dd.i))]
     outlier.ind.i <- c(outlier.ind.low.i, outlier.ind.high.i)
     if (length(outlier.ind.i) > 0) {
       tt <- locpoly(selProfile.i[-outlier.ind.i], y.out.i[-outlier.ind.i], degree=degree,  gridsize=gridsize, bandwidth=bandwidth, ...)
@@ -724,6 +730,11 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
       }
       norm.i[rank.diff.ind.i] <- replaceVal.i
     }
+		if (length(profile.naInd.i) > 0) {
+			tmp.i <- norm.i
+			norm.i <- rep(NA, nrow(normData))
+			norm.i[-profile.naInd.i] <- tmp.i
+		}
     
     # plot(selProfile.i, y.out.i, pch='.')
     # lines(tt, col=2)
