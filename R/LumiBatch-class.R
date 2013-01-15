@@ -667,7 +667,7 @@ setMethod('density', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, dotColor=1, main=NULL) 
+	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, dotColor=1, highlight=NULL, highlightColor=2, main=NULL) 
 {
 	upperPanel <- function(x, y) {
 		if (smoothScatter) {
@@ -678,6 +678,10 @@ setMethod("pairs", signature(x="ExpressionSet"),
 				points(x[subset], y[subset], col=dotColor[subset], pch='.', cex=3)
 			} else {
 				points(x[subset], y[subset], col=dotColor, pch='.', cex=3)
+			}
+			if (!is.null(highlight)) {
+				highlight <- intersect(subset, highlight)
+				points(x[highlight], y[highlight], col=highlightColor, pch='.', cex=3)
 			}
 		}
 		
@@ -717,6 +721,13 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	}
 
 	if (smoothScatter) subset <- NULL
+	if (is.character(highlight)) {
+		# convert it as numeric index
+		index <- 1:nrow(x)
+		names(index) <- featureNames(x)
+		highlight <- index[highlight]
+	} 
+
 	expr <- exprs(x)
 	if (class(x) == 'MethyLumiM') logMode <- FALSE
 	if(logMode) {
@@ -748,6 +759,8 @@ setMethod("pairs", signature(x="ExpressionSet"),
 	} else {
 		subset <- 1:nrow(expr)
 	}
+	
+	
 	pairs(expr,upper.panel=upperPanel, diag.panel=diagPanel, 
 			lower.panel=lowerPanel, main=main, ...)
 })

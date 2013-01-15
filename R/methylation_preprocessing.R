@@ -543,7 +543,7 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
 }
 
 
-adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logMode=TRUE, ...) {
+adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logMode=TRUE, verbose=TRUE, ...) {
   
 	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
@@ -565,6 +565,7 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
   bothInd <- which(annotation$COLOR_CHANNEL == 'Both' | annotation$COLOR_CHANNEL == '')
   bandwidth <- ifelse(logMode, 0.3, 200)
   for (i in 1:ncol(unmethy)) {
+		if (verbose) cat('Processing sample', colnames(unmethy)[i], '...\n')
     red.a.i <- unmethy[redInd, i]
     red.b.i <- methy[redInd, i]
     red.i <- c(red.a.i, red.b.i)
@@ -576,22 +577,22 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
       ## For 450K data
       if (length(bothInd) > 0) {
         ## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
-        y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, unmethy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+        y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, unmethy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, verbose=verbose, ...)
         unmethy[bothInd,i] <- y.out.i[(length(red.i)+1):length(y.out.i)]
-        # y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+        # y.out.i <- smoothQuantileNormalization(red.i, grn.i, adjData=c(red.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, verbose=verbose, ...)
         # methy[bothInd,i] <- y.out.i[(length(red.i)+1):length(y.out.i)]
       } else {
-        y.out.i <- smoothQuantileNormalization(red.i, grn.i, logMode=logMode, bandwidth=bandwidth, ...)
+        y.out.i <- smoothQuantileNormalization(red.i, grn.i, logMode=logMode, bandwidth=bandwidth, verbose=verbose, ...)
       }
       unmethy[redInd, i] <- y.out.i[1:length(red.a.i)]
       methy[redInd, i] <- y.out.i[(length(red.a.i)+1):length(red.i)]
     } else {
       if (length(bothInd) > 0) {
         ## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
-        y.out.i <- smoothQuantileNormalization(grn.i, red.i, adjData=c(grn.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, ...)
+        y.out.i <- smoothQuantileNormalization(grn.i, red.i, adjData=c(grn.i, methy[bothInd,i]), logMode=logMode, bandwidth=bandwidth, verbose=verbose, ...)
         methy[bothInd,i] <- y.out.i[(length(grn.i)+1):length(y.out.i)]
       } else {
-        y.out.i <- smoothQuantileNormalization(grn.i, red.i, logMode=logMode, bandwidth=bandwidth, ...)
+        y.out.i <- smoothQuantileNormalization(grn.i, red.i, logMode=logMode, bandwidth=bandwidth, verbose=verbose, ...)
       }
       unmethy[grnInd, i] <- y.out.i[1:length(grn.a.i)]
       methy[grnInd, i] <- y.out.i[(length(grn.a.i)+1):length(grn.i)]
@@ -651,7 +652,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     normData <- adjData
   }
   for (i in 1:ncol(dataMatrix)) {
-	  if (verbose)  cat('Processing sample', colnames(dataMatrix)[i], '...\n')
+	  # if (verbose)  cat('Processing sample', colnames(dataMatrix)[i], '...\n')
     profile.i <- dataMatrix[,i]
 		profile.naInd.i <- which(is.na(profile.i))
 		if (length(profile.naInd.i) > 0)
@@ -692,7 +693,7 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     ## remove outliers points at two ends
 		rank.i <- rank(selProfile.i, ties.method='min')
     lowInd.i <- which(rank.i <= 500)
-    highInd.i <- which(rank.i > length(selProfile.i) - 500)
+    highInd.i <- which(rank.i > max(rank.i) - 500)
     #boundary.i <- quantile(selProfile.i, c(0.3, 0.7))
     #lowInd.i <- selProfile.i < boundary.i[1]
     #highInd.i <- selProfile.i > boundary.i[2]
@@ -723,12 +724,11 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
     if (length(rank.diff.ind.i) > 0) {
       rank.na.i <- rank.old.i[rank.diff.ind.i]
       replaceVal.i <- NULL
-      for (rank.na.ij in rank.na.i) {
+      for (rank.na.ij in unique(rank.na.i)) {
         down.ij <- sort(norm.i[rank.old.i < rank.na.ij & !(rank.old.i %in% rank.na.i)], decreasing=TRUE)[1]
         up.ij <- sort(norm.i[rank.old.i > rank.na.ij & !(rank.old.i %in% rank.na.i)], decreasing=FALSE)[1]
-        replaceVal.i <- c(replaceVal.i, mean(c(up.ij, down.ij), na.rm=TRUE))
+				norm.i[rank.diff.ind.i[rank.na.i == rank.na.ij]] <- mean(c(up.ij, down.ij), na.rm=TRUE)
       }
-      norm.i[rank.diff.ind.i] <- replaceVal.i
     }
 		if (length(profile.naInd.i) > 0) {
 			tmp.i <- norm.i
@@ -1476,7 +1476,9 @@ colorBiasSummary <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmeth
 
 plotDensity <- function(dataMatrix, logMode=TRUE, addLegend=TRUE, legendPos="topright", subset=NULL, ...) {
   otherPar <- list(...)
-  if (is(dataMatrix, 'MethyLumiM')) logMode <- FALSE
+  if (is(dataMatrix, 'MethyLumiM')) {
+    if (dataType(dataMatrix) == 'M')  logMode <- FALSE
+  } 
 
   if (is(dataMatrix, 'ExpressionSet')) {
       dataMatrix <- exprs(dataMatrix)
