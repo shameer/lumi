@@ -8,13 +8,14 @@ Color bias adjustment of Illumina Infinium methylaton microarrays using smooth q
 Color bias adjustment of Illumina Infinium methylaton microarrays using smooth quantile normalization \code{\link{smoothQuantileNormalization}}
 }
 \usage{
-adjColorBias.quantile(methyLumiM, refChannel = c("green", "red"), logMode = TRUE, ...)
+adjColorBias.quantile(methyLumiM, refChannel = c("green", "red"), logMode = TRUE, verbose = TRUE,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{ a MethyLumiM object or any eSet object with "methylated" and "unmethylated" data matrix element in the assayData slot }
   \item{refChannel}{ the reference color channel for color bias adjustment }
   \item{logMode}{ whether perform the adjustment in log scale or not }
+  \item{verbose}{ whether print extra information during processing }
   \item{\dots}{ other parameters used by \code{\link{smoothQuantileNormalization}}}
 }
 \details{
