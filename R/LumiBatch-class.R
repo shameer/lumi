@@ -667,7 +667,7 @@ setMethod('density', signature(x='ExpressionSet'),
 
 
 setMethod("pairs", signature(x="ExpressionSet"), 
-	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, dotColor=1, highlight=NULL, highlightColor=2, main=NULL) 
+	function(x, ..., smoothScatter=FALSE, logMode=TRUE, subset=5000, fold=2, dotColor=1, highlight=NULL, highlightColor=2, main=NULL, checkTransform=TRUE) 
 {
 	upperPanel <- function(x, y) {
 		if (smoothScatter) {
@@ -687,8 +687,13 @@ setMethod("pairs", signature(x="ExpressionSet"),
 		
 		abline(0, 1, col="red", lty=1)
 		if (logMode) {
-			abline(log2(fold), 1, col="blue", lty=2)
-			abline(log2(1/fold), 1, col="blue", lty=2)
+			if (checkTransform) {
+				abline(log2(fold), 1, col="blue", lty=2)
+				abline(log2(1/fold), 1, col="blue", lty=2)
+			} else {
+				abline(fold, 1, col="blue", lty=2)
+				abline(-fold, 1, col="blue", lty=2)
+			}
 		} else {
 			abline(fold, 1, col="blue", lty=2)
 			abline(-fold, 1, col="blue", lty=2)
@@ -697,8 +702,13 @@ setMethod("pairs", signature(x="ExpressionSet"),
 
 	lowerPanel <- function(x, y, cex=1.44) {
 		if (logMode) {
-			up <- length(which((x-y) > log2(fold)))
-			down <- length(which((y-x) > log2(fold)))
+			if (checkTransform) {
+				up <- length(which((x-y) > log2(fold)))
+				down <- length(which((y-x) > log2(fold)))
+			} else {
+				up <- length(which((x-y) > fold))
+				down <- length(which((y-x) > fold))
+			}
 		} else {
 			up <- length(which((x/y) > fold))
 			down <- length(which((y/x) > fold))
@@ -730,22 +740,25 @@ setMethod("pairs", signature(x="ExpressionSet"),
 
 	expr <- exprs(x)
 	if (class(x) == 'MethyLumiM') logMode <- FALSE
-	if(logMode) {
-		if (max(expr, na.rm=TRUE) > 50) {
-			## force the expression value as positive in the logMode
-			# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
-			# remove the negative values
-			if (min(expr, na.rm=TRUE) < 0) {
-				rMin <- rowMin(expr)
-				expr <- expr[rMin > 0, , drop=FALSE]
+	if (checkTransform) {
+		if(logMode) {
+			if (max(expr, na.rm=TRUE) > 50) {
+				## force the expression value as positive in the logMode
+				# if (min(expr, na.rm=TRUE) < 0) expr <- expr - min(expr, na.rm=TRUE) + 1
+				# remove the negative values
+				if (min(expr, na.rm=TRUE) < 0) {
+					rMin <- rowMin(expr)
+					expr <- expr[rMin > 0, , drop=FALSE]
+				}
+				expr <- log2(expr)
 			}
-			expr <- log2(expr)
-		}
-	} else if (class(x) != 'MethyLumiM') {
-		if (max(expr, na.rm=TRUE) < 50) {
-			expr <- 2^expr
+		} else if (class(x) != 'MethyLumiM') {
+			if (max(expr, na.rm=TRUE) < 50) {
+				expr <- 2^expr
+			}
 		}
 	}
+
 
 	if (!is.null(subset)) {
 		if (!is.numeric(subset)) stop('subset should be numeric.')
