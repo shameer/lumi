@@ -9,7 +9,7 @@
 
 \usage{
 \S4method{pairs}{ExpressionSet}(x, ..., smoothScatter = FALSE, logMode = TRUE, subset = 5000, fold=2, dotColor=1, 
-	highlight = NULL, highlightColor = 2, main = NULL)
+	highlight = NULL, highlightColor = 2, main = NULL, checkTransform = TRUE)
 }
 
 \arguments{
@@ -22,7 +22,8 @@
 	\item{dotColor}{color of points in the scatter plot}
 	\item{highlight}{the subset dots need to be highlighted}
 	\item{highlightColor}{the color for those highlighted dots}
-	\item{main}{ title of the plot }	
+	\item{main}{ title of the plot }
+	\item{checkTransform}{a \code{logical} variable, default TRUE}
 }
 
 \details{
