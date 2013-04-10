@@ -43,7 +43,7 @@ importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
 importFrom(nleqslv, nleqslv)
 
 exportClasses(LumiBatch)
-exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce, "controlData", "controlData<-")
+exportMethods(beadNum, "beadNum<-", boxplot, combine, density, detection, "detection<-", getHistory, hist, MAplot, pairs, plot, "sampleNames<-", exprs, "exprs<-", se.exprs, "se.exprs<-", show, summary, "[", coerce, "controlData", "controlData<-", asBigMatrix)
 
 export(IlluminaID2nuID, addControlData2lumi, addNuID2lumi, addNuId2lumi,                                                            
 bgAdjust, detectOutlier, detectionCall, estimateLumiCV, getChipInfo, getControlData, getControlProbe,
