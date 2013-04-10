@@ -11,6 +11,7 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 	}
 	
 	if (!(is.function(method))) {
+		method <- method[1]
 		if (!(method %in% c('bgAdjust', 'none', 'forcePositive', 'bgAdjust.affy'))) {
 			cat('This method is not supported!\n')
 			return(x.lumi)

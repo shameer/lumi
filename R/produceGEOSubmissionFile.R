@@ -51,9 +51,9 @@ function(lumiNormalized, lumiRaw, lib.mapping=NULL, idType='Probe', sampleInfo=N
 	sampleTitle <- sampleInfo[,'Sample_title']
 	for (i in seq(sampleID)) {
 		if (i == 1) {
-			cat('^SAMPLE =', sampleTitle[i], '\n', sep='', file=fileName, append=FALSE)
+			cat('^SAMPLE = ', sampleID[i], '\n', sep='', file=fileName, append=FALSE)
 		} else {
-			cat('^SAMPLE =', sampleTitle[i], '\n', sep='', file=fileName, append=TRUE)			
+			cat('^SAMPLE = ', sampleID[i], '\n', sep='', file=fileName, append=TRUE)			
 		}
 		sampleInfo.i <- paste('!', sampleInfoTitle[-1], ' = ', sampleInfo[i,-1], '\n', sep='', collapse='')
 		sampleInfo.i <- gsub("'", "\\'", sampleInfo.i)

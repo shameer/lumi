@@ -855,3 +855,98 @@ setMethod('plot',
 	}
 	return(invisible(TRUE))	
 })
+
+
+## Example
+# library(lumi)
+# data(example.lumi)
+# test <- asBigMatrix(example.lumi, nCol=6)
+setMethod('asBigMatrix',
+	signature(object='ExpressionSet'),
+	function(object, rowInd=NULL, colInd=NULL, nCol=NULL, dimNames=NULL, saveDir='.', savePrefix=NULL, ...)
+{
+	if (!is.null(dimNames)) {
+		if (!is.list(dimNames) || length(dimNames) != 2) stop("dimNames should be a list with length 2!")
+	}
+	nRow <- nrow(object)
+	if (is.null(nCol)) {
+		if (is.null(dimNames)) {
+			nCol <- ncol(object)
+		} else {
+			nCol <- length(dimNames[[2]])
+			if (length(nCol) < ncol(object)) stop('The length of dimNames[[2]] should not be less than the columns of the input object!')
+		}
+	} 
+	if (is.null(dimNames)) {
+		dimNames <- list(featureNames(object), sampleNames(object))
+		## append colnames if nCol is longer than dimNames[[2]]
+		if (length(dimNames[[2]]) < nCol) {
+			appLen <- nCol - length(dimNames[[2]])
+			dimNames[[2]] <- c(dimNames[[2]], paste(rep('unknown', appLen), seq(appLen), sep='.'))
+		}
+	} else if (length(dimNames[[1]]) < nRow) {
+		stop('The length of dimNames[[1]] should be the same as the rows of the input object!')
+	}
+	subsetMode <- FALSE
+	extensionMode <- FALSE 
+	if (is.null(rowInd)) {
+		rowInd <- 1:nRow
+	} else {
+		nRow <- length(rowInd)
+		dimNames[[1]] <- dimNames[[1]][rowInd]
+		subsetMode <- TRUE
+	}
+	if (is.null(colInd)) {
+		colInd <- 1:nCol
+	} else {
+		nCol <- length(colInd)
+		dimNames[[2]] <- dimNames[[2]][colInd]
+		subsetMode <- TRUE
+	}
+	if (nCol != ncol(object)) extensionMode <- TRUE
+	
+	if (is.null(savePrefix)) {
+		## use the variable name as the bigmatrix directory prefix
+		savePrefix <- match.call(asBigMatrix)[['object']]  
+	} 
+	
+	if (saveDir == '.') saveDir <- getwd()
+	saveDir <- file.path(saveDir, paste(savePrefix, 'bigmat', sep='_'))
+	oldDir <- NULL
+	for (ad.name in assayDataElementNames(object)) {
+  	matrix.i <- assayDataElement(object, ad.name)
+		if (is.null(matrix.i)) next
+		backingfile <- file.path(saveDir, ad.name)
+		
+		if (!is(assayDataElement(object, ad.name), "BigMatrix") && ! extensionMode) {
+			x.mat <- BigMatrix(matrix.i[dimNames[[1]], dimNames[[2]]], backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
+		} else {
+			x.mat <- BigMatrix(backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
+			for (i in 1:length(dimNames[[2]])) {
+				col.i <- dimNames[[2]][i]
+				x.mat[dimNames[[1]], col.i] <- matrix.i[dimNames[[1]], col.i]
+			}
+		}
+		assayDataElement(object, ad.name) <- x.mat
+  }
+	object <- updateAssayDataElementPaths(object, saveDir)
+
+	if (extensionMode || subsetMode) {
+		appLen <- nCol - nrow(pData(object))
+		if (length(appLen) > 0) {
+			pdata <- rbind(as.matrix(pData(object)), matrix(NA, nrow=appLen, ncol=ncol(pData(object))))
+			pdata <- as.data.frame(pdata)
+			rownames(pdata) <- dimNames[[2]]
+		} else {
+			pdata <- pData(object)
+			if (length(colInd) < nrow(pdata)) pdata <- pdata[colInd,]
+		}
+		className <- class(object)
+		object.new <- new(className, assayData=assayData(object))
+		pData(object.new) <- pdata
+		fData(object.new) <- fData(object)[rowInd,]
+		object <- object.new
+	}
+	return(object)
+})
+

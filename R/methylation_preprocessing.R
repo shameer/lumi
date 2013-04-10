@@ -21,7 +21,7 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 
 ## import Illumina Infinium methylation IDAT files based on barcodes.
 ## This is an extension of the methylumi::lumIDAT function 
-importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, ...) {
+importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FALSE, dir.bigMatrix='.', savePrefix.bigMatrix=NULL, ...) {
   
   if (missing(sampleInfo)) {
     stop('Please provide "sampleInfo"!')
@@ -74,8 +74,15 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, ...) {
   
   ## read IDAT files by individual dataPath
   barcodesList <- split(barcodes, realDataPath)
-  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
-  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
+	if (bigMatrix) {
+		## read first batch of samples and create a BigMatrix with all sample information
+		## Then fill in the rest sample information
+	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
+	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
+	} else {
+	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
+	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
+	}
   
   ## add sample info 
   if (!is.null(sampleInfo)) {
@@ -189,14 +196,18 @@ addControlData2methyLumiM <- function(controlData, methyLumiM, checkConsistency 
 
 
 # normalization
-lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
+lumiMethyN <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), separateColor=FALSE, verbose=TRUE, overwriteBigMatrix=FALSE, ...) 
 {
   if (!is.function(method)) method <- match.arg(method)
 
   if (!is(methyLumiM, 'MethyLumiM')) {
     stop('The object should be class "MethyLumiM" inherited!')
   }
-  
+ 
+	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
+		stop('BigMatrix was identified in the AssayData, please set overwriteBigMatrix parameter as TRUE if you want to overwrite the existing data.')
+	} 
+ 
   history.submitted <- as.character(Sys.time())
   if (!(is.function(method))) {
     if (!(method %in% c('ssn', 'rssn', 'quantile', 'none'))) {
@@ -266,13 +277,18 @@ lumiMethyN <- function(methyLumiM, method = c('ssn', 'quantile', 'none'), separa
 
 
 # color balance adjustment
-lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbose=TRUE, ...) 
+lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbose=TRUE, overwriteBigMatrix=FALSE, ...) 
 {
   if (!is.function(method)) method <- match.arg(method)
 
   if (!is(methyLumiM, 'MethyLumiM')) {
     stop('The object should be class "MethyLumiM" inherited!')
   }
+
+	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
+		stop('BigMatrix was identified in the AssayData, please set overwriteBigMatrix parameter as TRUE if you want to overwrite the existing data.')
+	} 
+
   annotation <- pData(featureData(methyLumiM))
   if (is.null(annotation$COLOR_CHANNEL))
     cat("No color balance adjustment because lack of COLOR_CHANNEL information!\n Please add it using addAnnotationInfo function.\n")
@@ -327,7 +343,7 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 }
 
 
-lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'none'), separateColor=FALSE, verbose=TRUE, ...) 
+lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'none'), separateColor=FALSE, verbose=TRUE, overwriteBigMatrix=FALSE, ...) 
 {
   if (!is.function(method)) method <- match.arg(method)
 
@@ -337,6 +353,10 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
   } else {
     stop('The object should be class "MethyLumiM" inherited!')
   }
+	
+	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
+		stop('BigMatrix was identified in the AssayData, please set overwriteBigMatrix parameter as TRUE if you want to overwrite the existing data.')
+	} 
   
   history.submitted <- as.character(Sys.time())
   if (!(is.function(method))) {
@@ -446,8 +466,15 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
     }
   } else {
     if (is.matrix(bglevel)) bglevel <- rowMeans(bglevel)
-    methy <- methy - rep(1, nrow(methy)) %*% t(bglevel)
-    unmethy <- unmethy - rep(1, nrow(unmethy)) %*% t(bglevel)
+		if (is(methy, 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+		    methy[,i] <- methy[,i] - bglevel[i]
+		    unmethy[,i] <- unmethy[,i] - bglevel[i]
+			}
+		} else {
+	    methy <- methy - rep(1, nrow(methy)) %*% t(bglevel)
+	    unmethy <- unmethy - rep(1, nrow(unmethy)) %*% t(bglevel)
+		}
   }
 
   ## check possible error of BG estimation model
@@ -459,8 +486,18 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
     warning("Possible bad quality samples or possible error of Background estimation model: \n")
     cat("\t", paste(colnames(methy)[negPerc > negPercTh], collapse=", "), "\n")
   }
-  methylated(methyLumiM) <- methy + targetBGLevel
-  unmethylated(methyLumiM) <- unmethy + targetBGLevel
+	
+	if (is(methy, 'BigMatrix')) {
+		for (i in 1:ncol(methy)) {
+	    methy[,i] <- methy[,i] + targetBGLevel
+	    unmethy[,i] <- unmethy[,i] + targetBGLevel
+		}
+	} else {
+		methy <- methy + targetBGLevel
+	  unmethy <- unmethy + targetBGLevel
+	}
+	methylated(methyLumiM) <- methy 
+  unmethylated(methyLumiM) <- unmethy
 
   if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)
   
@@ -503,37 +540,34 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
   bg.red <- bg[,"red"]
   bg.grn <- bg[,"green"]
   
-  intensity.grn <- unmethy[allGrnInd,] + methy[allGrnInd,]
-  intensity.red <- unmethy[allRedInd,] + methy[allRedInd,]
-  m.int.grn <- colMeans(intensity.grn) - bg.grn
-  m.int.red <- colMeans(intensity.red) - bg.red
-  if (refChannel == 'green') {
-    m.ref <- m.int.grn
-    bg.ref <- bg.grn
-  } else if (refChannel == 'red') {
-    m.ref <- m.int.red
-    bg.ref <- bg.red
-  } else {
-    m.ref <- (m.int.grn + m.int.red)/2
-    bg.ref <- (bg.grn + bg.red)/2
-  }
+	## compatible with BigMatrix data
+	for (i in 1:ncol(methy)) {
+	  intensity.grn <- unmethy[allGrnInd,i] + methy[allGrnInd,i]
+	  intensity.red <- unmethy[allRedInd,i] + methy[allRedInd,i]
+	  m.int.grn <- colMeans(intensity.grn) - bg.grn
+	  m.int.red <- colMeans(intensity.red) - bg.red
+	  if (refChannel == 'green') {
+	    m.ref <- m.int.grn
+	    bg.ref <- bg.grn
+	  } else if (refChannel == 'red') {
+	    m.ref <- m.int.red
+	    bg.ref <- bg.red
+	  } else {
+	    m.ref <- (m.int.grn + m.int.red)/2
+	    bg.ref <- (bg.grn + bg.red)/2
+	  }
 
-  unmethy[allRedInd, ] <- (unmethy[allRedInd,] - rep(1, length(allRedInd)) %*% t(bg.red)) * 
-    (rep(1, length(allRedInd)) %*% t(m.ref/m.int.red)) + rep(1, length(allRedInd)) %*% t(bg.ref)
-  unmethy[allGrnInd, ] <- (unmethy[allGrnInd,] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * 
-    (rep(1, length(allGrnInd)) %*% t(m.ref/m.int.grn)) + rep(1, length(allGrnInd)) %*% t(bg.ref)
-  methy[allRedInd, ] <- (methy[allRedInd,] - rep(1, length(allRedInd)) %*% t(bg.red)) * 
-    (rep(1, length(allRedInd)) %*% t(m.ref/m.int.red)) + rep(1, length(allRedInd)) %*% t(bg.ref)
-  methy[allGrnInd, ] <- (methy[allGrnInd,] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * 
-    (rep(1, length(allGrnInd)) %*% t(m.ref/m.int.grn)) + rep(1, length(allGrnInd)) %*% t(bg.ref)
-  
-  if (length(allBothInd) > 0) {
-    ## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
-    unmethy[allBothInd, ] <- (unmethy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.red)) * 
-      (rep(1, length(allBothInd)) %*% t(m.ref/m.int.red)) + rep(1, length(allBothInd)) %*% t(bg.ref)
-    methy[allBothInd, ] <- (methy[allBothInd,] - rep(1, length(allBothInd)) %*% t(bg.grn)) * 
-      (rep(1, length(allBothInd)) %*% t(m.ref/m.int.grn)) + rep(1, length(allBothInd)) %*% t(bg.ref)
-  }
+	  unmethy[allRedInd, i] <- unmethy[allRedInd,i] -  bg.red * m.ref / m.int.red + bg.ref
+	  unmethy[allGrnInd, i] <- unmethy[allGrnInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
+	  methy[allRedInd, i] <- methy[allRedInd,i] - bg.red * m.ref / m.int.red + bg.ref
+	  methy[allGrnInd, i] <- methy[allGrnInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
+
+	  if (length(allBothInd) > 0) {
+	    ## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
+	    unmethy[allBothInd, i] <- unmethy[allBothInd,i] - bg.red * m.ref / m.int.red + bg.ref
+	    methy[allBothInd, i] <- methy[allBothInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
+	  }
+	}
     
   methy.adj <- methyLumiM
   assayDataElement(methy.adj, 'unmethylated') <- unmethy
@@ -870,12 +904,25 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
     unmethy[allGrnInd, ] <- (unmethy[allGrnInd, ] - rep(1, length(allGrnInd)) %*% t(bg.grn)) * (rep(1, length(allGrnInd)) %*% t(meanTotalIntensity.grn/totalIntensity.grn)) + meanBg.grn
   } else {
     meanBg <- mean(bg)
-
-    intensity <- unmethy + methy
-    totalIntensity <- colSums(intensity)
-    meanTotalIntensity <- mean(totalIntensity)
-    unmethy <- (unmethy - rep(1, nrow(intensity)) %*% t(bg)) * (rep(1, nrow(intensity)) %*% t(meanTotalIntensity/totalIntensity)) + meanBg
-    methy <- (methy - rep(1, nrow(intensity)) %*% t(bg)) * (rep(1, nrow(intensity)) %*% t(meanTotalIntensity/totalIntensity)) + meanBg
+		
+		if (is(methy, 'BigMatrix')) {
+			totalIntensity <- NULL
+			for (i in 1:ncol(methy)) {
+		    intensity.i <- unmethy[,i] + methy[,i]
+		    totalIntensity <- c(totalIntensity, sum(intensity.i))
+			}
+		  meanTotalIntensity <- mean(totalIntensity)
+			for (i in 1:ncol(methy)) {
+		  	unmethy[,i] <- (unmethy[,i] - bg[i]) * (meanTotalIntensity[i]/totalIntensity) + meanBg
+		    methy[,i] <- (methy[,i] - bg[i]) * (meanTotalIntensity[i]/totalIntensity) + meanBg
+			}
+		} else {
+	    intensity <- unmethy + methy
+	    totalIntensity <- colSums(intensity)
+	    meanTotalIntensity <- mean(totalIntensity)
+	    unmethy <- (unmethy - rep(1, nrow(intensity)) %*% t(bg)) * (rep(1, nrow(intensity)) %*% t(meanTotalIntensity/totalIntensity)) + meanBg
+	    methy <- (methy - rep(1, nrow(intensity)) %*% t(bg)) * (rep(1, nrow(intensity)) %*% t(meanTotalIntensity/totalIntensity)) + meanBg
+		}
   } 
   
   assayDataElement(methyLumiM, 'unmethylated') <- unmethy
@@ -885,7 +932,130 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
 }
 
 
-normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) {
+## this internal function was based on limma::normalizeQuantiles
+.estimate.quauntile.reference <- function(dataMatrix, ..., batchSize=50, repTime=NULL, ties=TRUE) {
+	otherDataMatrix <- list(...)
+
+	## subsampling the data to estimate the reference when the size is bigger than the batchSize
+	if (ncol(dataMatrix) > batchSize) {
+		repTime <- ncol(dataMatrix) / batchSize * 2
+		if (ncol(dataMatrix) < batchSize) {
+			batchSize <- ncol(dataMatrix)
+			repTime <- 1
+		}
+		for (i in 1:repTime) {
+			ind.i <- sample(1:ncol(dataMatrix), batchSize)
+			dataMatrix.i <- dataMatrix[, ind.i]
+			if (length(otherDataMatrix) > 0) {
+				for (j in 1:length(otherDataMatrix)) {
+					dataMatrix.i <- rbind(dataMatrix.i, otherDataMatrix[[j]][, ind.i])
+				}
+			}
+			reference.i <- .estimate.quauntile.reference(dataMatrix.i)
+			reference <- cbind(reference, reference.i)
+		}
+		reference <- rowMeans(reference)
+		return(reference)
+	} else {
+		dataMatrix <- dataMatrix[,]
+		if (length(otherDataMatrix) > 0) {
+			for (j in 1:length(otherDataMatrix)) {
+				dataMatrix <- rbind(dataMatrix, otherDataMatrix[[j]][,])
+			}
+		}
+	  dm <- dim(dataMatrix)
+	  if (is.null(dm)) 
+	      return(dataMatrix)
+	  if (dm[2] == 1) 
+	      return(dataMatrix)
+	  O <- S <- array(, dm)
+	  nobs <- rep(dm[1], dm[2])
+	  i <- (0:(dm[1] - 1))/(dm[1] - 1)
+	  for (j in 1:dm[2]) {
+	      Si <- sort(dataMatrix[, j], method = "quick", index.return = TRUE)
+	      nobsj <- length(Si$x)
+	      if (nobsj < dm[1]) {
+	          nobs[j] <- nobsj
+	          isna <- is.na(dataMatrix[, j])
+	          S[, j] <- approx((0:(nobsj - 1))/(nobsj - 1), Si$x, 
+	              i, ties = "ordered")$y
+	          O[!isna, j] <- ((1:dm[1])[!isna])[Si$ix]
+	      }
+	      else {
+	          S[, j] <- Si$x
+	          O[, j] <- Si$ix
+	      }
+	  }
+	  reference <- rowMeans(S)	
+		return(reference)		
+	}
+}
+
+
+## this internal function was based on limma::normalizeQuantiles
+.quantileNormalization.reference <- function(dataMatrix, reference=NULL, ties = TRUE) {
+		
+	dm <- dim(dataMatrix)
+  if (is.null(dm)) {
+		dataMatrix <- matrix(dataMatrix, ncol=1)
+		dm <- dim(dataMatrix)
+	}
+
+  if (dm[2] == 1 && is.null(reference)) 
+      return(dataMatrix)
+	if (!is.null(reference)) {
+		if (length(reference) != dm[1]) stop('The length of reference does not match the dimension of dataMatrix!')
+	}
+  O <- S <- array(, dm)
+  nobs <- rep(dm[1], dm[2])
+  i <- (0:(dm[1] - 1))/(dm[1] - 1)
+  for (j in 1:dm[2]) {
+      Si <- sort(dataMatrix[, j], method = "quick", index.return = TRUE)
+      nobsj <- length(Si$x)
+      if (nobsj < dm[1]) {
+          nobs[j] <- nobsj
+          isna <- is.na(dataMatrix[, j])
+          S[, j] <- approx((0:(nobsj - 1))/(nobsj - 1), Si$x, 
+              i, ties = "ordered")$y
+          O[!isna, j] <- ((1:dm[1])[!isna])[Si$ix]
+      }
+      else {
+          S[, j] <- Si$x
+          O[, j] <- Si$ix
+      }
+  }
+	if (is.null(reference)) {
+		reference <- rowMeans(S)
+	} else {
+		reference <- sort(reference, method='quick')
+	}
+
+	nobs <- rep(dm[1], dm[2])
+	index <- (0:(dm[1] - 1))/(dm[1] - 1)
+
+ for (j in 1:dm[2]) {
+      if (ties) 
+          rk <- rank(dataMatrix[, j])
+      if (nobs[j] < dm[1]) {
+          isna <- is.na(dataMatrix[, j])
+          if (ties) 
+              dataMatrix[!isna, j] <- approx(index, reference, (rk[!isna] - 1)/(nobs[j] - 
+                1), ties = "ordered")$y
+          else dataMatrix[O[!isna, j], j] <- approx(index, reference, (0:(nobs[j] - 
+              1))/(nobs[j] - 1), ties = "ordered")$y
+      }
+      else {
+          if (ties) 
+              dataMatrix[, j] <- approx(index, reference, (rk - 1)/(dm[1] - 1), ties = "ordered")$y
+          else dataMatrix[O[, j], j] <- reference
+      }
+  }
+	return(dataMatrix)
+}
+
+
+## 
+normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, reference=NULL, ...) {
   
 	if (!all(c("unmethylated", "methylated") %in% assayDataElementNames(methyLumiM))) {
     stop("The input should include 'methylated' and 'unmethylated' elements in the assayData slot!\n")
@@ -905,39 +1075,66 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, ...) 
     }
   }
   
-  if (separateColor) {
-    methy.n <- methy; unmethy.n <- unmethy
-    methy.red <- methy[allRedInd, ]
-    methy.grn <- methy[allGrnInd, ]
-    unmethy.red <- unmethy[allRedInd, ]
-    unmethy.grn <- unmethy[allGrnInd, ]
-    x.matrix.red <- rbind(methy.red, unmethy.red)
-    x.matrix.grn <- rbind(methy.grn, unmethy.grn)
-    # Normalize the intensity using quantile normalization
-    x.matrix.red <- limma::normalizeQuantiles(x.matrix.red, ...)
-    x.matrix.grn <- limma::normalizeQuantiles(x.matrix.grn, ...)
-    # x.matrix.red <- normalize.quantiles.robust(x.matrix.red + 0.0, ...)
-    # x.matrix.grn <- normalize.quantiles.robust(x.matrix.grn + 0.0, ...)
-    len.red <- length(allRedInd)
-    len.grn <- length(allGrnInd)
-    methy.n[allRedInd,] <- x.matrix.red[1:len.red,]
-    unmethy.n[allRedInd,] <- x.matrix.red[(len.red+1):nrow(x.matrix.red),]
-    methy.n[allGrnInd,] <- x.matrix.grn[1:len.grn,]
-    unmethy.n[allGrnInd,] <- x.matrix.grn[(len.grn+1):nrow(x.matrix.grn),]
-  } else {
-    x.matrix <- rbind(methy, unmethy)
-    # Normalize the intensity using quantile normalization
-    x.matrix <- limma::normalizeQuantiles(x.matrix, ...)
-    #x.matrix <- normalize.quantiles.robust(x.matrix + 0.0, ...)
-    methy.n <- x.matrix[1:nrow(methy),]
-    unmethy.n <- x.matrix[(nrow(unmethy)+1):nrow(x.matrix),]    
-  }
-  colnames(methy.n) <- colnames(unmethy.n) <- colnames(methy)
-  rownames(methy.n) <- rownames(unmethy.n) <- rownames(methy)
+	## It will perform normalization sample by sample when the data is a BigMatrix
+	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix")) {
+		## estimate the reference by randomly pick columns
+		if (is.null(reference)) {
+			reference <- .estimate.quauntile.reference(dataMatrix=assayDataElement(methyLumiM, 'methylated'), dataMatrix2=assayDataElement(methyLumiM, 'unmethylated'), batchSize=50)
+		}
+		for (i in 1:ncol(methy)) {
+		  x.matrix.i <- rbind(methy[,i, drop=FALSE], unmethy[,i, drop=FALSE])
+	    # Normalize the intensity using quantile normalization
+	    x.matrix.i <- .quantileNormalization.reference(x.matrix.i, reference=reference, ...)
+			methy[,i] <- x.matrix.i[1:nrow(methy),1]
+		  unmethy[,i] <- x.matrix.i[(nrow(methy)+1):nrow(x.matrix.i),1]    
+			# estimate the M-value
+			if (is(methyLumiM, "MethyLumiM")) assayDataElement(methyLumiM, 'exprs')[,i] <- lumi::estimateM(methyLumiM[,i], returnType='matrix')	
+		}			
+		
+	} else {
+	  if (separateColor) {
+	    methy.n <- methy; unmethy.n <- unmethy
+	    methy.red <- methy[allRedInd, ]
+	    methy.grn <- methy[allGrnInd, ]
+	    unmethy.red <- unmethy[allRedInd, ]
+	    unmethy.grn <- unmethy[allGrnInd, ]
+	    x.matrix.red <- rbind(methy.red, unmethy.red)
+	    x.matrix.grn <- rbind(methy.grn, unmethy.grn)
+	    # Normalize the intensity using quantile normalization
+			if (!is.null(reference)) {
+		    x.matrix.red <- .quantileNormalization.reference(x.matrix.red, reference=reference, ...)
+		    x.matrix.grn <- .quantileNormalization.reference(x.matrix.red, reference=reference, ...)
+			} else {
+		    x.matrix.red <- limma::normalizeQuantiles(x.matrix.red, ...)
+		    x.matrix.grn <- limma::normalizeQuantiles(x.matrix.grn, ...)
+		    # x.matrix.red <- normalize.quantiles.robust(x.matrix.red + 0.0, ...)
+		    # x.matrix.grn <- normalize.quantiles.robust(x.matrix.grn + 0.0, ...)
+			}
+	    len.red <- length(allRedInd)
+	    len.grn <- length(allGrnInd)
+	    methy.n[allRedInd,] <- x.matrix.red[1:len.red,]
+	    unmethy.n[allRedInd,] <- x.matrix.red[(len.red+1):nrow(x.matrix.red),]
+	    methy.n[allGrnInd,] <- x.matrix.grn[1:len.grn,]
+	    unmethy.n[allGrnInd,] <- x.matrix.grn[(len.grn+1):nrow(x.matrix.grn),]
+	  } else {
+	    x.matrix <- rbind(methy, unmethy)
+	    # Normalize the intensity using quantile normalization
+			if (!is.null(reference)) {
+		    x.matrix <- .quantileNormalization.reference(x.matrix, reference=reference, ...)
+	    } else {
+				x.matrix <- limma::normalizeQuantiles(x.matrix, ...)
+	    	#x.matrix <- normalize.quantiles.robust(x.matrix + 0.0, ...)
+	    }
+			methy.n <- x.matrix[1:nrow(methy),]
+	    unmethy.n <- x.matrix[(nrow(unmethy)+1):nrow(x.matrix),]    
+	  }
+	  colnames(methy.n) <- colnames(unmethy.n) <- colnames(methy)
+	  rownames(methy.n) <- rownames(unmethy.n) <- rownames(methy)
+	  assayDataElement(methyLumiM, 'unmethylated') <- unmethy.n
+	  assayDataElement(methyLumiM, 'methylated') <- methy.n
+	  if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)	
+	}
 
-  assayDataElement(methyLumiM, 'unmethylated') <- unmethy.n
-  assayDataElement(methyLumiM, 'methylated') <- methy.n
-  if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)
   return(methyLumiM)
 }
 
@@ -953,13 +1150,9 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
   returnType <- match.arg(returnType)
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
   methy <- assayDataElement(methyLumiM, 'methylated') 
-  if (!is.null(unmethy) && !is.null(methy)) {
-    intensity <- unmethy + methy
-  } else {
-    cat("The input data does not include methylated and unmethylated data information!\n")
-    intensity <- NULL
-  }
+
   if (returnType == "matrix") {
+    intensity <- unmethy[,] + methy[,]
     return(intensity)
   } else {
     # methyLumiM <- as(methyLumiM, "ExpressionSet")
@@ -967,7 +1160,14 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
 		if ('dataType' %in% slotNames(methyLumiM)) {
 			dataType(methyLumiM) <- 'Intensity'
 		}
-		assayDataElement(methyLumiM, 'exprs') <- intensity
+		if (is(assayDataElement(methyLumiM, 'exprs'), 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+				assayDataElement(methyLumiM, 'exprs')[,i] <- unmethy[,i] + methy[,i]
+			}
+		} else {
+			assayDataElement(methyLumiM, 'exprs') <- unmethy[,] + methy[,]
+		}
+
     return(methyLumiM)
   }
 }
@@ -994,21 +1194,35 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
   
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
   methy <- assayDataElement(methyLumiM, 'methylated') 
-  mm <- min(c(unmethy, methy), na.rm=TRUE)
+	## in case of BigMatrix
+  mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
   if (mm < 0.01) {
-    unmethy[unmethy < 0.01] <- 0.01 
-    methy[methy < 0.01] <- 0.01 
+		if (is(methy, 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+				if (any(unmethy[,i] < 0.01)) unmethy[which(unmethy[,i] < 0.01), i] <- 0.01 
+		    if (any(methy[,i] < 0.01)) methy[which(methy[,i] < 0.01), i] <- 0.01 
+			}
+		} else {
+	    unmethy[unmethy < 0.01] <- 0.01 
+	    methy[methy < 0.01] <- 0.01 
+		}
   }
-  M <- log2((methy + offset) / (unmethy + offset))
-  if (returnType == "matrix") {
+	if (returnType == 'matrix') {
+	  M <- log2((methy[,] + offset) / (unmethy[,] + offset))
     return(M)
-  } else {
+	} else {
 		if ('dataType' %in% slotNames(methyLumiM)) {
 			dataType(methyLumiM) <- 'M'
 		}
-		assayDataElement(methyLumiM, 'exprs') <- M
+		if (is(assayDataElement(methyLumiM, 'exprs'), 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+				assayDataElement(methyLumiM, 'exprs')[,i] <- log2((methy[,i] + offset) / (unmethy[,i] + offset))
+			}
+		} else {
+			assayDataElement(methyLumiM, 'exprs') <- log2((methy[,] + offset) / (unmethy[,] + offset))
+		}
     return(methyLumiM)
-  }
+	}
 }
 
 # estimate the Beta-value based on methylated and unmethylated probe intensities
@@ -1020,20 +1234,36 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
   returnType <- match.arg(returnType)
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
   methy <- assayDataElement(methyLumiM, 'methylated') 
-  unmethy[unmethy < 1] <- 1
-  methy[methy < 1] <- 1
-  intensity <- unmethy + methy
-  beta <- methy / (intensity + offset)
+	## in case of BigMatrix
+  mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+  if (mm < 0.01) {
+		if (is(methy, 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+				if (any(unmethy[,i] < 0.01)) unmethy[which(unmethy[,i] < 0.01), i] <- 0.01 
+		    if (any(methy[,i] < 0.01)) methy[which(methy[,i] < 0.01), i] <- 0.01 
+			}
+		} else {
+	    unmethy[unmethy < 0.01] <- 0.01 
+	    methy[methy < 0.01] <- 0.01 
+		}
+  }
   if (returnType == "matrix") {
+	  beta <- methy[,] / (unmethy[,] + methy[,] + offset)
     return(beta)
   } else {
     # methyLumiBeta <- as(methyLumiM, "ExpressionSet")
-		assayDataElement(methyLumiM, 'exprs') <- beta
 		if ('dataType' %in% slotNames(methyLumiM)) {
 			dataType(methyLumiM) <- 'Beta'
 		}
-    # exprs(methyLumiBeta) <- beta
-    return(methyLumiM)
+		
+		if (is(assayDataElement(methyLumiM, 'exprs'), 'BigMatrix')) {
+			for (i in 1:ncol(methy)) {
+				assayDataElement(methyLumiM, 'exprs')[,i] <- methy[,i] / (unmethy[,i] + methy[,i] + offset)
+			}
+		} else {
+			assayDataElement(methyLumiM, 'exprs') <- methy[,] / (unmethy[,] + methy[,] + offset)
+		}
+  	return(methyLumiM)
   }
 }
 

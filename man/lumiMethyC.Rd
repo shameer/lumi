@@ -8,13 +8,14 @@ Color bias adjust of Illumina Infinium methylation data
 Color bias adjust of Illumina Infinium methylation data, which is an object in MethyLumiM class.
 }
 \usage{
-lumiMethyC(methyLumiM, method = c("quantile", "ssn", "none"), verbose = TRUE, ...)
+lumiMethyC(methyLumiM, method = c("quantile", "ssn", "none"), verbose = TRUE, overwriteBigMatrix=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
   \item{method}{ color bias adjustment methods or user provided function, see "details" for more information of user defined function. }
   \item{verbose}{a boolean to decide whether to print out some messages }
+  \item{overwriteBigMatrix}{whether to overwrite the result to the BigMatrix data, only valid when the input data is BigMatrix-based}
   \item{\dots}{ other parameters used by corresponding method }
 }
 \details{

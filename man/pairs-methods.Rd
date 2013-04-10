@@ -23,7 +23,7 @@
 	\item{highlight}{the subset dots need to be highlighted}
 	\item{highlightColor}{the color for those highlighted dots}
 	\item{main}{ title of the plot }
-	\item{checkTransform}{a \code{logical} variable, default TRUE}
+	\item{checkTransform}{whether to check the data is log2-transformed or not}
 }
 
 \details{

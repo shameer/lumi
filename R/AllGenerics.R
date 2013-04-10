@@ -16,6 +16,8 @@ setGeneric("detection<-", function(object, value) standardGeneric("detection<-")
 
 setGeneric("getHistory", function(object) standardGeneric("getHistory"))
 
+setGeneric("asBigMatrix", function(object, ...) standardGeneric("asBigMatrix"))
+
 
 if (is.null(getGeneric("show"))) setGeneric("show", function(object) standardGeneric("show"))
 if (is.null(getGeneric("combine"))) setGeneric("combine", function(x, y, ...) standardGeneric("combine"))

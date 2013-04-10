@@ -8,12 +8,13 @@ Quantile normalization of Illumina Infinium methylation data at probe level
 Quantile normalization of Illumina Infinium methylation data at probe level. Input data is a MethyLumiM object
 }
 \usage{
-normalizeMethylation.quantile(methyLumiM, separateColor = FALSE, ...)
+normalizeMethylation.quantile(methyLumiM, separateColor = FALSE, reference = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
   \item{separateColor}{determine whether separately normalize two color channels}
+  \item{reference}{the reference vector (same length as the number of matrix rows) for quanitle normalization}
   \item{\dots}{ other parameters used by normalize.quantiles.robust method }
 }
 \value{
