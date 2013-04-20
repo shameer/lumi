@@ -1,6 +1,7 @@
 \name{asBigMatrix-methods}
 \docType{methods}
 \alias{asBigMatrix-methods}
+\alias{asBigMatrix}
 \alias{asBigMatrix,ExpressionSet-method}
 \title{convert the data matrix in the assayData of a ExpressionSet as BigMatrix}
 \description{

@@ -32,9 +32,7 @@ importFrom(DBI, dbReadTable, dbListTables, dbConnect, dbDisconnect, dbListFields
 importFrom(AnnotationDbi, as.list)
 importClassesFrom(AnnotationDbi, AnnDbBimap)
 importMethodsFrom(AnnotationDbi, "[", mappedkeys)
-importMethodsFrom(bigmemoryExtras, dim, dimnames, length, ncol, nrow, apply,  "[", "[<-", 'dimnames<-')
 
-importFrom(bigmemoryExtras, updateAssayDataElementPaths, BigMatrix, attachAssayDataElements)
 importFrom(graphics, pairs, boxplot, hist, image, lines, matplot, points, abline, axis, par, text)
 importFrom(stats, density, heatmap)
 importFrom(MASS, rlm, psi.bisquare)

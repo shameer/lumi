@@ -200,8 +200,8 @@ lumiMethyN <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), separa
 {
   if (!is.function(method)) method <- match.arg(method)
 
-  if (!is(methyLumiM, 'MethyLumiM')) {
-    stop('The object should be class "MethyLumiM" inherited!')
+  if (!is(methyLumiM, 'MethyLumiM') && !is(methyLumiM, 'MethyGenoSet')) {
+    stop('The object should be class "MethyLumiM" or "MethyGenoSet"!')
   }
  
 	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
@@ -281,8 +281,8 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
 {
   if (!is.function(method)) method <- match.arg(method)
 
-  if (!is(methyLumiM, 'MethyLumiM')) {
-    stop('The object should be class "MethyLumiM" inherited!')
+  if (!is(methyLumiM, 'MethyLumiM') && !is(methyLumiM, 'MethyGenoSet')) {
+    stop('The object should be class "MethyLumiM" or "MethyGenoSet"!')
   }
 
 	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
@@ -347,11 +347,11 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
 {
   if (!is.function(method)) method <- match.arg(method)
 
-  if (is(methyLumiM, 'MethyLumiM')) {
+  if (is(methyLumiM, 'MethyLumiM') || is(methyLumiM, 'MethyGenoSet')) {
     unmethy <- assayDataElement(methyLumiM, 'unmethylated')
     methy <- assayDataElement(methyLumiM, 'methylated')
   } else {
-    stop('The object should be class "MethyLumiM" inherited!')
+    stop('The object should be class "MethyLumiM" or "MethyGenoSet" inherited!')
   }
 	
 	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix") && !overwriteBigMatrix) {
@@ -499,7 +499,7 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
 	methylated(methyLumiM) <- methy 
   unmethylated(methyLumiM) <- unmethy
 
-  if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)
+  if (is(methyLumiM, "MethyLumiM") || is(methyLumiM, 'MethyGenoSet')) methyLumiM <- estimateM(methyLumiM)
   
   attr(methyLumiM, "EstimatedBG") <- list(rawBG=bglevel, adjBG=rep(targetBGLevel, ncol(methy)))  
   return(methyLumiM)
@@ -540,39 +540,38 @@ adjColorBias.ssn <- function(methyLumiM, refChannel=c("green", "red", "mean")) {
   bg.red <- bg[,"red"]
   bg.grn <- bg[,"green"]
   
-	## compatible with BigMatrix data
+	## To be compatible with BigMatrix data
 	for (i in 1:ncol(methy)) {
 	  intensity.grn <- unmethy[allGrnInd,i] + methy[allGrnInd,i]
 	  intensity.red <- unmethy[allRedInd,i] + methy[allRedInd,i]
-	  m.int.grn <- colMeans(intensity.grn) - bg.grn
-	  m.int.red <- colMeans(intensity.red) - bg.red
+	  m.int.grn <- mean(intensity.grn) - bg.grn[i]
+	  m.int.red <- mean(intensity.red) - bg.red[i]
 	  if (refChannel == 'green') {
 	    m.ref <- m.int.grn
-	    bg.ref <- bg.grn
+	    bg.ref <- bg.grn[i]
 	  } else if (refChannel == 'red') {
 	    m.ref <- m.int.red
-	    bg.ref <- bg.red
+	    bg.ref <- bg.red[i]
 	  } else {
 	    m.ref <- (m.int.grn + m.int.red)/2
-	    bg.ref <- (bg.grn + bg.red)/2
+	    bg.ref <- (bg.grn[i] + bg.red[i])/2
 	  }
-
-	  unmethy[allRedInd, i] <- unmethy[allRedInd,i] -  bg.red * m.ref / m.int.red + bg.ref
-	  unmethy[allGrnInd, i] <- unmethy[allGrnInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
-	  methy[allRedInd, i] <- methy[allRedInd,i] - bg.red * m.ref / m.int.red + bg.ref
-	  methy[allGrnInd, i] <- methy[allGrnInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
+	  unmethy[allRedInd, i] <- unmethy[allRedInd,i] -  bg.red[i] * m.ref / m.int.red + bg.ref
+	  unmethy[allGrnInd, i] <- unmethy[allGrnInd,i] - bg.grn[i] * m.ref / m.int.grn + bg.ref
+	  methy[allRedInd, i] <- methy[allRedInd,i] - bg.red[i] * m.ref / m.int.red + bg.ref
+	  methy[allGrnInd, i] <- methy[allGrnInd,i] - bg.grn[i] * m.ref / m.int.grn + bg.ref
 
 	  if (length(allBothInd) > 0) {
 	    ## the methylated probe has 'Grn' color, while the unmethylated probe has 'Red' color
-	    unmethy[allBothInd, i] <- unmethy[allBothInd,i] - bg.red * m.ref / m.int.red + bg.ref
-	    methy[allBothInd, i] <- methy[allBothInd,i] - bg.grn * m.ref / m.int.grn + bg.ref
+	    unmethy[allBothInd, i] <- unmethy[allBothInd,i] - bg.red[i] * m.ref / m.int.red + bg.ref
+	    methy[allBothInd, i] <- methy[allBothInd,i] - bg.grn[i] * m.ref / m.int.grn + bg.ref
 	  }
 	}
     
   methy.adj <- methyLumiM
   assayDataElement(methy.adj, 'unmethylated') <- unmethy
   assayDataElement(methy.adj, 'methylated') <- methy
-  if (is(methy.adj, "MethyLumiM")) methy.adj <- estimateM(methy.adj)
+  if (is(methy.adj, "MethyLumiM") || is(methy.adj, 'MethyGenoSet')) methy.adj <- estimateM(methy.adj)
   return(methy.adj)
 }
 
@@ -636,7 +635,7 @@ adjColorBias.quantile <- function(methyLumiM, refChannel=c("green", "red"), logM
   methy.adj <- methyLumiM
   assayDataElement(methy.adj, 'unmethylated') <- unmethy
   assayDataElement(methy.adj, 'methylated') <- methy
-  if (is(methy.adj, "MethyLumiM")) methy.adj <- estimateM(methy.adj)
+  if (is(methy.adj, "MethyLumiM") || is(methy.adj, 'MethyGenoSet')) methy.adj <- estimateM(methy.adj)
   return(methy.adj)
 }
 
@@ -927,16 +926,17 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
   
   assayDataElement(methyLumiM, 'unmethylated') <- unmethy
   assayDataElement(methyLumiM, 'methylated') <- methy
-  if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)
+  if (is(methyLumiM, "MethyLumiM") || is(methyLumiM, "MethyGenoSet")) methyLumiM <- estimateM(methyLumiM)
   return(methyLumiM)
 }
 
 
 ## this internal function was based on limma::normalizeQuantiles
-.estimate.quauntile.reference <- function(dataMatrix, ..., batchSize=50, repTime=NULL, ties=TRUE) {
+.estimate.quantile.reference <- function(dataMatrix, ..., batchSize=50, repTime=NULL, ties=TRUE) {
 	otherDataMatrix <- list(...)
 
 	## subsampling the data to estimate the reference when the size is bigger than the batchSize
+	reference <- NULL
 	if (ncol(dataMatrix) > batchSize) {
 		repTime <- ncol(dataMatrix) / batchSize * 2
 		if (ncol(dataMatrix) < batchSize) {
@@ -951,7 +951,7 @@ normalizeMethylation.ssn <- function(methyLumiM, separateColor=FALSE) {
 					dataMatrix.i <- rbind(dataMatrix.i, otherDataMatrix[[j]][, ind.i])
 				}
 			}
-			reference.i <- .estimate.quauntile.reference(dataMatrix.i)
+			reference.i <- .estimate.quantile.reference(dataMatrix.i)
 			reference <- cbind(reference, reference.i)
 		}
 		reference <- rowMeans(reference)
@@ -1079,7 +1079,7 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, refer
 	if (is(assayDataElement(methyLumiM, 'exprs'), "BigMatrix")) {
 		## estimate the reference by randomly pick columns
 		if (is.null(reference)) {
-			reference <- .estimate.quauntile.reference(dataMatrix=assayDataElement(methyLumiM, 'methylated'), dataMatrix2=assayDataElement(methyLumiM, 'unmethylated'), batchSize=50)
+			reference <- .estimate.quantile.reference(dataMatrix=assayDataElement(methyLumiM, 'methylated'), dataMatrix2=assayDataElement(methyLumiM, 'unmethylated'), batchSize=50)
 		}
 		for (i in 1:ncol(methy)) {
 		  x.matrix.i <- rbind(methy[,i, drop=FALSE], unmethy[,i, drop=FALSE])
@@ -1132,7 +1132,7 @@ normalizeMethylation.quantile <- function(methyLumiM, separateColor=FALSE, refer
 	  rownames(methy.n) <- rownames(unmethy.n) <- rownames(methy)
 	  assayDataElement(methyLumiM, 'unmethylated') <- unmethy.n
 	  assayDataElement(methyLumiM, 'methylated') <- methy.n
-	  if (is(methyLumiM, "MethyLumiM")) methyLumiM <- estimateM(methyLumiM)	
+	  if (is(methyLumiM, "MethyLumiM") || is(methyLumiM, "MethyGenoSet")) methyLumiM <- estimateM(methyLumiM)
 	}
 
   return(methyLumiM)

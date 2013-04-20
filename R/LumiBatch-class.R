@@ -865,6 +865,28 @@ setMethod('asBigMatrix',
 	signature(object='ExpressionSet'),
 	function(object, rowInd=NULL, colInd=NULL, nCol=NULL, dimNames=NULL, saveDir='.', savePrefix=NULL, ...)
 {
+	## check whether the user just wants a physical copy of the data to a new location
+	if (grepl('windows', R.Version()$platform, ignore.case=TRUE)) stop("Package bigmemoryExtras does not support Windows systems.")
+	
+	if (saveDir == '.') saveDir <- getwd()
+	if (is.null(savePrefix)) {
+		## use the variable name as the bigmatrix directory prefix
+		savePrefix <- match.call(asBigMatrix)[['object']]  
+	} 
+	saveDir <- file.path(saveDir, paste(savePrefix, 'bigmat', sep='_'))
+	
+	if (is.null(rowInd) && is.null(colInd) && is.null(nCol) && is.null(dimNames)) {
+		oldDir <- dirname(assayData(object)[[assayDataElementNames(object)[1]]]$datapath)
+		if (oldDir != saveDir) {
+			if (!file.exists(saveDir)) {
+				dir.create(saveDir,showWarnings=FALSE)
+				sapply(dir(oldDir, full.names=T), file.copy, to=saveDir, overwrite=TRUE, recursive=TRUE)
+			}  
+		}
+		object <- bigmemoryExtras::updateAssayDataElementPaths(object, saveDir)
+		return(object)		
+	}
+	
 	if (!is.null(dimNames)) {
 		if (!is.list(dimNames) || length(dimNames) != 2) stop("dimNames should be a list with length 2!")
 	}
@@ -905,31 +927,23 @@ setMethod('asBigMatrix',
 	}
 	if (nCol != ncol(object)) extensionMode <- TRUE
 	
-	if (is.null(savePrefix)) {
-		## use the variable name as the bigmatrix directory prefix
-		savePrefix <- match.call(asBigMatrix)[['object']]  
-	} 
-	
-	if (saveDir == '.') saveDir <- getwd()
-	saveDir <- file.path(saveDir, paste(savePrefix, 'bigmat', sep='_'))
-	oldDir <- NULL
 	for (ad.name in assayDataElementNames(object)) {
   	matrix.i <- assayDataElement(object, ad.name)
 		if (is.null(matrix.i)) next
 		backingfile <- file.path(saveDir, ad.name)
 		
-		if (!is(assayDataElement(object, ad.name), "BigMatrix") && ! extensionMode) {
-			x.mat <- BigMatrix(matrix.i[dimNames[[1]], dimNames[[2]]], backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
+		if (!is(assayDataElement(object, ad.name), "BigMatrix") && !extensionMode) {
+			x.mat <- bigmemoryExtras::BigMatrix(matrix.i[dimNames[[1]], dimNames[[2]]], backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
 		} else {
-			x.mat <- BigMatrix(backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
-			for (i in 1:length(dimNames[[2]])) {
-				col.i <- dimNames[[2]][i]
+			x.mat <- bigmemoryExtras::BigMatrix(backingfile=backingfile, nrow=nRow, ncol=nCol, dimnames=dimNames, ...)
+			for (i in 1:ncol(matrix.i)) {
+				col.i <- colnames(matrix.i)[i]
 				x.mat[dimNames[[1]], col.i] <- matrix.i[dimNames[[1]], col.i]
 			}
 		}
 		assayDataElement(object, ad.name) <- x.mat
   }
-	object <- updateAssayDataElementPaths(object, saveDir)
+	object <- bigmemoryExtras::updateAssayDataElementPaths(object, saveDir)
 
 	if (extensionMode || subsetMode) {
 		appLen <- nCol - nrow(pData(object))
@@ -942,9 +956,8 @@ setMethod('asBigMatrix',
 			if (length(colInd) < nrow(pdata)) pdata <- pdata[colInd,]
 		}
 		className <- class(object)
-		object.new <- new(className, assayData=assayData(object))
-		pData(object.new) <- pdata
-		fData(object.new) <- fData(object)[rowInd,]
+		object.new <- new(className, assayData=assayData(object), phenoData=AnnotatedDataFrame(pdata), 
+				featureData=AnnotatedDataFrame(fData(object)[rowInd,,drop=FALSE]))
 		object <- object.new
 	}
 	return(object)
