@@ -80,7 +80,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		colClasses <- rep(NA, length(header))
 		colClasses[probeId.pos] <- 'character'
 	} else {
-		colClasses <- NULL
+		colClasses <- NA
 	}
 
 	## ---------------------------------------
@@ -296,7 +296,7 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 		# It is based on annotationColumn
 		annotationColumn <- header[toupper(header) %in% toupper(annotationColumn)]
 		if (length(annotationColumn) == 0) {
-			cat('Annotation columns are not available in the data.\n')
+			#cat('Annotation columns are not available in the data.\n')
 		} else {
 			annotationInfo <- allData[,annotationColumn, drop=FALSE]
 		}

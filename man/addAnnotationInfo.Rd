@@ -5,16 +5,21 @@
 Add probe color channel and basic annotation information based on the annotation library of Illumina methylation microarray
 }
 \usage{
-addAnnotationInfo(methyLumiM, lib = NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'))
+addAnnotationInfo(methyLumiM, lib = 'FDb.InfiniumMethylation.hg19', annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{methyLumiM}{a MethyLumiM object includes Illumina Infinium methylation data}
-  \item{lib}{Annotation library of Illumina methylation microarray. For example, "IlluminaHumanMethylation27k.db" for 27k array, "IlluminaHumanMethylation450k.db" for 450k infinium array }
+  \item{lib}{Annotation library of Illumina methylation microarray. }
   \item{annotationColumn}{only include 'COLOR_CHANNEL', 'CHROMOSOME' and 'POSITION' information}
 }
 \value{
 return the MethyLumiM object with COLOR_CHANNEL, CHROMOSOME and chromome POSITION information added to the featureData.
+}
+\details{
+The "lib" parameter supports both FeatureDb based annotation libraries and old array-based annotation libraries.
+'FDb.InfiniumMethylation.hg19' is the FeatureDb based annotation library, which includes both 450k and 27k data. 
+"IlluminaHumanMethylation27k.db" (for 27k array) and "IlluminaHumanMethylation450k.db" (450k infinium array) are old types of annotation libraries.
 }
 
 \author{Pan DU}

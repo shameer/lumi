@@ -104,7 +104,7 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
 }
 
 
-addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
+addAnnotationInfo <- function(methyLumiM, lib='FDb.InfiniumMethylation.hg19', annotationColumn=c('COLOR_CHANNEL', 'CHROMOSOME', 'POSITION')) {
   
  	if (is(methyLumiM, 'MethyLumiM')) {
 	  # retrieve feature data
@@ -118,33 +118,55 @@ addAnnotationInfo <- function(methyLumiM, lib=NULL, annotationColumn=c('COLOR_CH
 	}
 	
 	if (!is.null(lib) && require(lib, character.only=TRUE)) {
-		
-		colorInfo <- chr <- loc <- rep(NA, length(probeList))
-		names(colorInfo) <- names(chr) <- names(loc) <- probeList
-		
-    obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
-		pp <- probeList[probeList %in% keys(obj)]
-    colorInfo[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
-    ff$COLOR_CHANNEL <- colorInfo
-		
-		## Check whether multiple versions of chromosome information is available,
-		## If so, only use the latest version.
-		chrPattern <- paste(sub("\\.db$", "", lib), "CHR", sep="")
-		chrObjs <- ls(paste("package:", lib, sep=""), pattern=paste(chrPattern, "[0-9]+$", sep=""))
-		if (length(chrObjs) > 1) {
-			chrVersion <- sub(".*[^0-9]([0-9]+)$", "\\1", chrObjs)
-			obj <- get(chrObjs[which.max(as.numeric(chrVersion))])
-		} else {
-			obj <- get(chrPattern)
-		}
-		pp <- probeList[probeList %in% keys(obj)]
-    chr[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
-    ff$CHROMOSOME <- as.character(chr)
+		## For FeatureDb annotation libraries
+		ff <- NULL
+		if (exists(lib)) {
+			lib <- get(lib)
+			if (is(lib, 'FeatureDb')) {
+				allAnnotation <- features(lib)
+			}
+			ff <- data.frame(ProbeID=probeList, CHROMOSOME=NA, POSITION=NA, COLOR_CHANNEL=NA)
+			rownames(ff) <- probeList
+			if (any(probeList %in% names(allAnnotation))) {
+				probeList <- probeList[probeList %in% names(allAnnotation)]
+				warnings('Some probes does not exist in the annotation library!')
+			}
+			allAnnotation <- as.data.frame(allAnnotation[probeList])
+			ff[probeList, 'CHROMOSOME'] <- allAnnotation$seqnames
+			ff[probeList, 'POSITION'] <- allAnnotation$start
+			ff[probeList, 'COLOR_CHANNEL'] <- allAnnotation$channel450
+		} 
 
-    obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
- 		pp <- probeList[probeList %in% keys(obj)]
-    loc[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
-    ff$POSITION <- as.numeric(as.character(loc))
+		if (is.null(ff)) {
+			## For old annotation libraries: IlluminaHumanMethylation450k.db
+			colorInfo <- chr <- loc <- rep(NA, length(probeList))
+			names(colorInfo) <- names(chr) <- names(loc) <- probeList
+
+	    obj <- get(paste(sub("\\.db$", "", lib), "COLORCHANNEL", sep=""))
+			pp <- probeList[probeList %in% keys(obj)]
+	    colorInfo[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+	    ff$COLOR_CHANNEL <- colorInfo
+
+			## Check whether multiple versions of chromosome information is available,
+			## If so, only use the latest version.
+			chrPattern <- paste(sub("\\.db$", "", lib), "CHR", sep="")
+			chrObjs <- ls(paste("package:", lib, sep=""), pattern=paste(chrPattern, "[0-9]+$", sep=""))
+			if (length(chrObjs) > 1) {
+				chrVersion <- sub(".*[^0-9]([0-9]+)$", "\\1", chrObjs)
+				obj <- get(chrObjs[which.max(as.numeric(chrVersion))])
+			} else {
+				obj <- get(chrPattern)
+			}
+			pp <- probeList[probeList %in% keys(obj)]
+	    chr[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+	    ff$CHROMOSOME <- as.character(chr)
+
+	    obj <- get(paste(sub("\\.db$", "", lib), "CPGCOORDINATE", sep=""))
+	 		pp <- probeList[probeList %in% keys(obj)]
+	    loc[pp] <- sapply(AnnotationDbi::mget(pp, obj), function(x) x[1])
+	    ff$POSITION <- as.numeric(as.character(loc))
+		}
+
 		
 	} else {
 		if (all(c('CHR', 'MAPINFO') %in% names(ff))) {
@@ -1308,10 +1330,10 @@ setMethod("boxplot",signature(x="MethyLumiM"), function(x, main, logMode=TRUE, .
 	  # tmp <- lapply(1:ncol(dataMatrix), function(i) dataMatrix[,i])
 	  tmp <- data.frame(M=as.vector(dataMatrix), sample=factor(col(dataMatrix), labels=colnames(dataMatrix)))
 	   
-	  bwplot(M ~ sample, data=tmp, ylab=ylab, main=main, scales=list(rot=90),
+	  print(bwplot(M ~ sample, data=tmp, ylab=ylab, main=main, scales=list(rot=90),
 		       panel = function(..., box.ratio) {
 		           panel.violin(..., col = "grey", varwidth = FALSE, box.ratio = box.ratio)
-		       })
+		       }))
 	  # hdr.boxplot(tmp, main=main, xlab='', ylab=ylab, prob=prob, col=col, ...)
 	}
 
