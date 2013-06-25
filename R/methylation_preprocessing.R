@@ -131,10 +131,10 @@ addAnnotationInfo <- function(methyLumiM, lib='FDb.InfiniumMethylation.hg19', an
 				probeList <- probeList[probeList %in% names(allAnnotation)]
 				warnings('Some probes does not exist in the annotation library!')
 			}
-			allAnnotation <- as.data.frame(allAnnotation[probeList])
-			ff[probeList, 'CHROMOSOME'] <- allAnnotation$seqnames
-			ff[probeList, 'POSITION'] <- allAnnotation$start
-			ff[probeList, 'COLOR_CHANNEL'] <- allAnnotation$channel450
+			allAnnotation <- allAnnotation[probeList]
+			ff[probeList, 'CHROMOSOME'] <- as.character(seqnames(allAnnotation))
+			ff[probeList, 'POSITION'] <- as.numeric(start(allAnnotation))
+			ff[probeList, 'COLOR_CHANNEL'] <- as.character(allAnnotation$channel450)
 		} 
 
 		if (is.null(ff)) {

@@ -44,21 +44,32 @@ function(x, subset=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds')
 		ppoints <- mds.result$points
 		eig <- mds.result$eig
 		percent <- round(eig/sum(eig) * 100, 1)
-
+		
+		colorLegend <- NULL
 		if (is.null(color)) {
 			color <- 1
 		} else {
 			if (!is.numeric(color)) {
 				allColor <- colors()
 				if (!all(is.element(color, allColor))) {
-					color <- as.numeric(factor(color, levels=unique(color)))
+					colorLegend <- unique(color)
+					color <- as.numeric(factor(color, levels=colorLegend))
 				} 
 			}
 		}
-		plot(ppoints[,dimension[1]], ppoints[,dimension[2]], type='n', xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), main=main, ...)
+		plot(ppoints[,dimension[1]], ppoints[,dimension[2]], type='n', 
+			xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),
+			ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), 
+			main=main, ...)
 		text(ppoints[,dimension[1]], ppoints[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
 		attr(ppoints, 'geneNum') <- length(subset)
 		attr(ppoints, 'threshold') <- cv.Th
+		
+		## add legend if color is a factor
+		if (!is.null(colorLegend)) {
+			legend('topleft', legend=colorLegend, text.col=1:length(colorLegend))
+		}
+		
 		return(invisible(ppoints))	
 	}
 }
