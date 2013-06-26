@@ -876,7 +876,7 @@ setMethod('asBigMatrix',
 	if (!file.exists(saveDir)) stop('saveDir does not exist!')
 	saveDir <- file.path(saveDir, paste(savePrefix, 'bigmat', sep='_'))
 	
-	if (is.null(rowInd) && is.null(colInd) && is.null(nCol) && is.null(dimNames)) {
+	if (is.null(rowInd) && is.null(colInd) && is.null(nCol) && is.null(dimNames) && is(exprs(object), 'BigMatrix')) {
 		oldDir <- dirname(assayData(object)[[assayDataElementNames(object)[1]]]$datapath)
 
 		if (oldDir != saveDir) {
