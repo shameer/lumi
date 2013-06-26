@@ -21,7 +21,7 @@ lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
 
 ## import Illumina Infinium methylation IDAT files based on barcodes.
 ## This is an extension of the methylumi::lumIDAT function 
-importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FALSE, dir.bigMatrix='.', savePrefix.bigMatrix=NULL, ...) {
+importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FALSE, dir.bigMatrix='.', savePrefix.bigMatrix, ...) {
   
   if (missing(sampleInfo)) {
     stop('Please provide "sampleInfo"!')
@@ -77,8 +77,27 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
 	if (bigMatrix) {
 		## read first batch of samples and create a BigMatrix with all sample information
 		## Then fill in the rest sample information
-	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
-	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
+		if (missing(savePrefix.bigMatrix)) {
+			warnings('savePrefix.bigMatrix is missing! bigMatrixFiles is used!')
+			savePrefix.bigMatrix <- 'bigMatrixFiles'
+		}
+		
+		for (i in 1:length(barcodesList)) {
+			lumi450k.i <- lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)
+			if (i == 1) {
+				dimNames <- list(featureNames(lumi450k.i), barcodes)
+				## predefine a big matrix
+				lumi450k <- asBigMatrix(lumi450k.i, nCol=length(barcodes), dimNames=dimNames, saveDir=dir.bigMatrix, savePrefix=savePrefix.bigMatrix)
+			} else {
+				## fill in data information of new samples
+				for (ad.name in assayDataElementNames(lumi450k.i)) {
+	        matrixAll.i <- assayDataElement(lumi450k.i, ad.name)
+					if (is.null(matrixAll.i)) next
+	        matrix.i <- assayDataElement(lumi450k.i, ad.name)
+					matrixAll.i[, colnames(matrix.i)] <- matrix.i
+			  }
+			}
+		}
 	} else {
 	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
 	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
@@ -500,8 +519,13 @@ bgAdjustMethylation <- function(methyLumiM, separateColor=FALSE, targetBGLevel=3
   }
 
   ## check possible error of BG estimation model
-  negPerc.methy <- apply(methy, 2, function(x) length(which(x < 0))/nrow(methy))
-  negPerc.unmethy <- apply(unmethy, 2, function(x) length(which(x < 0))/nrow(unmethy))
+	if (is(methy, 'BigMatrix')) {
+	  negPerc.methy <- bigmemoryExtras::apply(methy, 2, function(x) length(which(x < 0))/nrow(methy))
+	  negPerc.unmethy <- bigmemoryExtras::apply(unmethy, 2, function(x) length(which(x < 0))/nrow(unmethy))
+	} else {
+	  negPerc.methy <- apply(methy, 2, function(x) length(which(x < 0))/nrow(methy))
+	  negPerc.unmethy <- apply(unmethy, 2, function(x) length(which(x < 0))/nrow(unmethy))
+	}
   negPerc <- pmax(negPerc.methy, negPerc.unmethy)
 
   if (any(negPerc > negPercTh)) {
@@ -1217,7 +1241,11 @@ estimateM <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), offse
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
   methy <- assayDataElement(methyLumiM, 'methylated') 
 	## in case of BigMatrix
-  mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	if (is(methy, 'BigMatrix')) {
+	  mm <- min(c(bigmemoryExtras::apply(unmethy, 2, min, na.rm=TRUE), bigmemoryExtras::apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	} else {
+		mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	}
   if (mm < 0.01) {
 		if (is(methy, 'BigMatrix')) {
 			for (i in 1:ncol(methy)) {
@@ -1257,7 +1285,11 @@ estimateBeta <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"), of
   unmethy <- assayDataElement(methyLumiM, 'unmethylated') 
   methy <- assayDataElement(methyLumiM, 'methylated') 
 	## in case of BigMatrix
-  mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	if (is(methy, 'BigMatrix')) {
+	  mm <- min(c(bigmemoryExtras::apply(unmethy, 2, min, na.rm=TRUE), bigmemoryExtras::apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	} else {
+		mm <- min(c(apply(unmethy, 2, min, na.rm=TRUE), apply(methy, 2, min, na.rm=TRUE)), na.rm=TRUE)
+	}
   if (mm < 0.01) {
 		if (is(methy, 'BigMatrix')) {
 			for (i in 1:ncol(methy)) {

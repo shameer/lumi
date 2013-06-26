@@ -873,15 +873,15 @@ setMethod('asBigMatrix',
 		## use the variable name as the bigmatrix directory prefix
 		savePrefix <- match.call(asBigMatrix)[['object']]  
 	} 
+	if (!file.exists(saveDir)) stop('saveDir does not exist!')
 	saveDir <- file.path(saveDir, paste(savePrefix, 'bigmat', sep='_'))
 	
 	if (is.null(rowInd) && is.null(colInd) && is.null(nCol) && is.null(dimNames)) {
 		oldDir <- dirname(assayData(object)[[assayDataElementNames(object)[1]]]$datapath)
+
 		if (oldDir != saveDir) {
-			if (!file.exists(saveDir)) {
-				dir.create(saveDir,showWarnings=FALSE)
-				sapply(dir(oldDir, full.names=T), file.copy, to=saveDir, overwrite=TRUE, recursive=TRUE)
-			}  
+			if (!file.exists(saveDir)) 	dir.create(saveDir,showWarnings=FALSE)
+			sapply(dir(oldDir, full.names=T), file.copy, to=saveDir, overwrite=TRUE, recursive=TRUE)  
 		}
 		object <- bigmemoryExtras::updateAssayDataElementPaths(object, saveDir)
 		return(object)		
