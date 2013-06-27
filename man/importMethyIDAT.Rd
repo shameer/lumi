@@ -7,7 +7,7 @@ Import Illumina methylation .idat files as an MethyLumiM object
 Import Illumina methylation .idat files as an MethyLumiM object. An extension of \code{\link[methylumi]{lumIDAT}} function
 }
 \usage{
-importMethyIDAT(sampleInfo, dataPath = getwd(), lib = NULL, bigMatrix=FALSE, dir.bigMatrix='.', savePrefix.bigMatrix=NULL, ...)
+importMethyIDAT(sampleInfo, dataPath = getwd(), lib = NULL, bigMatrix=FALSE, dir.bigMatrix='.', savePrefix.bigMatrix, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
