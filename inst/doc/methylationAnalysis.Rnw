@@ -4,26 +4,25 @@
 %\VignetteDepends{lumi, Biobase}
 %\VignettePackage{lumi}
 
-\documentclass[a4paper]{article}
-
-\usepackage{amsmath,pstricks}
-% With MikTeX 2.9, using pstricks also requires using auto-pst-pdf or running
-% pdflatex will fail. Note that using auto-pst-pdf requires to set environment
-% variable MIKTEX_ENABLEWRITE18=t on Windows, and to set shell_escape = t in
-% texmf.cnf for Tex Live on Unix/Linux/Mac.
-\usepackage{auto-pst-pdf}
+\documentclass[12pt]{article}
+\usepackage{amsmath,fullpage}
 \usepackage{hyperref}
-\usepackage[authoryear,round]{natbib}
 
-\newcommand{\Rfunction}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\texttt{#1}}}
-\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\R}{{\textsf{R}}}
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\term}[1]{{\emph{#1}}}
+\newcommand{\Rpackage}[1]{\textsf{#1}}
+\newcommand{\Rfunction}[1]{\texttt{#1}}
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rslot}[1]{\texttt{#1}}
 \newcommand{\Rclass}[1]{{\textit{#1}}}
 \newcommand{\Rmethod}[1]{{\textit{#1}}}
+\newcommand{\Rfunarg}[1]{{\textit{#1}}}
+
 
 \SweaveOpts{keep.source=TRUE}
 
-\author{Pan Du$^\ddagger$\footnote{dupan (at) northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng (at) northwestern.edu}, Spencer Huang$^\ddagger$\footnote{huangcc (at) northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe (at) northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2 (at) northwestern.edu}}
+\author{Pan Du$^\dagger$\footnote{dupan.mail (at) gmail.com}, Gang Feng$^\ddagger$\footnote{g-feng (at) northwestern.edu}, Spencer Huang$^\ddagger$\footnote{huangcc (at) northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe (at) northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2 (at) northwestern.edu}}
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 
@@ -31,7 +30,9 @@
 
 \title{Analyze Illumina Infinium methylation microarray data}
 \maketitle
-\begin{center}$^\ddagger$Biomedical Informatics Center \\ Northwestern University, Chicago, IL, 60611, USA
+\begin{center}$^\dagger$Genentech Inc., South San Francisco, CA, 94080, USA
+\end{center}
+\begin{center}$^\ddagger$Biomedical Informatics Center, Northwestern University, Chicago, IL, 60611, USA
 \end{center}
 
 \tableofcontents
@@ -39,7 +40,7 @@
 
 \section{Overview} 
 
-This is a tutorial of processing Illumina Infinium methylation microarray data using \Rpackage{lumi} package. For the processing of Illumina GoldenGate methylation microarray data, please check the \Rpackage{methylumi} package. The tutorial will briefly describe the class structure, supported methods and functions in quality and color balance assessment, color balance adjustment, background adjustment, normalization and modeling the methylation status. It will also illustrate why we suggest using M-value instead of Beta-value in the statistics analysis.
+This is a tutorial of processing Illumina Infinium 27k and 450k methylation microarray data using \Rpackage{lumi} package. For the processing of Illumina GoldenGate methylation microarray data, please check the \Rpackage{methylumi} package. The tutorial will briefly describe the class structure, supported methods and functions in quality and color balance assessment, color balance adjustment, background adjustment, normalization and modeling the methylation status. It will also illustrate why we suggest using M-value instead of Beta-value in the statistics analysis.
 
 
 \section{Major classes of Illumina methylation microarray data}
@@ -48,7 +49,26 @@ By default, Illumina suggests using the Beta-value to quantify the methylation l
 
 For this reason, we defined a new \Rclass{MethyLumiM} class. \Rclass{MethyLumiM} is a class inherited from \Rclass{ExpressionSet} class. The "assayData" slot includes three required data matrix, which are "exprs", "methylated" and "unmethylated". The "exprs" is a matrix of M-values, which is the log2 ratio of methylated and unmethylated probe intensities; "methylated" and "unmethylated" are intensity matrix measured by methylated and unmethylalted probes of Illumina Infinium methylation microarray. "detection" is an optional matrix in "assayData" slot. It is the detection p-value outputted by Illumina GenomeStudio software. To keep the control data information, which is mainly used for the quality control purpose, the \Rclass{MethyLumiM} class has a "controlData" slot. The "controlData" slot can be either NULL or a \Rclass{MethyLumiQC} object. Users are able to plot the control data using \Rfunction{plotControlData} function.
 
-We use the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package to read in the Illumina methylation data, which was outputted by Illumina GenomeStudio or BeadStudio software. The \Rfunction{methylumiR} function returns a \Rclass{MethyLumiSet} class object.  For convenience, we wrote a coerce function to map from \Rclass{MethyLumi}, \Rclass{MethyLumiSet} or other \Rclass{eSet} inherited objects to \Rclass{MethyLumiM} class object. And We wrote a \Rfunction{lumiMethyR} function as a wrap function of \Rfunction{methylumiR} and coerce the returned object as a \Rclass{MethyLumiM} class object.
+\section{Import the methylation data}
+
+Illumina microarray has two types of output data files: Illumina IDAT files and Illumina GenomeStudio output files. Illumina IDAT files provide the detailed bead level information, and Illumina GenomeStudio output files keep the probe level summarized information. As expected the Illumina IDAT files is much bigger in file size, but it keeps all data information and the format is consistent across versions. In comparison, the Illumina GenomeStudio output files is portable in size, but it only keeps the summarized information and its format may have slight changes across versions.
+
+\subsection{Import bead-level Illumina IDAT files}
+For convenience of importing IDAT files, we wrote a \Rfunction{importMethyIDAT} function, which is a wrapper of \Rfunction{lumIDAT} in \Rpackage{methylumi} package. 
+As Illumina organizes the output .idat files by barcodes, \Rfunction{importMethyIDAT} automatically checks the sub-folders in the names of barcodes for .idat files. Users need to a barcode vector or a data.frame with required columns. Please check the help of \Rfunction{importMethyIDAT} function for more details.
+
+One benefit of using \Rfunction{importMethyIDAT} is that it automatically imports the control data information together with other methylation data. 
+
+\subsection{Import probe-level Illumina GenomeStudio output files}
+
+We define a \Rfunction{lumiMethyR} function to read the Illumina methylation data, which is a wrap of the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package.  The \Rfunction{lumiMethyR} function coerces the returned object (in \Rclass{MethyLumiSet} class) as a \Rclass{MethyLumiM} class object. The annotation library is not required if the GenomeStudio output data has already included the "COLOR\_CHANNEL" column. 
+
+\begin{Sinput}
+> ## specify the file name
+> # fileName <- 'Example_Illumina_Methylation_profile.txt' 
+> ## load the data
+> # example.lumiMethy <- lumiMethyR(fileName, lib="IlluminaHumanMethylation27k.db")  # Not Run
+\end{Sinput}
 
 
 \section{Data preprocessing}
@@ -57,17 +77,6 @@ The first thing is to load the  \Rpackage{lumi} package.
 <<load library, eval=T>>=
 library(lumi)
 @
-
-\subsection{Read the methylation microarray data}
-We define a \Rfunction{lumiMethyR} function to read the Illumina methylation data, which is a wrap of the \Rfunction{methylumiR} function in  \Rpackage{methylumi} package.  The \Rfunction{lumiMethyR} function coerces the returned object (in \Rclass{MethyLumiSet} class) as a \Rclass{MethyLumiM} class object. The annotation library is not required if the GenomeStudio output data has already included the "COLOR\_CHANNEL" column. 
-
-
-\begin{Sinput}
-> ## specify the file name
-> # fileName <- 'Example_Illumina_Methylation_profile.txt' 
-> ## load the data
-> # example.lumiMethy <- lumiMethyR(fileName, lib="IlluminaHumanMethylation27k.db")	# Not Run
-\end{Sinput}
 
 
 \subsection{Example methylation datasets}
@@ -92,7 +101,7 @@ sampleNames(example.lumiMethy)
 <<sampleRelation, fig=true, width=8, height=8, quiet=T, echo=T>>=
 plotSampleRelation(example.lumiMethy, method='mds', cv.Th=0) 
 @
-\caption{Overall sample relations in example.lumiMethy dataset}
+\caption{Overall sample relations of the raw data in example.lumiMethy dataset}
 \label{fig:sampleRelation}
 \end{figure}            
 
@@ -101,7 +110,7 @@ plotSampleRelation(example.lumiMethy, method='mds', cv.Th=0)
 <<sampleRelationTree, fig=true, width=8, height=8, quiet=T, echo=T>>=
 plotSampleRelation(example.lumiMethy, method='cluster', cv.Th=0) 
 @
-\caption{Overall sample relations shown as a hierarchical tree}
+\caption{Overall sample relations of the raw data shown as a hierarchical tree}
 \label{fig:sampleRelationCluster}
 \end{figure}            
 
@@ -123,7 +132,7 @@ sampleNames(example.methyTitration)
 <<sampleRelationTitration, fig=true, width=8, height=8, quiet=T, echo=T>>=
 plotSampleRelation(example.methyTitration, method='mds', cv.Th=0) 
 @
-\caption{Overall sample relations of the titration dataset}
+\caption{Overall sample relations of the titration dataset before preprocessing}
 \label{fig:sampleRelationTitration}
 \end{figure}            
 
@@ -141,7 +150,7 @@ Similar with expression microarray data, the \Rpackage{lumi} defines density and
 ## plot the density
 density(example.methyTitration, xlab="M-value")	
 @
-\caption{Density plot of M-value methylation levels of titration data before normalization}
+\caption{Density plot of M-value methylation levels of titration data before preprocessing}
 \label{fig:densityMTitration}
 \end{figure}            
 
@@ -155,7 +164,7 @@ sampleColor[grep("Treat", sampleNames(example.lumiMethy))] <- 2
 
 density(example.lumiMethy, col=sampleColor, xlab="M-value")	## plot the density
 @
-\caption{Density plot of M-value methylation levels before normalization}
+\caption{Density plot of M-value methylation levels before preprocessing}
 \label{fig:densityM}
 \end{figure}            
 
@@ -166,7 +175,7 @@ density(example.lumiMethy, col=sampleColor, xlab="M-value")	## plot the density
 ## Because the distribution of M-value has two modes, we use a boxplot different from regular ones
 boxplot(example.lumiMethy)
 @
-\caption{Multi-mode boxplot of M-value methylation levels before normalization}
+\caption{Multi-mode boxplot of M-value methylation levels before preprocessing}
 \label{fig:boxplotM}
 \end{figure}            
 
@@ -183,7 +192,7 @@ The  \Rpackage{lumi} package provides three different types of plotting function
 <<densityColorBiasBoth, fig=true, width=8, height=6, quiet=T, echo=T>>=
 plotColorBias1D(example.lumiMethy)
 @
-\caption{Density plot of two color channels (both methylated and unmethylated probe intensities)}
+\caption{Density plot of two color channels (both methylated and unmethylated probe intensities) before preprocessing}
 \label{fig:densityColorBiasBoth}
 \end{figure}            
 
@@ -192,7 +201,7 @@ plotColorBias1D(example.lumiMethy)
 <<densityColorBiasMethy, fig=true, width=8, height=6, quiet=T, echo=T>>=
 plotColorBias1D(example.lumiMethy, channel='methy')
 @
-\caption{Density plot of two color channels (methylated probe intensities)}
+\caption{Density plot of two color channels (methylated probe intensities) before preprocessing}
 \label{fig:densityColorBiasMethy}
 \end{figure}            
 
@@ -201,7 +210,7 @@ plotColorBias1D(example.lumiMethy, channel='methy')
 <<densityColorBiasUnmethy, fig=true, width=8, height=6, quiet=T, echo=T>>=
 plotColorBias1D(example.lumiMethy, channel='unmethy')
 @
-\caption{Density plot of two color channels (unmethylated probe intensities)}
+\caption{Density plot of two color channels (unmethylated probe intensities) before preprocessing}
 \label{fig:densityColorBiasUnmethy}
 \end{figure}            
 
@@ -213,7 +222,7 @@ Similarly, we defined boxplot function, which plot two color channels separately
 <<boxplotColorBiasMethy, fig=true, width=8, height=6, quiet=T, echo=T>>=
 boxplotColorBias(example.lumiMethy, channel='methy')
 @
-\caption{Box plot of two color channels (methylated probe intensities)}
+\caption{Box plot of two color channels (methylated probe intensities) before preprocessing}
 \label{fig:boxplotColorBiasMethy}
 \end{figure}          
   
@@ -223,7 +232,7 @@ boxplotColorBias(example.lumiMethy, channel='methy')
 <<boxplotColorBiasUnmethy, fig=true, width=8, height=6, quiet=T, echo=T>>=
 boxplotColorBias(example.lumiMethy, channel='unmethy')
 @
-\caption{Box plot of two color channels (unmethylated probe intensities)}
+\caption{Box plot of two color channels (unmethylated probe intensities) before preprocessing}
 \label{fig:boxplotColorBiasUnmethy}
 \end{figure}            
 
@@ -257,7 +266,7 @@ Apart from color balance assessment, we propose to assess the sample quality bas
 <<boxplotColorBiasSum, fig=true, width=8, height=6, quiet=T, echo=T>>=
 boxplotColorBias(example.lumiMethy, channel='sum')
 @
-\caption{Box plot of of CpG-site Intensity (two color channels were plotted separately)}
+\caption{Box plot of of CpG-site Intensity (two color channels were plotted separately) before preprocessing}
 \label{fig:boxplotColorBiasSum}
 \end{figure}            
 
@@ -268,7 +277,7 @@ boxplotColorBias(example.lumiMethy, channel='sum')
 <<densityColorBiasSum, fig=true, width=8, height=6, quiet=T, echo=T>>=
 plotColorBias1D(example.lumiMethy, channel='sum')
 @
-\caption{Density plot of CpG-site Intensity (two color channels were plotted separately)}
+\caption{Density plot of CpG-site Intensity (two color channels were plotted separately) before preprocessing}
 \label{fig:densityColorBiasSum}
 \end{figure}            
 
@@ -279,7 +288,7 @@ plotColorBias1D(example.lumiMethy, channel='sum')
 <<densityIntensity, fig=true, width=8, height=6, quiet=T, echo=T>>=
 density(estimateIntensity(example.lumiMethy), xlab="log2(CpG-site Intensity)")
 @
-\caption{Density plot of CpG-site Intensity}
+\caption{Density plot of CpG-site Intensity before preprocessing}
 \label{fig:densityIntensity}
 \end{figure}            
 
@@ -289,7 +298,7 @@ density(estimateIntensity(example.lumiMethy), xlab="log2(CpG-site Intensity)")
 <<boxplotIntensity, fig=true, width=8, height=6, quiet=T, echo=T>>=
 boxplot(estimateIntensity(example.lumiMethy))
 @
-\caption{Boxplot of CpG-site Intensity}
+\caption{Boxplot of CpG-site Intensity before preprocessing}
 \label{fig:boxplotIntensity}
 \end{figure}            
 
@@ -310,7 +319,7 @@ selSample <- c( "Ctrl1", "Ctrl1.rep", "Treat1", "Treat1.rep")
 ## plot pair plot with the dots in scatter plot colored based on the color channels
 pairs(estimateIntensity(example.lumiMethy[, selSample]), dotColor= colorChannel, main="Pair plot of CpG-site Intensity")
 @
-\caption{Pair plot of CpG-site Intensity with colors}
+\caption{Pair plot of CpG-site Intensity with colors before preprocessing}
 \label{fig:pairsColor}
 \end{figure}            
 
@@ -321,6 +330,9 @@ pairs(estimateIntensity(example.lumiMethy[, selSample]), dotColor= colorChannel,
 Based on the color balance assessment plots shown in previous two sections, we can see there are clear color balance differences between two batches in the example control and treatment dataset. That means we need to perform color balance adjustment before further analysis. Alternatively, we can separately process two color channels, but will course many inconveniences in the following up analysis. For example, we have to use different p-value or fold-change thresholds in identifying the differentially methylated CpG sites. Moreover, considering  we may not have access to the color channel information later on, performing color balance adjustment first will make following up analysis much more convenient.
 
 The \Rpackage{lumi} package provides \Rfunction{lumiMethyC} function for color balance adjustment. The basic idea of color balance adjustment is to treat it as the normalization between two color channels. Function \Rfunction{lumiMethyC} provides two color balance adjustment methods: "quantile" and "ssn". Because two color channels have different number of probes and not match each other, we cannot directly apply regular "quantile" normalization used in expression microarray analysis. To solve this problem, we designed a  \Rfunction{smoothQuantileNormalization} method. Basically, it requires the quantile normalization should be smooth. By doing this, the \Rfunction{smoothQuantileNormalization} can further resolve one major withdraw of regular quantile normalization, i.e., quantile normalization doesn't work well in the areas with sparse density, like two extremes of data distribution. Figure \ref{fig:densityColorBiasSumAdj} and \ref{fig:boxplotColorBiasSumAdj} show density and boxplot of two color channels after color balance adjustment using smooth quantile normalization. Figure \ref{fig:scatterColorBias1Adj} shows the scatter plots after color balance adjustment using smooth quantile normalization, we can see the distribution becomes very similar between two color channels. And the change of pair plot after color balance is more obvious by comparing Figure \ref{fig:pairsColorAdj} and Figure  \ref{fig:pairsColor}.
+
+
+The Illumina Methylation Infinium 450K uses both Infinium I and II assays with increased breadth of coverage. The Infinium I assay employs two bead types per CpG locus with one for methylated and the other for unmethylated states, and both states are measured with the same fluorescent color. This design is the same as the previous Infinium methylation 27k array. The Infinium II assay uses one bead type and single base extension chemistry with the methylated state determined by the green dye and the unmethylated state by red dye, in which dye bias becomes bigger concern because it is directly related with methylation status. Based on the assumption that the color bias of CpG-sites is independent from the type of probe design, we estimate the color-bias correction curve based on the Infinium I CpG-sites (independent of methylation status), and then apply this correction curve to the CpG-sites with the Infinium II design. Our results show this correction method is effective.
 
 
 <<color balance adjustment, eval=T>>=
@@ -363,7 +375,7 @@ plotColorBias2D(lumiMethy.c.adj, selSample=1, cex=2)
 \centering
 <<pairsColorAdj, fig=true, width=8, height=8, quiet=T, echo=T>>=
 ## plot pairwise plot after color balance adjustment 
-pairs(estimateIntensity(lumiMethy.c.adj[, selSample]), dotColor= colorChannel, main="Pair plot of CpG-site Intensity")
+pairs(estimateIntensity(lumiMethy.c.adj[, selSample]), dotColor= colorChannel, main="Pair plot of CpG-site Intensity after color balance adjustment")
 @
 \caption{Pair plot of CpG-site Intensity with colors}
 \label{fig:pairsColorAdj}
@@ -391,7 +403,7 @@ lumiMethy.bc.adj <- lumiMethyB(lumiMethy.c.adj, method="bgAdjust2C")
 ## plot the background mode of methylated probe data of first five example samples
 plotColorBias1D(example.lumiMethy[,1:5], channel='methy', xlim=c(-1000,5000), logMode=FALSE)
 @
-\caption{Background mode shown in the density plot of methylated probes}
+\caption{Background mode shown in the density plot of methylated probes before background adjustment}
 \label{fig:bgDensityMethy}
 \end{figure}            
 
@@ -423,38 +435,27 @@ plotColorBias1D(lumiMethy.bc.adj [,1:5], channel='methy', xlim=c(-1000,5000), lo
 \subsection{Data normalization}
 Because the total amount of CpG methylation can differ significantly from sample to sample in different conditions, many assumptions used by mRNA expression microarrays are not valid in processing DNA methylation data. So directly applying the normalization methods designed for expression microarray to the methylation data, like M-value or Beta-value, is inappropriate. To circumvent this difficulty, we perform normalization at the probe level, i.e., normalize the intensities of methylated and unmethylated probes instead of the summarized methylation levels. 
 
-The \Rpackage{lumi} package provides \Rfunction{lumiMethyN} function for probe level normalization. Currently, it supports two methods, "ssn" and "quantile". Users can also provide there own normalization methods, as long as it imports and outputs a data matrix. See subsection " Use user provided preprocessing functions" of for more details. The "ssn" (simple scaling normalization) method first estimates the background level use function \Rfunction{estimateMethylationBG}, then scale the background subtracted data to the same average intensity level, and finally adjust the background level to a user specified level. The assumption of "quantile" normalization is  that the intensity distribution of the pooled methylated and unmethylated probes, as shown in Figure \ref{fig:densityColorBiasBoth}, are the similar for different samples. The quantile normalization itself is the same as expression microarrays.
+The \Rpackage{lumi} package provides \Rfunction{lumiMethyN} function for probe level normalization. Currently, it supports two methods, "quantile" and "ssn". Users can also provide there own normalization methods, as long as it imports and outputs a data matrix. See subsection " Use user provided preprocessing functions" of for more details. The assumption of "quantile" normalization is that the intensity distribution of the pooled methylated and unmethylated probes, as shown in Figure \ref{fig:densityColorBiasBoth}, are the similar for different samples. The quantile normalizaiton is the default method. The "ssn" (simple scaling normalization) method first estimates the background level use function \Rfunction{estimateMethylationBG}, then scale the background subtracted data to the same average intensity level, and finally adjust the background level to a user specified level. The assumption of quantile normalization is more aggressive than SSN, it assumes the distribution of pooled intensities of methylated and unmethylated probes are the same. The selection of SSN and quantile normalization is similar with the case in expression microarray. It depends on the data itself and the purpose of analysis.
 
-To check the effectiveness of normalization, we first check the sample relations after SSN normalization, as shown in Figure \ref{fig:sampleRelationClusterNormalized}. We can see most of the technique replicates are clustered together after normalization. Comparing with the sample relations of the raw data shown in Figure \ref{fig:sampleRelationCluster},  the improvement is obvious.  Figure \ref{fig:densitySSN} and \ref{fig:densityQuantile} show the density plots of methylation levels after SSN and quantile normalization, separately. The red and black colors represent "Treatment" and "Control" samples, respectively. We can see the mode positions of normalized data are more consistent across samples while keeping the methylation differences in the middle methylation range. 
+To check the effectiveness of normalization, we first check the sample relations after normalization, as shown in Figure \ref{fig:sampleRelationClusterNormalized}. We can see most of the technique replicates are clustered together after normalization. Comparing with the sample relations of the raw data shown in Figure \ref{fig:sampleRelationCluster}, the improvement is obvious.  Figure \ref{fig:densityQuantile} show the density plots of methylation levels after quantile normalization. The red and black colors represent "Treatment" and "Control" samples, respectively. We can see the mode positions of normalized data are more consistent across samples while keeping the methylation differences in the middle methylation range. 
 
-Figure \ref{fig:densityIntensityNormalizedSSN} and \ref{fig:densityIntensityNormalizedQ} show the density plot of CpG-site Intensity after SSN and quantile normalization, respectively. Comparing with the density plot of CpG-site Intensity before preprocessing, shown in Figure \ref{fig:densityIntensity}, we can see they are much more consistent across samples. We can see the distribution of CpG-site Intensity of quantile normalized data is more consistent than SSN normalized data. This is because the assumption of quantile normalization is more aggressive than SSN, it assumes the distribution of pooled intensities of methylated and unmethylated probes are the same. The selection of SSN and quantile normalization is similar with the case in expression microarray. It depends on the data itself and the purpose of analysis. Figure \ref{fig:boxplotColorBiasNormalized} shows the color bias boxplot after preprocessing. We can see they are very consistent across samples. Finally, we show the pair plot of M-value after preprocessing. We expect there is little difference between technique replicates, but more difference between "Treatment" and "Control" samples, this is exactly what is shown in Figure \ref{fig:pairMNormalize}.  All of these results show the color balance adjustment plus normalization is effective. 
+Figure \ref{fig:densityIntensityNormalizedQ} show the density plot of CpG-site Intensity after normalization. Figure \ref{fig:boxplotColorBiasNormalized} shows the color bias boxplot after preprocessing. We can see they are very consistent across samples. Finally, we show the pair plot of M-value after preprocessing. We expect there is little difference between technique replicates, but more difference between "Treatment" and "Control" samples, this is exactly what is shown in Figure \ref{fig:pairMNormalize}.  All of these results show the color balance adjustment plus normalization is effective. 
 
 <<Normalization, eval=T>>=
-## Perform SSN normalization based on color balance adjusted data
-lumiMethy.c.ssn <- lumiMethyN(lumiMethy.c.adj, method='ssn')
 ## Perform quantile normalization based on color balance adjusted data
 lumiMethy.c.quantile <- lumiMethyN(lumiMethy.c.adj, method='quantile')
+## Perform SSN normalization based on color balance adjusted data
+lumiMethy.c.ssn <- lumiMethyN(lumiMethy.c.adj, method='ssn')
 @
 
 
 \begin{figure}
 \centering
 <<sampleRelationTreeNormalized, fig=true, width=8, height=8, quiet=T, echo=T>>=
-plotSampleRelation(lumiMethy.c.ssn, method='cluster', cv.Th=0) 
+plotSampleRelation(lumiMethy.c.quantile, method='cluster', cv.Th=0) 
 @
-\caption{Overall sample relations shown as a hierarchical tree}
+\caption{Overall sample relations shown as a hierarchical tree after normalization}
 \label{fig:sampleRelationClusterNormalized}
-\end{figure}            
-
-
-\begin{figure}
-\centering
-<<densitySSN, fig=true, width=8, height=6, quiet=T, echo=T>>=
-## plot the density of M-values after SSN normalization
-density(lumiMethy.c.ssn, col= sampleColor, main="Density plot after SSN normalization")
-@
-\caption{Density plot of M-values after SSN normalization}
-\label{fig:densitySSN}
 \end{figure}            
 
 
@@ -466,16 +467,6 @@ density(lumiMethy.c.quantile, col= sampleColor, main="Density plot after quantil
 @
 \caption{Density plot of M-values after quantile normalization}
 \label{fig:densityQuantile}
-\end{figure}            
-
-
-\begin{figure}
-\centering
-<<densityIntensityNormalizedSSN, fig=true, width=8, height=6, quiet=T, echo=T>>=
-density(estimateIntensity(lumiMethy.c.ssn), col= sampleColor,  xlab="log2(CpG-site Intensity)")
-@
-\caption{Density plot of CpG-site Intensity after quantile SSN normalization}
-\label{fig:densityIntensityNormalizedSSN}
 \end{figure}            
 
 
@@ -513,8 +504,12 @@ pairs(lumiMethy.c.quantile[, selSample], dotColor= colorChannel, main="Pair plot
 
 
 \subsection{Modeling the methylation status}
+
 Comparing with the Beta-value, we cannot directly know the methylation status of the CpG site based on the M-value. By checking the density plots of M-values, as shown in Figure \ref{fig:densityIntensityNormalizedQ} and Figure \ref{fig:densityIntensityNormalizedSSN}, we can see the density plot has two obvious modes, with one corresponds to the unmethylated CpG sites and another one corresponds to the methylated CpG sites. Based on this observation, we developed an algorithm to estimate the methylation status by fitting a two component Gamma mixture model. Function \Rfunction{gammaFitEM} estimates the parameters of gamma mixture models using EM algorithm. Figure \ref{fig:gammaFit} shows the fitted two component gamma mixture model in comparison with the histogram of the first sample in example.lumiMethy dataset.
+
+NOTE: the methylation status modeling algorithm was developed based on 27K methylation array. It has not been tested for 450K array. Considering 450K array covers both promoter and gene body, the two component Gamma mixture model assumption may not be valid any more.
  
+
 \begin{figure}
 \centering
 <<gammaFit, fig=true, width=10, height=8, quiet=T, echo=T>>=
@@ -601,11 +596,9 @@ presentCount <- detectionCall(example.lumiMethy)
 
 
 \section{Gene annotation}
-The annotation package,  \Rpackage{IlluminaHumanMethylation27k.db}, of  the HumanMethylation27 BeadChip can be downloaded from Bioconductor. The usage of this package is the same as the expression microarrays.
+The annotation packages,  \Rpackage{IlluminaHumanMethylation27k.db} and \Rpackage{IlluminaHumanMethylation450k.db} can be downloaded from Bioconductor for HumanMethylation27k and HumanMethylation450K BeadChips, respectively. The usage of this package is the same as the expression microarrays. 
 
-
-\section{Performance comparison}
-To be added in the near future ...
+Recently, another \Rfunction{GRanges} based package, \Rpackage{FDb.InfiniumMethylation.hg19}, is available for hg19 human genome. There are \Rfunction{get27k} and \Rfunction{get450k} functions to retrieve the probe information of 27k and 450k BeadChips. For more details, please check \Rpackage{FDb.InfiniumMethylation.hg19} package.
 
 
 \section{A use case: from raw data to functional analysis}
@@ -656,8 +649,8 @@ write.exprs(lumiMethy.c.ssn, file='processedMethylationExampleData.txt')
 @
 
 
-\subsection{Identify differentially methylated genes and Functional analysis}
-The identification of differentially methylated genes and Functional analysis are the same as expression data, shown in the lumi.pdf. Here we will not repeat this part.
+\subsection{Identify differentially methylated genes and other further analysis}
+We developed a separate package \Rpackage{methyAnalysis} for further methylation analysis independent of platforms. Please check \Rpackage{methyAnalysis} package for more details.
 
 
 \subsection{GEO submission of the methylation data}

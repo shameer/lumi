@@ -17,7 +17,7 @@ lumiMethyR(..., lib = NULL, controlData = NULL)
   \item{controlData}{the controlData file name or a MethyLumiQC object to be added to the "controlData" slot of the MethyLumiM object}
 }
 \details{
-This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package. It will coerce the returned object as MethyLumiM class.
+This function is a wrap of \code{\link[methylumi]{methylumiR}} function in methylumi package. It will coerce the returned object as MethyLumiM class. The methylated and unmethylated probe intensity information is required for color-bias adjustment and normalization. If users have the Illumina IDAT files, we suggest use  \code{\link{importMethyIDAT}} function to import the data. The  \code{\link{importMethyIDAT}} function will automatically retrieve the required information and return a MethyLumiM object. 
 }
 \value{ return a MethyLumiM object }
 
@@ -26,7 +26,7 @@ Pan Du
 }
 
 \seealso{
-  See Also \code{\link[methylumi]{methylumiR}} and \code{\link{addControlData2methyLumiM}}
+  See Also \code{\link{importMethyIDAT}}, \code{\link[methylumi]{methylumiR}} and \code{\link{addControlData2methyLumiM}}
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -35,7 +35,7 @@ function(lumiNormalized, lib.mapping=NULL, fileName='GEOsampleInfo.txt') {
 		comm <- hh$command
 	}
 	if (is(lumiNormalized, 'MethyLumiM')) {
-		hh <- methylumi:::getHistory(lumiNormalized)
+		hh <- methylumi::getHistory(lumiNormalized)
 		comm <- hh$command
 	}
 	if (is(lumiNormalized, 'LumiBatch')) {
