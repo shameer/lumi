@@ -503,45 +503,6 @@ pairs(lumiMethy.c.quantile[, selSample], dotColor= colorChannel, main="Pair plot
 \end{figure}            
 
 
-\subsection{Modeling the methylation status}
-
-Comparing with the Beta-value, we cannot directly know the methylation status of the CpG site based on the M-value. By checking the density plots of M-values, as shown in Figure \ref{fig:densityIntensityNormalizedQ} and Figure \ref{fig:densityIntensityNormalizedSSN}, we can see the density plot has two obvious modes, with one corresponds to the unmethylated CpG sites and another one corresponds to the methylated CpG sites. Based on this observation, we developed an algorithm to estimate the methylation status by fitting a two component Gamma mixture model. Function \Rfunction{gammaFitEM} estimates the parameters of gamma mixture models using EM algorithm. Figure \ref{fig:gammaFit} shows the fitted two component gamma mixture model in comparison with the histogram of the first sample in example.lumiMethy dataset.
-
-NOTE: the methylation status modeling algorithm was developed based on 27K methylation array. It has not been tested for 450K array. Considering 450K array covers both promoter and gene body, the two component Gamma mixture model assumption may not be valid any more.
- 
-
-\begin{figure}
-\centering
-<<gammaFit, fig=true, width=10, height=8, quiet=T, echo=T>>=
-## Fit the two component gamma mixture model of the first sample of example.lumiMethy
-fittedGamma <- gammaFitEM(exprs(example.lumiMethy)[,1], plotMode=TRUE)
-@
-\caption{Compare the fitted two component gamma mixture model with the histogram of the first sample of example.lumiMethy}
-\label{fig:gammaFit}
-\end{figure}            
-
-
-Function \Rfunction{methylationCall} estimates the methylation status based on the fitting results of  \Rfunction{gammaFitEM}. Three methylation statuses are reported: "Unmethy" (unmethylation posterior probability > unmethylation threshold), "Methy" (methylation posterior probability > methylation threshold), or "Margin". By default, both unmethylation and methylation probability thresholds are 0.95. Following is  the summary of methylation status of the first sample in example.lumiMethy dataset:
-
-<<estimate methylation status based on M-value, echo=T>>=
-## estimate the methylation status based on the results of gammaFitEM
-methyCall <- methylationCall(fittedGamma)
-table(methyCall)
-@ 
-
-The inputs of both \Rfunction{gammaFitEM} and \Rfunction{methylationCall} are a M-value vector of a particular sample.  Function \Rfunction{lumiMethyStatus} is a wrap function of \Rfunction{methylationCall} to process a \Rclass{MethyLumiM} object. It returns a methylation status matrix of the same dimension as the input \Rclass{MethyLumiM} object. The methylation probability matrix is kept as the "probability" attributes of the result. Following is an example:
-
-<<estimate methylation status  of a LumiMethyM object, echo=T>>=
-## estimate the methylation status of a LumiMethyM object
-methyCall <- lumiMethyStatus(example.lumiMethy[,1:4])
-head(methyCall)
-
-## retrieve the methylation probability matrix
-methyProb <- attr(methyCall, "probability")
-head(methyProb)
-@ 
-
-
 \subsection{Use user provided preprocessing functions}
 For convenience to the users, the user can specify their own preprocessing function when call \Rfunction{lumiMethyB}, \Rfunction{lumiMethyC} and \Rfunction{lumiMethyN}. The  input and output of the user provided function should be a intensity matrix (pool of methylated and unmethylated probe intensities). Following are some examples of using user defined preprocessing functions.
 

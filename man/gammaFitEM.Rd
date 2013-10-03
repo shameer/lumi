@@ -26,6 +26,9 @@ gammaFitEM(M, initialFit = NULL, fix.k = NULL, weighted = TRUE, maxIteration = 5
 The assumption of this function is that the M-value distribution is composed of the mixture of two shifted gamma distributions, which are defined as:
 dgamma(x-s[1], shape=k[1], scale=theta[1]) and dgamma(s[2]-x, shape=k[2], scale=theta[2]). Here s represents the shift.
 
+
+NOTE: the methylation status modeling algorithm was developed based on 27K methylation array. It has not been tested for 450K array. Considering 450K array covers both promoter and gene body, the two component Gamma mixture model assumption may not be valid any more.
+
 }
 \value{
 

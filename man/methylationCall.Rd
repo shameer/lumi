@@ -18,6 +18,9 @@ methylationCall(x, threshold = 0.95, ...)
 }
 \details{
 	Retrieve the probability element returned by \code{\link{gammaFitEM}}, and convert it as three status calls based on probability threshold
+	
+	NOTE: the methylation status modeling algorithm was developed based on 27K methylation array. It has not been tested for 450K array. Considering 450K array covers both promoter and gene body, the two component Gamma mixture model assumption may not be valid any more.
+
 }
 \value{
 A vector of three methylation status: "Unmethy" (unmethylation posterior probability > unmethylation threshold), "Methy" (methylation posterior probability > methylation threshold), or "Margin". The sum of unmethylation posterior probability and methylation posterior probability equals one. The methylation probability is returned as an attribute of "probability".
