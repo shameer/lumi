@@ -13,7 +13,7 @@
 \item{x}{ a \code{\link{MethyLumiM-class}} object}
 \item{main}{ title of the boxplot }
 \item{logMode}{only works when the dataType of x is "Intensity"}
-\item{\dots}{ optional arguments to \code{\link[hdrcde]{hdr.boxplot}}.}
+\item{\dots}{ optional arguments to \code{\link[lattice]{bwplot}}.}
 }
 
 \details{
