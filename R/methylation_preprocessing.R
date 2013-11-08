@@ -146,9 +146,10 @@ addAnnotationInfo <- function(methyLumiM, lib='FDb.InfiniumMethylation.hg19', an
 			}
 			ff <- data.frame(ProbeID=probeList, CHROMOSOME=NA, POSITION=NA, COLOR_CHANNEL=NA)
 			rownames(ff) <- probeList
-			if (any(probeList %in% names(allAnnotation))) {
+			if (any(!(probeList %in% names(allAnnotation)))) {
+			  missingProbe <- probeList[!(probeList %in% names(allAnnotation))]
 				probeList <- probeList[probeList %in% names(allAnnotation)]
-				warnings('Some probes does not exist in the annotation library!')
+				warnings(paste(paste(missingProbe, collapse=','), 'probes do not exist in the annotation library!'))
 			}
 			allAnnotation <- allAnnotation[probeList]
 			ff[probeList, 'CHROMOSOME'] <- as.character(seqnames(allAnnotation))
@@ -196,8 +197,9 @@ addAnnotationInfo <- function(methyLumiM, lib='FDb.InfiniumMethylation.hg19', an
 			stop('Probe annotation information is not available. Please provide annotation library!')
 		}
 	}
+	if (!is.data.frame(ff)) ff <- as.data.frame(ff, stringsAsFactors=FALSE)
 	
-	rownames(ff) <- probeList
+	rownames(ff) <- ff$ProbeID
 	if (is(methyLumiM, 'MethyLumiM')) {
 	  fData(methyLumiM) <- ff
 		return(methyLumiM)

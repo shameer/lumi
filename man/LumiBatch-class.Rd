@@ -48,7 +48,7 @@
 
 \section{Creating Objects}{
 
-  \code{new('LumiBatch',
+  \code{new("LumiBatch",
     exprs = [matrix],
 	se.exprs = [matrix],
 	beadNum = [matrix],
