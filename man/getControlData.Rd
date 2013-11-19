@@ -21,14 +21,16 @@ getControlData(x, type = c('data.frame', 'LumiBatch'), ...)
 \seealso{ \code{\link{addControlData2lumi}} }
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	## return a data.frame
-	controlData <- getControlData(controlFile)
-	class(controlData)
-	names(controlData)
-	
-	## return a LumiBatch object
-	controlData <- getControlData(controlFile, type='LumiBatch')
-	summary(controlData)
+	if (file.exists(controlFile)) {
+  	## return a data.frame
+  	controlData <- getControlData(controlFile)
+  	class(controlData)
+  	names(controlData)
+
+  	## return a LumiBatch object
+  	controlData <- getControlData(controlFile, type='LumiBatch')
+  	summary(controlData)
+	}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

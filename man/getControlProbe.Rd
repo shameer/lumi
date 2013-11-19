@@ -20,10 +20,12 @@ returns the corresponding probe Ids for the control type.
 \seealso{  \code{\link{addControlData2lumi}} }
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	## return a data.frame
-	controlData <- getControlData(controlFile)
-	getControlType(controlData)
-	getControlProbe(controlData, type='housekeeping')
+	if (file.exists(controlFile)) {
+    ## return a data.frame
+    controlData <- getControlData(controlFile)
+    getControlType(controlData)
+    getControlProbe(controlData, type='housekeeping')
+	}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

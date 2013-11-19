@@ -20,9 +20,11 @@ getControlType(controlData)
 \seealso{  \code{\link{addControlData2lumi}}, \code{\link[methylumi]{controlTypes}} for methylation data }
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	## return a data.frame
-	controlData <- getControlData(controlFile)
-	getControlType(controlData)
+	if (file.exists(controlFile)) {
+	  ## return a data.frame
+	  controlData <- getControlData(controlFile)
+	  getControlType(controlData)
+	}
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

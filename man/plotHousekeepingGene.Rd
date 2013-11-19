@@ -25,8 +25,10 @@ plotHousekeepingGene(controlData, lib = NULL, slideIndex = NULL, addLegend = TRU
 
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	controlData <- getControlData(controlFile)
-	plotHousekeepingGene(controlData)
+	if (file.exists(controlFile)) {
+  	controlData <- getControlData(controlFile)
+  	plotHousekeepingGene(controlData)
+	}
 
 }
 \keyword{methods}

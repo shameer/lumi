@@ -25,8 +25,10 @@ plotStringencyGene(controlData, lib = NULL, slideIndex = NULL, addLegend = TRUE,
 
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	controlData <- getControlData(controlFile)
-	plotStringencyGene(controlData)
+	if (file.exists(controlFile)) {
+  	controlData <- getControlData(controlFile)
+  	plotStringencyGene(controlData)
+	}
 }
 \keyword{methods}
 \keyword{hplot}

@@ -28,9 +28,11 @@ For methylation data, the red and green channels will be plotted respectively in
 \seealso{ \code{\link{addControlData2lumi}} and \code{\link{addControlData2methyLumiM}}  }
 \examples{
 	controlFile <- system.file('doc', 'Control_Probe_Profile.txt', package='lumi')
-	controlData <- getControlData(controlFile)
-	getControlType(controlData)
-	plotControlData(controlData, type='NEGATIVE')
+	if (file.exists(controlFile)) {
+	  	controlData <- getControlData(controlFile)
+	    getControlType(controlData)
+	    plotControlData(controlData, type='NEGATIVE')
+	}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
