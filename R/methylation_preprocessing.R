@@ -87,11 +87,11 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
 			if (i == 1) {
 				dimNames <- list(featureNames(lumi450k.i), barcodes)
 				## predefine a big matrix
-				lumi450k <- asBigMatrix(lumi450k.i, nCol=length(barcodes), dimNames=dimNames, saveDir=dir.bigMatrix, savePrefix=savePrefix.bigMatrix)
+				lumi450k <- lumi::asBigMatrix(lumi450k.i, nCol=length(barcodes), dimNames=dimNames, saveDir=dir.bigMatrix, savePrefix=savePrefix.bigMatrix)
 			} else {
 				## fill in data information of new samples
 				for (ad.name in assayDataElementNames(lumi450k.i)) {
-	        matrixAll.i <- assayDataElement(lumi450k.i, ad.name)
+	        matrixAll.i <- assayDataElement(lumi450k, ad.name)
 					if (is.null(matrixAll.i)) next
 	        matrix.i <- assayDataElement(lumi450k.i, ad.name)
 					matrixAll.i[, colnames(matrix.i)] <- matrix.i
@@ -110,7 +110,7 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
     ## rename the samples if SAMPLE_NAME is provided in sampleInfo
     samplename <- sampleInfo[barcodes,'SAMPLE_NAME']
     if (!is.null(samplename)) {
-      sampleNames(lumi450k) <- samplename
+      sampleNames(lumi450k) <- as.character(samplename)
     }
   }
   
@@ -835,12 +835,22 @@ smoothQuantileNormalization <- function(dataMatrix, ref=NULL, adjData=NULL, logM
 estimateMethylationBG <- function(methyLumiM, separateColor=FALSE, nbin=1000) {
     
   estimateBG <- function(dataMatrix, nbin=1000) {
-    bg <- apply(dataMatrix, 2, function(x) {
-      hh.x <- hist(x, nbin, plot=FALSE)
-      Th <- hh.x$breaks[which.max(hh.x$counts) + 1] * 2
-      dd.x <- density(x[x < Th], na.rm=TRUE)
-      bg.x <- dd.x$x[which.max(dd.x$y)]    
-    })
+    if (is(dataMatrix, 'BigMatrix')) {
+      bg <- bigmemoryExtras::apply(dataMatrix, 2, function(x) {
+         hh.x <- hist(x, nbin, plot=FALSE)
+         Th <- hh.x$breaks[which.max(hh.x$counts) + 1] * 2
+         dd.x <- density(x[x < Th], na.rm=TRUE)
+         bg.x <- dd.x$x[which.max(dd.x$y)]    
+       })
+    } else {
+      bg <- apply(dataMatrix, 2, function(x) {
+        hh.x <- hist(x, nbin, plot=FALSE)
+        Th <- hh.x$breaks[which.max(hh.x$counts) + 1] * 2
+        dd.x <- density(x[x < Th], na.rm=TRUE)
+        bg.x <- dd.x$x[which.max(dd.x$y)]    
+      })
+    }
+
     return(bg)
   }
   
@@ -1707,6 +1717,58 @@ plotColorBias2D <- function(methyLumiM, selSample=1, combineMode=F, layoutRatioW
   return(invisible(TRUE))
 }
 
+
+# scatterPlotWithDensity <- function(x, y, channel=NULL, col=NULL, layoutRatioWidth=c(0.75,0.25), layoutRatioHeight=c(0.25, 0.75), 
+#       margins = c(5, 5, 2, 2), cex=1.25, ...) {
+#   
+#   if (!is.null(channel)) {
+#     grn.a <- unmethy[color.channel == "Grn"]
+#     red.a <- unmethy[color.channel == "Red"]
+#     grn.b <- methy[color.channel == "Grn"]
+#     red.b <- methy[color.channel == "Red"]
+#   } else {
+#     channel <- rep(1, length(x))
+#   }
+# 
+#   oldpar <- par(no.readonly = TRUE)
+#   layout(matrix(c(2,1,0,3), nrow=2), widths = layoutRatioWidth, heights = layoutRatioHeight, respect = FALSE)
+#   # layout.show(3)
+#   ## plot the scatter plot 
+#   par(mar = c(margins[1], margins[2], 0, 0))
+# 
+#   plot(x, y, type='n', ...)
+#   
+#   uniChannels <- unique(channel)
+#   if (is.null(col)) col <- 1:length(uniChannels)
+#   density.all <- NULL
+#   for (i in seq(uniChannels)) {
+#     x.i <- x[channel == uniChannels[i]]
+#     y.i <- y[channel == uniChannels[i]]
+#     dd.x.i <- density(x.i)
+#     dd.y.i <- density(y.i)
+#     density.all <- c(density.all, list(x=dd.x.i, y=dd.y.i))
+#   }
+#   
+#   ## plot densitis
+#   for (i in seq(uniChannels)) {
+# 
+#     x.i <- x[channel == uniChannels[i]]
+#     y.i <- y[channel == uniChannels[i]]
+#     points(x.i, y.i, pch='.', cex=cex, col=col[i])
+# 
+#     ## plot the density plot of unmethylated probes
+#     par(mar = c(1, margins[2], margins[3], 0))
+#     plot(dd.x.i, xlab='', ylab='Density', xlim=otherPar$xlim, ylim=range(c(dd.grn.a$y, dd.red.a$y)), xaxt='n', col='red', type='l', main='')
+#     lines(dd.grn.a, col='green')
+#     ## plot the density plot of methylated probes
+#     par(mar = c(margins[1], 1, 0, margins[4]))
+#     plot(dd.red.b$y, dd.red.b$x, xlab='Density', ylab='', xlim=range(c(dd.grn.b$y, dd.red.b$y)), ylim=otherPar$ylim, yaxt='n', col='red', type='l', main='')
+#     lines(dd.grn.b$y, dd.grn.b$x, col='green')
+#     
+#   }
+# 
+#   par(oldpar)
+# }
 
 colorBiasSummary <- function(methyLumiM, logMode=TRUE, channel=c('both', 'unmethy', 'methy', 'sum')) {
 
