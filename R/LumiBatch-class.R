@@ -684,40 +684,43 @@ setMethod("pairs", signature(x="ExpressionSet"),
 				points(x[highlight], y[highlight], col=highlightColor, pch='.', cex=3)
 			}
 		}
-		
 		abline(0, 1, col="red", lty=1)
-		if (logMode) {
-			if (checkTransform) {
-				abline(log2(fold), 1, col="blue", lty=2)
-				abline(log2(1/fold), 1, col="blue", lty=2)
-			} else {
-				abline(fold, 1, col="blue", lty=2)
-				abline(-fold, 1, col="blue", lty=2)
-			}
-		} else {
-			abline(fold, 1, col="blue", lty=2)
-			abline(-fold, 1, col="blue", lty=2)
+		if (!is.null(fold) && !is.na(fold)) {
+  		if (logMode) {
+  			if (checkTransform) {
+  				abline(log2(fold), 1, col="blue", lty=2)
+  				abline(log2(1/fold), 1, col="blue", lty=2)
+  			} else {
+  				abline(fold, 1, col="blue", lty=2)
+  				abline(-fold, 1, col="blue", lty=2)
+  			}
+  		} else {
+  			abline(fold, 1, col="blue", lty=2)
+  			abline(-fold, 1, col="blue", lty=2)
+  		}
 		}
 	}
 
 	lowerPanel <- function(x, y, cex=1.44) {
-		if (logMode) {
-			if (checkTransform) {
-				up <- length(which((x-y) > log2(fold)))
-				down <- length(which((y-x) > log2(fold)))
-			} else {
-				up <- length(which((x-y) > fold))
-				down <- length(which((y-x) > fold))
-			}
-		} else {
-			up <- length(which((x/y) > fold))
-			down <- length(which((y/x) > fold))
-		}
-		ex <- par("fin")[1]*0.9
 		txt <- paste("Cor =", as.character(round(cor(x,y),3)),"\n")
-		txt <- paste(txt, up, " (> ", fold, ", up)\n", sep="")
-		txt <- paste(txt, down, " (> ", fold, ", down)\n", sep="")
-		text(mean(range(x)), mean(range(x)), labels=txt, cex=ex)
+		ex <- par("fin")[1]*0.9
+	  if (!is.null(fold) && !is.na(fold)) {
+  		if (logMode) {
+  			if (checkTransform) {
+  				up <- length(which((x-y) > log2(fold)))
+  				down <- length(which((y-x) > log2(fold)))
+  			} else {
+  				up <- length(which((x-y) > fold))
+  				down <- length(which((y-x) > fold))
+  			}
+  		} else {
+  			up <- length(which((x/y) > fold))
+  			down <- length(which((y/x) > fold))
+  		}
+  		txt <- paste(txt, up, " (> ", fold, ", up)\n", sep="")
+  		txt <- paste(txt, down, " (> ", fold, ", down)\n", sep="")
+	  }
+		text(mean(range(x)), mean(range(y)), labels=txt, cex=ex)
 	}
 
 	## put histograms on the diagonal

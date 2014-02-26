@@ -102,6 +102,9 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
 	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
 	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
 	}
+
+  ## update the barcodes, the order may change after split barcodes to barcodesList
+  barcodes <- colnames(lumi450k)
   
   ## add sample info 
   if (!is.null(sampleInfo)) {
@@ -1218,13 +1221,13 @@ estimateIntensity <- function(methyLumiM, returnType=c("ExpressionSet", "matrix"
 		if ('dataType' %in% slotNames(methyLumiM)) {
 			dataType(methyLumiM) <- 'Intensity'
 		}
-		if (is(assayDataElement(methyLumiM, 'exprs'), 'BigMatrix')) {
-			for (i in 1:ncol(methy)) {
-				assayDataElement(methyLumiM, 'exprs')[,i] <- unmethy[,i] + methy[,i]
-			}
-		} else {
+    # if (is(assayDataElement(methyLumiM, 'exprs'), 'BigMatrix')) {
+    #   for (i in 1:ncol(methy)) {
+    #     assayDataElement(methyLumiM, 'exprs')[,i] <- unmethy[,i] + methy[,i]
+    #   }
+    # } else {
 			assayDataElement(methyLumiM, 'exprs') <- unmethy[,] + methy[,]
-		}
+    # }
 
     return(methyLumiM)
   }
