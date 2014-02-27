@@ -73,7 +73,7 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
   }
   
   ## read IDAT files by individual dataPath
-  barcodesList <- split(barcodes, realDataPath)
+  barcodesList <- split(barcodes, factor(realDataPath, levels=unique(realDataPath)))
 	if (bigMatrix) {
 		## read first batch of samples and create a BigMatrix with all sample information
 		## Then fill in the rest sample information
@@ -102,16 +102,15 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
 	  lumi450k <- lapply(1:length(barcodesList), function(i) lumIDAT(barcodesList[[i]], idatPath=names(barcodesList)[i], ...)) # return MethyLumiM object
 	  suppressWarnings(lumi450k <- do.call('combine', lumi450k))
 	}
-
-  ## update the barcodes, the order may change after split barcodes to barcodesList
-  barcodes <- colnames(lumi450k)
   
   ## add sample info 
   if (!is.null(sampleInfo)) {
+    ## update the barcodes, the order may change after split barcodes to barcodesList
+    barcodes <- colnames(lumi450k)
     rownames(sampleInfo) <- paste(barcodeInfo[, 'SENTRIX_BARCODE'], barcodeInfo[, 'SENTRIX_POSITION'], sep='_')
     pData(lumi450k) <- sampleInfo[barcodes,]
     ## rename the samples if SAMPLE_NAME is provided in sampleInfo
-    samplename <- sampleInfo[barcodes,'SAMPLE_NAME']
+    samplename <- make.unique(sampleInfo[barcodes,'SAMPLE_NAME'])
     if (!is.null(samplename)) {
       sampleNames(lumi450k) <- as.character(samplename)
     }
@@ -322,7 +321,7 @@ lumiMethyN <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), separa
 }
 
 
-# color balance adjustment
+# color balance adjustmentdim
 lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbose=TRUE, overwriteBigMatrix=FALSE, ...) 
 {
   if (!is.function(method)) method <- match.arg(method)
