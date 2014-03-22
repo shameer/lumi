@@ -38,7 +38,6 @@ importFrom(stats, density, heatmap)
 importFrom(MASS, rlm, psi.bisquare)
 importFrom(affy, normalize.loess, mva.pairs, bg.adjust, plotDensity)
 importFrom(preprocessCore, normalize.quantiles, normalize.quantiles.robust)
-importFrom(nleqslv, nleqslv)
 
 importFrom(GenomicFeatures, features)
 importFrom(GenomicRanges, seqnames)
