@@ -29,11 +29,11 @@ function(u, std, nSupport=min(length(u), 500), backgroundStd=NULL, fitMethod=c('
 		smoothStd <- predict(lm2, data.frame(x2=downSampledU^2, x1=downSampledU))
 	} else {
 		## downsampling to speed up 
-		if (min(u) < 1) {
-			offset <- 1 - min(u)
-		} else {
-			offset <- 0
-		}
+    # if (min(u) < 1) {
+    #   offset <- 1 - min(u)
+    # } else {
+    #   offset <- 0
+    # }
 		offset <- 1 - min(u)
 		downSampledU <- 2^seq(from=log2(min(u + offset)), to=log2(max(u + offset)), length=nSupport) - offset
 
