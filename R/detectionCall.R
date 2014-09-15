@@ -21,8 +21,9 @@ function(x.lumi, Th = 0.01, type=c('probe', 'sample', 'matrix')) {
 		}
 		# low <- mean(expr[detect[,1] > 0.9,1])
 		# high <- mean(expr[detect[,1] < 0.1,1])
-		low <- expr[which.max(detect[,1]), 1]
-		high <- expr[which.min(detect[,1]), 1]
+		tmp <- expr[,1]
+		low <- tmp[!is.na(tmp)][which.max(detect[!is.na(tmp),1])]
+		high <- tmp[!is.na(tmp)][which.min(detect[!is.na(tmp),1])]
 		if (low > high) detect <- 1 - detect
 	}
 	

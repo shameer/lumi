@@ -45,7 +45,8 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
     colnames(barcodeInfo) <- c('SENTRIX_BARCODE', 'SENTRIX_POSITION')
 	} else {
 		colnames(sampleInfo) <- toupper(colnames(sampleInfo))
-		if (any(colnames(sampleInfo) == 'SENTRIX_ID')) {
+		
+		if (any(colnames(sampleInfo) == 'SENTRIX_ID') && !('SENTRIX_BARCODE' %in% colnames(sampleInfo))) {
 			colnames(sampleInfo)[colnames(sampleInfo) == 'SENTRIX_ID'] <- 'SENTRIX_BARCODE'
 		}
     if (!all(c('SENTRIX_BARCODE', 'SENTRIX_POSITION') %in% colnames(sampleInfo))) {
@@ -110,8 +111,8 @@ importMethyIDAT <- function(sampleInfo, dataPath=getwd(), lib=NULL, bigMatrix=FA
     rownames(sampleInfo) <- paste(barcodeInfo[, 'SENTRIX_BARCODE'], barcodeInfo[, 'SENTRIX_POSITION'], sep='_')
     pData(lumi450k) <- sampleInfo[barcodes,]
     ## rename the samples if SAMPLE_NAME is provided in sampleInfo
-    samplename <- make.unique(sampleInfo[barcodes,'SAMPLE_NAME'])
-    if (!is.null(samplename)) {
+    if (!is.null(sampleInfo$SAMPLE_NAME)) {
+      samplename <- make.unique(sampleInfo[barcodes,'SAMPLE_NAME'])
       sampleNames(lumi450k) <- as.character(samplename)
     }
   }
