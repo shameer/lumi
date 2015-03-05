@@ -342,7 +342,7 @@ setMethod("[", "LumiBatch", function(x, i, j, ..., drop = FALSE)
 
 		## controlData information
 		if (nrow(controlData(x)) > 0) {
-			if (is.numeric(j))  j <- sampleName[j]
+			if (is.logical(j) || is.numeric(j)) j <- sampleName[j]
 			if (all(j %in% colnames(controlData(x)))) {
 				if (all(c("controlType", "ProbeID") %in% colnames(controlData(x)))) {
 				  j <- c("controlType", "ProbeID", j)

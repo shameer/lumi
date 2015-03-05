@@ -1,5 +1,5 @@
 `plotSampleRelation` <-
-function(x, subset=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL, main=NULL, ...) {
+function(x, subset=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds'), dimension=c(1,2), color=NULL, main=NULL, pch=NULL, addLegend=TRUE, ...) {
 	if (is(x, 'ExpressionSet')) {
 		dataMatrix <- exprs(x)
 	} else if (is.matrix(x)) {
@@ -57,17 +57,28 @@ function(x, subset=NULL, cv.Th=0.1, standardize=TRUE, method=c('cluster', 'mds')
 				} 
 			}
 		}
-		plot(ppoints[,dimension[1]], ppoints[,dimension[2]], type='n', 
-			xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),
-			ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), 
-			main=main, ...)
-		text(ppoints[,dimension[1]], ppoints[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
+		if (missing(pch)) {
+			plot(ppoints[,dimension[1]], ppoints[,dimension[2]], type='n', 
+				xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),
+				ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), 
+				main=main, ...)
+			text(ppoints[,dimension[1]], ppoints[,dimension[2]], col=color, labels=colnames(dataMatrix), cex=1)
+		} else {
+			plot(ppoints[,dimension[1]], ppoints[,dimension[2]],  
+				xlab=paste('Principal Component ', dimension[1], " (", percent[dimension[1]], "%)", sep=""),
+				ylab=paste('Principal Component ', dimension[2], " (", percent[dimension[2]], "%)", sep=""), 
+				main=main, col=color, pch=pch, ...)
+		}
 		attr(ppoints, 'geneNum') <- length(subset)
 		attr(ppoints, 'threshold') <- cv.Th
 		
 		## add legend if color is a factor
-		if (!is.null(colorLegend)) {
-			legend('topleft', legend=colorLegend, text.col=1:length(colorLegend))
+		if (!is.null(colorLegend) && addLegend) {
+			if (!missing(pch)) {
+				legend('topleft', legend=colorLegend, col=unique(color), pch=unique(pch))
+			} else {
+				legend('topleft', legend=colorLegend, text.col=1:length(colorLegend))
+			}
 		}
 		
 		return(invisible(ppoints))	

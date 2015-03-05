@@ -6,7 +6,7 @@
   plot the sample relations based on MDS or hierarchical clustering
 }
 \usage{
-plotSampleRelation(x, subset = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL, main = NULL, ...)
+plotSampleRelation(x, subset = NULL, cv.Th = 0.1, standardize = TRUE, method = c("cluster", "mds"), dimension = c(1, 2), color = NULL, main = NULL, pch=NULL, addLegend=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,8 @@ plotSampleRelation(x, subset = NULL, cv.Th = 0.1, standardize = TRUE, method = c
   \item{dimension}{ the principle components to visualize the MDS plot }
   \item{color}{ the color for each sample during plot. Only support the "mds" method }
   \item{main}{ the title of the plot }
+  \item{pch}{ use symbols instead of text to label the samples }
+  \item{addLegend}{ Whether to add legend to MDS (two-dimensional PCA) plot }
   \item{\dots}{ Other parameters used by plot function. }
 }
 \details{
