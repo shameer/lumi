@@ -20,6 +20,7 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 		cat('Inputting the data ...\n')
 		if (transform != 'none') cat(paste('Transformation', transform, 'will be performed for each data file ...\n'))
 	}
+
 	for (i in 1:length(fileList)) {
 		file.i <- fileList[i]
 		if (transform != 'none') {
@@ -100,9 +101,9 @@ lumiR.batch <- function(fileList, convertNuID = TRUE, lib.mapping = NULL, detect
 	# Add history track
 	if (is(x.lumi, 'LumiBatch')) {
 	    history.finished <- as.character(Sys.time())
-		#history.command <- match.call()
-	    history.command <- capture.output(print(match.call(lumiR.batch)))  
-
+	    # history.command <- capture.output(print(match.call(lumiR.batch)))  
+			history.command <- paste(deparse(match.call(lumiR.batch)), collapse='')  
+			
 		## replace with the real file name
 		if (length(fileList) > 1) {
 			fileList <- paste('c("', paste(fileList, collapse='","', sep=''), '")', sep='')

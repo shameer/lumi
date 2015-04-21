@@ -312,8 +312,8 @@ lumiMethyN <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), separa
     }
   }
   history.finished <- as.character(Sys.time())
-  history.command <- capture.output(print(match.call(lumiMethyB)))
-  
+  # history.command <- capture.output(print(match.call(lumiMethyN)))
+  history.command <- paste(deparse(match.call(lumiMethyN)), collapse='') 
   lumiVersion <- packageDescription('lumi')$Version
   methyLumiM@history<- rbind(methyLumiM@history, data.frame(submitted=history.submitted, 
       finished=history.finished, command=history.command, lumiVersion=lumiVersion))
@@ -379,7 +379,8 @@ lumiMethyC <- function(methyLumiM, method = c('quantile', 'ssn', 'none'), verbos
     } 
   }
   history.finished <- as.character(Sys.time())
-  history.command <- capture.output(print(match.call(lumiMethyB)))
+  # history.command <- capture.output(print(match.call(lumiMethyC)))
+  history.command <- paste(deparse(match.call(lumiMethyC)), collapse='') 
   
   lumiVersion <- packageDescription('lumi')$Version
   methyLumiM@history<- rbind(methyLumiM@history, data.frame(submitted=history.submitted, 
@@ -468,7 +469,8 @@ lumiMethyB <- function(methyLumiM, method = c('bgAdjust2C', 'forcePositive', 'no
   }
   methyLumiM <- estimateM(methyLumiM)
   history.finished <- as.character(Sys.time())
-  history.command <- capture.output(print(match.call(lumiMethyB)))
+  # history.command <- capture.output(print(match.call(lumiMethyB)))
+  history.command <- paste(deparse(match.call(lumiMethyB)), collapse='') 
   
   lumiVersion <- packageDescription('lumi')$Version
   methyLumiM@history<- rbind(methyLumiM@history, data.frame(submitted=history.submitted, 
@@ -2353,8 +2355,8 @@ lumiMethyStatus <- function(methyLumiM, ...)
   colnames(M.status) <- colnames(M.prob) <- colnames(M)
 
   history.finished <- as.character(Sys.time())
-  history.command <- capture.output(print(match.call(lumiMethyStatus)))
-  
+  # history.command <- capture.output(print(match.call(lumiMethyStatus)))
+  history.command <- paste(deparse(match.call(lumiMethyStatus)), collapse='') 
   lumiVersion <- packageDescription('lumi')$Version
   attr(M.status, "history") <- rbind(methyLumiM@history, data.frame(submitted=history.submitted, 
       finished=history.finished, command=history.command, lumiVersion=lumiVersion))

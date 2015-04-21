@@ -486,8 +486,8 @@ function(fileName, sep = NULL, detectionTh = 0.01, na.rm = TRUE, convertNuID = T
 
     # history tracking
     history.finished <- as.character(Sys.time())
-	#history.command <- match.call()
-    history.command <- capture.output(print(match.call(lumiR)))  
+    # history.command <- capture.output(print(match.call(lumiR))) 
+		history.command <- paste(deparse(match.call(lumiR)), collapse='')  
 	
 	## replace with the real file name
 	if (length(grep(',', history.command)) > 0) {

@@ -62,8 +62,10 @@ function(x.lumi, method=c('quantile', 'rsn', 'ssn', 'loess', 'vsn', 'rankinvaria
 		
 	    # history tracking
 		if (is(x.lumi, 'LumiBatch')) {
-		    history.finished <- as.character(Sys.time())
-			history.command <- capture.output(print(match.call(lumiN)))
+		  history.finished <- as.character(Sys.time())
+			#history.command <- capture.output(print(match.call(lumiN)))
+      history.command <- paste(deparse(match.call(lumiN)), collapse='') 
+			
 			if (is.null(new.lumi@history$lumiVersion)) new.lumi@history$lumiVersion <- rep(NA, nrow(new.lumi@history))
 			lumiVersion <- packageDescription('lumi')$Version
 			new.lumi@history<- rbind(new.lumi@history, data.frame(submitted=history.submitted, 
