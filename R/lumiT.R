@@ -120,7 +120,8 @@ function(x.lumi, method=c('vst', 'log2', 'cubicRoot'), ifPlot=FALSE, simpleOutpu
 	if (is(x.lumi, 'LumiBatch')) {
 		# history tracking
 		history.finished <- as.character(Sys.time())
-		history.command <- capture.output(print(match.call(lumiT)))
+		# history.command <- capture.output(print(match.call(lumiT)))
+		history.command <- paste(deparse(match.call(lumiT)), collapse='') 
 
 		if (is.null(new.lumi@history$lumiVersion)) new.lumi@history$lumiVersion <- rep(NA, nrow(new.lumi@history))
 		lumiVersion <- packageDescription('lumi')$Version

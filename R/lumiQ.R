@@ -52,8 +52,9 @@ function(x.lumi, logMode=TRUE, detectionTh=0.01, verbose=TRUE) {
 
 	## record history
 	history.finished <- as.character(Sys.time())
-	history.command <- capture.output(print(match.call(lumiQ)))
-
+	# history.command <- capture.output(print(match.call(lumiQ)))
+	history.command <- paste(deparse(match.call(lumiQ)), collapse='') 
+	
 	if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
 	lumiVersion <- packageDescription('lumi')$Version
 	x.lumi@history <- rbind(x.lumi@history, data.frame(submitted=history.submitted, 

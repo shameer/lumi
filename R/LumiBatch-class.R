@@ -504,7 +504,9 @@ setMethod("combine", signature=c(x="LumiBatch", y="LumiBatch"), function(x, y, .
 
 	# history tracking
 	history.finished <- as.character(Sys.time())
-	history.command <- capture.output(print(match.call(combine)))  
+	# history.command <- capture.output(print(match.call(combine)))  
+	history.command <- paste(deparse(match.call(combine)), collapse='') 
+
 	x@history<- rbind(x@history, y@history)
 	if (is.null(x@history$lumiVersion)) x@history$lumiVersion <- rep(NA, nrow(x@history))
 	lumiVersion <- packageDescription('lumi')$Version

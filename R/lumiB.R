@@ -51,8 +51,9 @@ lumiB <- function(x.lumi, method = c('none', 'bgAdjust', 'forcePositive', 'bgAdj
 		if (is(x.lumi, 'LumiBatch')) {
 			# history tracking
 			history.finished <- as.character(Sys.time())
-			history.command <- capture.output(print(match.call(lumiB)))
-        	
+			# history.command <- capture.output(print(match.call(lumiB)))
+      history.command <- paste(deparse(match.call(lumiB)), collapse='') 
+			  	
 			if (is.null(x.lumi@history$lumiVersion)) x.lumi@history$lumiVersion <- rep(NA, nrow(x.lumi@history))
 			lumiVersion <- packageDescription('lumi')$Version
 			x.lumi@history<- rbind(x.lumi@history, data.frame(submitted=history.submitted, 
