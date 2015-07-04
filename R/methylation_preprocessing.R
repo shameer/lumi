@@ -1,5 +1,6 @@
-lumiMethyR <- function(..., lib=NULL, controlData=NULL) {
-  methyLumiSet <- methylumiR(...)
+lumiMethyR <- function(filename, lib=NULL, controlData=NULL, qcfile=NULL, sampleDescriptions=NULL, 
+    sep = NULL) {
+  methyLumiSet <- methylumiR(filename, qcfile=qcfile, sampleDescriptions=sampleDescriptions, sep=sep)
   methyLumiM <- as(methyLumiSet, "MethyLumiM")
   if (!is.null(lib)) {
     # methyLumiM <- addColorChannelInfo(methyLumiM, lib=lib)
