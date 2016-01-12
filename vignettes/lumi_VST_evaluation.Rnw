@@ -187,11 +187,9 @@ A good variance stabilizing method should stabilize the variance between the tec
 selChip <-  c(repl1[1],repl2[1]) 
 oldpar <- par(mfrow=c(length(normDataList) + 1,1))
 for (i in 1:length(normDataList)) {
-  meanSdPlot(normDataList[[i]][, selChip], ylab='Standard deviation',
-      main=names(normDataList)[i], ylim=c(0,1)) 
+  meanSdPlot(normDataList[[i]][, selChip], ylab='Standard deviation')
 }
-meanSdPlot(vsn.pair[, selChip], ylab='Standard deviation',
-      main='VSN-techReplicate ', ylim=c(0,1))
+meanSdPlot(vsn.pair[, selChip], ylab='Standard deviation')
 par(oldpar)
 @
 \caption{Mean and standard deviation relations of the technical replicate 
