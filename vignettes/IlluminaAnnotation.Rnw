@@ -1,0 +1,239 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{Resolve the inconsistency of Illumina identifiers through nuID}
+%\VignetteKeywords{Illumina, BeadArray, Microarray preprocessing}
+%\VignetteDepends{lumi, lumiHumanIDMapping, lumiHumanAll.db, annotate, Biobase}
+%\VignettePackage{lumi}
+
+\documentclass[a4paper]{article}
+
+\usepackage{amsmath,pstricks}
+% With MikTeX 2.9, using pstricks also requires using auto-pst-pdf or running
+% pdflatex will fail. Note that using auto-pst-pdf requires to set environment
+% variable MIKTEX_ENABLEWRITE18=t on Windows, and to set shell_escape = t in
+% texmf.cnf for Tex Live on Unix/Linux/Mac.
+\usepackage{auto-pst-pdf}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\textit{#1}}}
+
+\SweaveOpts{keep.source=TRUE}
+
+\author{Pan Du$^\ddagger$\footnote{dupan@northwestern.edu}, Warren A. Kibbe$^\ddagger$\footnote{wakibbe@northwestern.edu}, Gang Feng$^\ddagger$\footnote{g-feng@northwestern.edu},  Jared Flatow$^\ddagger$\footnote{jflatow@northwestern.edu}, Simon Lin$^\ddagger$\footnote{s-lin2@northwestern.edu}}
+\begin{document}
+
+\setkeys{Gin}{width=1\textwidth} 
+
+\title{Resolve the inconsistency of Illumina identifiers through nuID}
+\maketitle
+\begin{center}$^\ddagger$Robert H. Lurie Comprehensive Cancer Center \\ Northwestern University, Chicago, IL, 60611, USA
+\end{center}
+
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Illumina Identifiers and BeadStudio output files}
+Illumina uses two types of identifiers: Illumina gene identifiers and Illumina probe identifiers. As their names suggest, Illumina gene identifiers are designed for genes while Illumina probe identifiers are designed for probes.  
+The problem of the gene identifier is that it can correspond to several different probes, which are supposed to match the same gene.  In this case, it basically averages the measurements of these probes.  This will cause big problem when these probes for the same gene have different measurement values. This happens often in real situations. Because of  the binding affinity difference or alternative splicing, the probes corresponding the the sample gene identifier may have quite different expression levels and patterns. If we use the gene identifier to identify the measurements, then we cannot differentiate the difference between these probes. Another problem of using gene identifiers is that the mapping between gene identifiers and probes could be changed with our better understanding of the gene. Therefore, we recommend to use probe identifiers.
+
+Before further discussion, let's describe more details of  Illumina BeadStudio output files. BeadStudio usually will export a list of files, which include 
+"Control Gene Profile.txt", "Group Probe Profile.txt", "Samples Table.txt", "Control Probe Profile.txt", "Sample Gene Profile.txt", "Group Gene Profile.txt", "Sample Probe Profile.txt". Among these files, the files with their name including "Probe" use Illumina probe identifiers, which are supposed to be unique for each probe. The files with their names including "Gene" use Illumina gene identifiers.  As the probe identifiers were designed for each probe, we recommend to use "Sample Probe Profile.txt" or "Group Probe Profile.txt" for the data analysis. 
+
+One problem of Illumina identifiers (both Illumina gene identifiers and Illumina probe identifiers) is that they are not stable and consistent between chip versions and releases. For example, the early version of BeadStudio output files use a numeric number as probe identifier, later on it uses the new version of probe identifiers named as \verb+"ILMN_0000"+ ("0000" represents a numeric number). Also, the early version of BeadStudio output files use TargetID as gene identifier, later on gene symbols are directly used as the gene identifiers. The Illumina probe identifiers also change over time.  Moreover, the identifiers are not unique. For instance, the same 50mer sequence has two different TargetIDs (early version of gene identifiers) used by Illumina: \verb+"GI_21070949-S"+ in the \verb+Mouse_Ref-8_V1+ chip and \verb+"scl022190.1_154-S"+ in the \verb+Mouse-6_V1+ chip. This causes difficulties when combining clinical microarray data collected over time using different versions of the chips.  To solve these problems, we designed a nucleotide universal identifier (nuID), which encodes the 50mer oligonucleotide sequence and contains error checking and self-identification code. By using nuID, all the problems mentioned above can be easily solved.  For details, please read [1]. 
+
+
+
+<<Loading required libraries, eval=T>>=
+library(lumi)
+library(annotate)
+# library(lumiHumanAll.db)
+@
+
+
+\section{nuID (nucleotide universal IDentifier)}
+
+Oligonucleotide probes that are sequence identical may have different identifiers between manufacturers and even between different versions of the same company's microarray; and sometimes the same identifier is reused and represents a completely different oligonucleotide, resulting in ambiguity and potentially mis-identification of the genes hybridizing to that probe. This also makes data interpretation and integration of different batches of data difficult.
+
+We have devised a unique, non-degenerate encoding scheme that can be used as a universal representation to identify an oligonucleotide across manufacturers. We have named the encoded representation 'nuID' , for nucleotide universal identifier. Inspired by the fact that the raw sequence of the oligonucleotide is the true definition of identity for a probe, the encoding algorithm uniquely and non-degenerately transforms the sequence itself into a compact identifier (a lossless compression). In addition, we added a redundancy check (checksum) to validate the integrity of the identifier. These two steps, encoding plus checksum, result in an nuID, which is a unique, non-degenerate, permanent, robust and efficient representation of the probe sequence. For commercial applications that require the sequence identity to be confidential, we have an encryption schema for nuID. We demonstrate the utility of nuIDs for the annotation of Illumina microarrays, and we believe it has universal applicability as a source-independent naming convention for oligomers.
+
+The nuID schema has three significant advantages over using the oligo sequence directly as an identifier: first it is more compact due to the base-64 encoding; second, it has a built-in error detection and self-identification; and third, it can be encrypted in cases where the sequences are preferred not to be disclosed. 
+
+\subsection{Examples of nuID}
+
+<<echo=T>>=
+## provide an arbitrary nucleotide sequence as an example 
+seq <- 'ACGTAAATTTCAGTTTAAAACCCCCCG'
+## create a nuID for it
+id <- seq2id(seq)
+print(id)
+@
+
+
+The original nucleotide sequence can be easily recovered by \Rfunction{id2seq}
+<<>>=
+id2seq(id)
+@
+
+The nuID is self-identifiable. \Rfunction{is.nuID} can check the sequence is nuID or not. 
+A real nuID
+<<>>=
+is.nuID(id)
+@
+
+An random sequence
+<<>>=
+is.nuID('adfqeqe')
+@
+
+
+\section{Illumina ID mapping packages}
+
+Figure \ref{idMapping} shows the overview of  Illumina ID mapping and annotation packages.  We will explain each step and provide examples in next sub-sections.  
+ 
+ 
+\begin{figure}
+\includegraphics{idMapping}
+\caption{Overview of Illumina ID mapping and annotation packages}
+\label{idMapping}
+\end{figure}
+
+
+\subsection{Mapping between Illumina IDs and nuIDs}
+Because of the unique advantages of nuIDs, converting Illumina IDs as nuIDs will make both probe annotation and maintenance easier. In the old versions of Illumina annotation packages, like \Rpackage{lumiHumanV1},  \Rpackage{lumiHumanV2}, \Rpackage{lumiMouseV1} and \Rpackage{lumiRatV1}, we included separate tables for TargetIDs and ProbeIDs mapping to nuIDs. This becomes difficult when we pool different version of nuIDs together because Illumina IDs may not be consistent across different versions and releases. To partially solve this problem, the lumiR function can automatically produce nuID based on the probe sequence included in the BeadStudio output file. If users have the Illumina manifest file of the chip, they can also use it for nuID conversion. The manifest file (.bgx) basically is  a zipped file by gzip. The first step is to unzip the manifest file. The unzipped manifest file is a Tab-separated file, you can open it in Excel. Suppose \verb+'MouseWG-6_V1_1_R2_11234304_A'+ is the manifest file and x.lumi is a LumiBatch object indexed by Illumina Probe IDs, the user can use the following code for nuID conversion:
+
+\begin{Sinput}
+   x.lumi = addNuID2lumi(x.lumi, annotationFile='MouseWG-6_V1_1_R2_11234304_A')
+\end{Sinput}
+
+However, in many cases, the BeadStudio output file does not include the probe sequence information and the users do not have the manifest file, either. This makes it necessary to create a separately Illumina ID mapping package, which includes all ID mapping information all versions of Illumina chips. We created three ID mapping packages: \Rpackage{lumiHumanIDMapping}, \Rpackage{lumiMouseIDMapping.db} and \Rpackage{lumiRatIDMapping.db} for human, mouse and rat, respectively. 
+
+The purpose of these packages is to provide ID mappings between different types of Illumina identifiers of expression chips and nuIDs, and also mappings from nuIDs to the the most recent RefSeq release. Each library includes the data tables corresponding  to all released Illumian expression chips of a particular species before the package releasing date. In each manifest file table, it includes nuIDs and different types of Illumina IDs: "Search\_key" ("Search\_Key"), "Target" ("ILMN\_Gene"), "Accession", "ProbeId" ("Probe\_Id"). It also includes a nuID\_MappingInfo table, which keeps the mapping information of nuID to RefSeq ID and its related mapping quality information. We will describe this part in more details in next sub-section. By using these ID mapping packages, users can also check the original chip information by providing a list of IDs. There is a function  \Rfunction{getChipInfo} in \Rpackage{lumi} package designed for this purpose.
+
+
+Get information of the ID mapping library:
+<<>>=
+  if (require(lumiHumanIDMapping))
+ 	 lumiHumanIDMapping()
+@
+
+Get chip information of the example data in the \Rpackage{lumi} package.
+<<>>=
+  ## Load Illumina example data in lumi package
+  data(example.lumi)
+  ## Match the chip information of this example data
+  if (require(lumiHumanIDMapping))
+	getChipInfo(example.lumi, species='Human')
+@
+
+\subsection{Mapping from nuIDs to RefSeq and Entrez gene IDs based on Illumina manifest files}
+Illumina manifest files are probe annotation files for each Illumina chip. In previous lumi annotation packages ( < 2.0.0), we performed the mapping from nuIDs (probe sequences) to RefSeq sequences by ourselves because the Illumina did not regularly maintain and update their manifest files at that time. Recently, we found Illumina made lots of improvements of the manifest file maintenance and set up a website ( http://www.illumina.com/support/downloads.ilmn\#manifests ) specially for the manifest files. Therefore, we decide directly using the mapping provided by Illumina. We assume the more recent releases of manifest files have more accurate annotation information, and higher versions of chips have better probe design. Therefore when we pool all probe annotations (indexed by nuIDs) together, for the duplicated annotations of the same probe Id (nuID), the most recent release of highest chip version will replace old ones. In this way, even the probes in the old chips can get the most recent annotation information. 
+
+The nuID mapping information is kept in the nuID\_MappingInfo table in the ID Mapping library. All these information was based on Illumina manifest files. The nuID mapping table includes following fields (columns):
+
+1. 	nuID: nuID for the probe sequence
+
+2. 	Access: The refseq  and other IDs, based on which Illumina designed the probes. 
+
+3. 	EntrezID: The Entrez gene IDs correspond to the Access IDs. 
+
+4. 	Symbol: The gene symbols correspond to the Entrez gene IDs.
+
+
+ Function \Rfunction{nuID2RefSeqID} and \Rfunction{nuID2EntrezID} were designed for mapping nuIDs to RefSeq IDs and EntrezIDs, respectively. If users want to get all the mapping information, they can use function \Rfunction{getNuIDMappingInfo}. Need to note, the EntrezID and gene symbol in the  nuID\_MappingInfo table were based on Illumina manifest files. They might have slight differences from the \Rpackage{lumiXXXAll.db} annotation library produced by using \Rpackage{AnnotationDbi} because their annotations were based on snapshots of the Entrez database at different time points (the NCBI Entez database keeps updating).
+
+
+Get nuID mapping information in the ID mapping package:
+<<>>=
+  if (require(lumiHumanIDMapping))
+	lumiHumanIDMapping_nuID()
+@
+
+Map nuID to RefSeq ID:
+<<>>=
+     nuIDs <- featureNames(example.lumi)
+      ## return all mapping information
+    if (require(lumiHumanIDMapping))
+          nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping')
+@
+
+Map nuID to Entrez Gene ID:
+<<>>=
+   if (require(lumiHumanIDMapping))
+        nuID2EntrezID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping')
+@
+
+Return all mapping information related with nuID
+<<>>=
+   if (require(lumiHumanIDMapping)) {
+        mappingInfo <- nuID2RefSeqID(nuIDs[1:10], lib.mapping='lumiHumanIDMapping', returnAllInfo =TRUE)
+        head(mappingInfo)
+   }
+@
+
+
+\section{Illumina microarray annotation packages}
+As the identifier inconsistency between different versions or even different releases of Illumina chips, it makes create annotation packages in the  traditional way difficult. In traditional way, we have to create individual annotation packages for different identifiers and different versions and releases of chips. That will result in lots of annotation packages, and make the maintenance difficult. Users will be hard to decide which package to use. By using the nuID universal identifier, we are able to build one annotation database for different versions and releases of the human (or other species) chips. Moreover, the nuID can be directly converted to the probe sequence, and used to get the most updated refSeq matches and annotations.  The recent transition of Bioconductor annotation packages to use SQLite databases  made the package size is no longer a concern. 
+
+ The latest version of Illumina annotation packages indexed by nuID are based on SQLite databases. They were built by using functions in \Rpackage{AnnotationDbi} package. There are three Bioconductor annotation packages: \Rpackage{lumiHumanAll.db}, \Rpackage{lumiMouseAll.db} and \Rpackage{lumiRatAll.db} for three species Human, Mouse and Rat respectively.   These packages include all the previously released Illumina expression chips. The previous versions of packages: \Rpackage{lumiHumanV1}, \Rpackage{lumiHumanV2}, \Rpackage{lumiMouseV1} and \Rpackage{lumiRatV1} will be discontinued. 
+ 
+ Basically, we converted the probe sequence as nuIDs and pooled them together. Then we can map nuIDs to different mRNA transcript libraries, which include RefSeq and Unigene. From version 1.8.0, the mappings were based on on the Illumina manifest files of the corresponding chips.  If there are duplicated nuIDs, then the latest release and higher version of mapping was used. These mapping information has been organized in the nuID\_MappingInfo table in the ID Mapping library (e.g., \Rpackage{lumiHumanIDMapping} for human Illumina chips). We then used \Rfunction{makeHUMANCHIP\_DB} function in \Rpackage{AnnotaionDbi} package to map RefSeq and Unigene IDs to Entrez genes and created the annotation libraries. Users can also build their own annotation package by providing the mappings from nuID to RefSeq or Unigene IDs.  The usage of these annotation libraries is exactly the same as other Bioconductor annotation packages, like Affymetrix. 
+ 
+ Here are some examples using the functions implemented in the \Rpackage{annotate} package:
+ 
+Get gene symbols:
+<<>>=
+     data(example.lumi)
+     nuIDs <- featureNames(example.lumi)
+     if (require(lumiHumanAll.db))
+     	getSYMBOL(nuIDs[1:3], 'lumiHumanAll.db')
+@
+
+Get Entrez Gene ID:
+<<>>=
+     if (require(lumiHumanAll.db))
+    	 getEG(nuIDs[1:3], 'lumiHumanAll.db')
+@
+
+Get related GO categories:
+<<>>=
+     if (require(lumiHumanAll.db)) {
+ 	 goInfo <- getGO(nuIDs[1], 'lumiHumanAll.db')
+	 goInfo[[1]][[1]]
+     }
+@
+    
+A general look up function
+<<>>=
+     if (require(lumiHumanAll.db))
+     	lookUp(nuIDs[1:3], "lumiHumanAll.db", what="SYMBOL")
+@
+
+Check what annotation elements available in the library
+<<>>=
+     if (require(lumiHumanAll.db))
+	ls('package:lumiHumanAll.db')
+@
+
+
+Need to mention, currently there are two sets of Illumina annotation packages in Bioconductor. The Illumina annotation packages mentioned here are named as "lumixxxx", e.g. \Rpackage{lumiHumanAll.db} and are maintained by us. There are another set of packages, named as "illuminaxxxx". These packages are indexed by Illumina IDs. They can also be used together with \Rpackage{lumi} package when the microarray data are indexed by Illumina IDs. 
+
+
+The majority of Bioconductor annotation packages are probe-based annotation package. As a result, these packages are manufacturers and array dependent. These packages include all kinds of mapping from probe to a specific gene annotation. For different packages of the same species, these gene annotations basically are the same. As a result, the majority information of different packages are redundant.  Bioconductor also provides Entrez gene based annotation packages. Each species has one Entrez gene based annotation package. For example, \Rpackage{org.Hs.eg.db}, \Rpackage{org.Mm.eg.db} and \Rpackage{org.Rn.eg.db} are designed for Human, Mouse and Rat respectively. Combining these packages with the Illumina ID mapping package, we can also analyze all kinds of chips of the same species. 
+
+
+
+\section{References}
+
+Du, P., Kibbe, W.A. and Lin, S.M., "nuID: A universal naming schema of oligonucleotides for Illumina, Affymetrix, and other microarrays", Biology Direct 2007, 2:16 (31May2007).
+
+http://www.illumina.com/support/downloads.ilmn\#manifests
+
+%\bibliographystyle{plainnat}
+%\bibliography{lumi}
+
+
+\end{document}
